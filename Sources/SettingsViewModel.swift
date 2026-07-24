@@ -133,7 +133,7 @@ class SettingsViewModel: ObservableObject {
         openPanel.canChooseDirectories = true
         openPanel.canChooseFiles = false
         openPanel.allowsMultipleSelection = false
-        openPanel.title = "기본 스캔 시작 폴더 설정"
+        openPanel.title = t("settings.panelTitle")
         
         openPanel.begin { [weak self] response in
             guard let self = self else { return }
@@ -221,7 +221,7 @@ class SettingsViewModel: ObservableObject {
         Task {
             try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5초 연산 시뮬레이션
             
-            self.updateAlertMessage = "현재 최신 버전(v1.0.0)의 Mac Clean Optimizer를 사용하고 있습니다."
+            self.updateAlertMessage = t("settings.updateAlert")
             self.isCheckingUpdate = false
             self.showUpdateAlert = true
         }

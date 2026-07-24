@@ -63,8 +63,8 @@ struct UninstallerView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // 헤더 영역
                 PageHeader(
-                    title: "앱 완전 삭제기",
-                    subtitle: "단순히 앱만 삭제하면 시스템에 남겨지는 캐시, 설정, 찌꺼기 파일을 완전 제거합니다.",
+                    title: t("uninst.title"),
+                    subtitle: t("uninst.subtitle"),
                     icon: "trash.circle.fill"
                 )
                 
@@ -102,7 +102,7 @@ struct UninstallerView: View {
                         ProgressView()
                             .scaleEffect(1.2)
                             .tint(Theme.accent)
-                        Text("안전하게 파일들을 휴지통으로 이동하는 중...")
+                        Text(t("uninst.movingToTrash"))
                             .fontWeight(.medium)
                             .foregroundColor(Theme.textPrimary)
                     }
@@ -121,7 +121,7 @@ struct UninstallerView: View {
             
             // 앱 검색 및 카운트 헤더
             HStack(spacing: 12) {
-                Text("설치된 응용 프로그램 (\(filteredApps.count)개)")
+                Text("\(t("uninst.installedApps")): \(filteredApps.count)")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(Theme.textPrimary)
 
@@ -145,14 +145,14 @@ struct UninstallerView: View {
                         )
                 }
                 .buttonStyle(.plain)
-                .help("설치된 앱 목록 새로고침")
+                .help(t("uninst.refreshHelp"))
 
                 // 정렬 필터
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.up.and.down.text.horizontal")
                         .foregroundColor(Theme.textSecondary)
                         .font(.system(size: 11))
-                    Picker("정렬", selection: $viewModel.sortOption) {
+                    Picker(t("uninst.sortLabel"), selection: $viewModel.sortOption) {
                         ForEach(AppSortOption.allCases) { option in
                             Text(option.displayName).tag(option)
                         }
@@ -177,7 +177,7 @@ struct UninstallerView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(Theme.textSecondary)
-                    TextField("앱 이름 검색...", text: $searchText)
+                    TextField(t("uninst.searchPlaceholder"), text: $searchText)
                         .textFieldStyle(.plain)
                         .frame(width: 180)
 
@@ -209,7 +209,7 @@ struct UninstallerView: View {
                     ProgressView()
                         .scaleEffect(1.0)
                         .tint(Theme.accent)
-                    Text("설치된 앱 리스트를 불러오는 중...")
+                    Text(t("uninst.loadingApps"))
                         .foregroundColor(Theme.textSecondary)
                         .font(.subheadline)
                     Spacer()
@@ -237,10 +237,10 @@ struct UninstallerView: View {
     private var compactDropZoneView: some View {
         HStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("여기에 앱(.app) 파일을 드래그 앤 드롭하세요")
+                Text(t("uninst.dropZoneTitle"))
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(Theme.textPrimary)
-                Text("드롭하면 관련된 캐시 및 찌꺼기 파일의 경로와 용량을 정밀 추적합니다.")
+                Text(t("uninst.dropZoneSubtitle"))
                     .font(.caption)
                     .foregroundColor(Theme.textSecondary)
 
@@ -249,7 +249,7 @@ struct UninstallerView: View {
                 }) {
                     HStack(spacing: 6) {
                         Image(systemName: "plus.circle")
-                        Text("수동으로 앱 파일 선택...")
+                        Text(t("uninst.selectManually"))
                     }
                     .font(.system(size: 11, weight: .medium))
                 }
@@ -364,11 +364,11 @@ struct UninstallerView: View {
                 .scaleEffect(1.5)
                 .tint(Theme.accent)
             VStack(spacing: 5) {
-                Text("찌꺼기 파일 탐색 중...")
+                Text(t("uninst.scanning"))
                     .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .foregroundColor(Theme.textPrimary)
                 if let app = viewModel.selectedApp {
-                    Text("\(app.name) 앱의 캐시, 환경설정, 로그 등을 추적하고 있습니다.")
+                    Text("\(app.name) \(t("uninst.scanningDetail"))")
                         .font(.subheadline)
                         .foregroundColor(Theme.textSecondary)
                 }
@@ -408,7 +408,7 @@ struct UninstallerView: View {
                     Spacer()
 
                     VStack(alignment: .trailing, spacing: 3) {
-                        Text("앱 크기")
+                        Text(t("uninst.appSize"))
                             .font(.caption)
                             .foregroundColor(Theme.textSecondary)
                         Text(app.readableSize)
@@ -431,7 +431,7 @@ struct UninstallerView: View {
                             }
                         }
                     )) {
-                        Text("파일명 및 경로")
+                        Text(t("uninst.fileNameAndPath"))
                             .fontWeight(.semibold)
                             .foregroundColor(Theme.textPrimary)
                     }
@@ -439,7 +439,7 @@ struct UninstallerView: View {
 
                     Spacer()
 
-                    Text("유형 및 크기")
+                    Text(t("uninst.typeAndSize"))
                         .fontWeight(.semibold)
                         .foregroundColor(Theme.textPrimary)
                 }
@@ -464,7 +464,7 @@ struct UninstallerView: View {
                 Button(action: {
                     viewModel.reset()
                 }) {
-                    Text("취소")
+                    Text(t("uninst.cancel"))
                 }
                 .buttonStyle(SecondaryButtonStyle())
 
@@ -472,10 +472,10 @@ struct UninstallerView: View {
 
                 HStack(spacing: 15) {
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("선택된 파일: \(selectedCount)개")
+                        Text("\(t("uninst.selectedFiles")): \(selectedCount)")
                             .font(.caption)
                             .foregroundColor(Theme.textSecondary)
-                        Text("총 선택 크기: \(readableSelectedSize)")
+                        Text("\(t("uninst.totalSelectedSize")): \(readableSelectedSize)")
                             .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundColor(Theme.textPrimary)
                     }
@@ -485,22 +485,22 @@ struct UninstallerView: View {
                     }) {
                         HStack {
                             Image(systemName: "trash.fill")
-                            Text("선택된 항목 휴지통으로 이동")
+                            Text(t("uninst.moveSelectedToTrash"))
                         }
                     }
                     .buttonStyle(DangerActionButtonStyle(enabled: selectedCount > 0))
                     .disabled(selectedCount == 0)
                     .confirmationDialog(
-                        "\(viewModel.selectedApp?.name ?? "앱") 관련 \(selectedCount)개 항목을 휴지통으로 이동합니다",
+                        "\(viewModel.selectedApp?.name ?? t("uninst.appFallback")) · \(selectedCount)\(t("uninst.confirmItemsToTrash"))",
                         isPresented: $showDeleteConfirm,
                         titleVisibility: .visible
                     ) {
-                        Button("휴지통으로 이동 (\(readableSelectedSize))", role: .destructive) {
+                        Button("\(t("uninst.moveToTrash")) (\(readableSelectedSize))", role: .destructive) {
                             viewModel.deleteSelectedItems()
                         }
-                        Button("취소", role: .cancel) {}
+                        Button(t("uninst.cancel"), role: .cancel) {}
                     } message: {
-                        Text("삭제된 항목은 휴지통에서 복구할 수 있습니다.")
+                        Text(t("uninst.recoverNote"))
                     }
                 }
             }
@@ -571,13 +571,13 @@ struct UninstallerView: View {
                 .shadow(color: Theme.accent.opacity(0.3), radius: 10, x: 0, y: 5)
 
             VStack(spacing: 8) {
-                Text("최적화 완료!")
+                Text(t("uninst.optimizeComplete"))
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundColor(Theme.textPrimary)
-                Text("선택한 항목들을 휴지통으로 안전하게 보냈습니다.")
+                Text(t("uninst.movedSafely"))
                     .font(.headline)
                     .foregroundColor(Theme.textSecondary)
-                Text("확보된 총 용량: \(ByteCountFormatter.string(fromByteCount: viewModel.cleanedSize, countStyle: .file))")
+                Text("\(t("uninst.freedTotal")): \(ByteCountFormatter.string(fromByteCount: viewModel.cleanedSize, countStyle: .file))")
                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                     .foregroundColor(Theme.accentDeep)
                     .padding(.top, 5)
@@ -587,7 +587,7 @@ struct UninstallerView: View {
             Button(action: {
                 viewModel.reset()
             }) {
-                Text("메인 화면으로 돌아가기")
+                Text(t("uninst.backToMain"))
             }
             .buttonStyle(PrimaryActionButtonStyle())
             

@@ -16,14 +16,14 @@ enum LeftoverCategory: String, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .appBundle: return "응용 프로그램 본체"
-        case .appSupport: return "Application Support (설정/데이터)"
-        case .caches: return "Caches (캐시 및 임시 파일)"
-        case .preferences: return "Preferences (설정)"
-        case .logs: return "Logs (로그 및 크래시)"
-        case .containers: return "Containers (샌드박스)"
-        case .launchAgents: return "Launch Agents (자동실행)"
-        case .others: return "기타 잔여 파일"
+        case .appBundle: return t("uninst.cat.appBundle")
+        case .appSupport: return t("uninst.cat.appSupport")
+        case .caches: return t("uninst.cat.caches")
+        case .preferences: return t("uninst.cat.preferences")
+        case .logs: return t("uninst.cat.logs")
+        case .containers: return t("uninst.cat.containers")
+        case .launchAgents: return t("uninst.cat.launchAgents")
+        case .others: return t("uninst.cat.others")
         }
     }
     
@@ -79,12 +79,12 @@ enum AppSortOption: String, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .nameAsc: return "이름 (가나다순)"
-        case .nameDesc: return "이름 (역순)"
-        case .sizeDesc: return "크기 (큰 순서)"
-        case .sizeAsc: return "크기 (작은 순서)"
-        case .dateDesc: return "설치 날짜 (최신순)"
-        case .dateAsc: return "설치 날짜 (오래된순)"
+        case .nameAsc: return t("uninst.sort.nameAsc")
+        case .nameDesc: return t("uninst.sort.nameDesc")
+        case .sizeDesc: return t("uninst.sort.sizeDesc")
+        case .sizeAsc: return t("uninst.sort.sizeAsc")
+        case .dateDesc: return t("uninst.sort.dateDesc")
+        case .dateAsc: return t("uninst.sort.dateAsc")
         }
     }
 }
@@ -101,7 +101,7 @@ struct SelectedAppInfo: Identifiable, Equatable, Hashable {
     let installationDate: Date
     
     var readableSize: String {
-        guard size > 0 else { return "계산 중..." }
+        guard size > 0 else { return t("common.calculating") }
         return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
     

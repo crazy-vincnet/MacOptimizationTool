@@ -9,7 +9,7 @@ struct MaintenanceTask: Identifiable {
     let color: Color
     var isRunning: Bool = false
     var isCompleted: Bool = false
-    var statusMessage: String = "대기 중"
+    var statusMessage: String = t("maint.status.idle")
 }
 
 @MainActor
@@ -17,29 +17,29 @@ class MaintenanceViewModel: ObservableObject {
     @Published var tasks: [MaintenanceTask] = [
         MaintenanceTask(
             id: "dns",
-            name: "DNS 캐시 초기화",
-            description: "네트워크 접속이 느려지거나 웹페이지가 열리지 않을 때 로컬 DNS 주소 캐시를 비웁니다.",
+            name: t("maint.task.dns.name"),
+            description: t("maint.task.dns.desc"),
             icon: "network",
             color: .blue
         ),
         MaintenanceTask(
             id: "launchServices",
-            name: "연결 프로그램 데이터베이스 재구성",
-            description: "우클릭 '다음으로 열기' 목록에 중복 앱이 나오거나 파일 연결 오류를 복구합니다.",
+            name: t("maint.task.launchServices.name"),
+            description: t("maint.task.launchServices.desc"),
             icon: "doc.badge.gearshape",
             color: .purple
         ),
         MaintenanceTask(
             id: "fontCache",
-            name: "시스템 폰트 캐시 정리",
-            description: "화면의 텍스트가 깨져 보이거나 폰트 렌더링 에러가 있을 때 폰트 캐시를 청소합니다.",
+            name: t("maint.task.fontCache.name"),
+            description: t("maint.task.fontCache.desc"),
             icon: "textformat",
             color: .orange
         ),
         MaintenanceTask(
             id: "spotlight",
-            name: "Spotlight 검색 인덱스 재빌드",
-            description: "Finder나 Spotlight에서 파일 검색이 정상 작동하지 않거나 느릴 때 인덱싱을 강제 재수행합니다.",
+            name: t("maint.task.spotlight.name"),
+            description: t("maint.task.spotlight.desc"),
             icon: "magnifyingglass",
             color: .green
         )
@@ -53,7 +53,7 @@ class MaintenanceViewModel: ObservableObject {
         
         tasks[index].isRunning = true
         tasks[index].isCompleted = false
-        tasks[index].statusMessage = "작업 진행 중..."
+        tasks[index].statusMessage = t("maint.status.running")
         isAnyTaskRunning = true
         
         Task {
@@ -75,7 +75,7 @@ class MaintenanceViewModel: ObservableObject {
             
             self.tasks[index].isRunning = false
             self.tasks[index].isCompleted = true
-            self.tasks[index].statusMessage = success ? "완료됨" : "오류"
+            self.tasks[index].statusMessage = success ? t("maint.status.done") : t("maint.status.error")
             self.isAnyTaskRunning = self.tasks.contains(where: { $0.isRunning })
         }
     }

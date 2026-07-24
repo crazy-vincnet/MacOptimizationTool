@@ -71,10 +71,19 @@ class LanguageManager: ObservableObject {
     
     func t(_ key: String) -> String {
         let lang = effectiveLanguage
-        return translations[lang]?[key] ?? translations[.english]?[key] ?? key
+        return Self.translations[lang]?[key] ?? Self.translations[.english]?[key] ?? key
     }
-    
-    private let translations: [AppLanguage: [String: String]] = [
+
+    /// 기본 사전 + 뷰별 생성 사전(GeneratedTranslations) 병합 결과.
+    private static let translations: [AppLanguage: [String: String]] = {
+        var merged = baseTranslations
+        for (lang, dict) in GeneratedTranslations.all {
+            merged[lang, default: [:]].merge(dict) { _, new in new }
+        }
+        return merged
+    }()
+
+    private static let baseTranslations: [AppLanguage: [String: String]] = [
         .korean: [
             // Sidebar
             "menu.dashboard": "대시보드",

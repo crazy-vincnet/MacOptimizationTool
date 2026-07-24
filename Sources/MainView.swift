@@ -147,10 +147,10 @@ struct MainView: View {
             
             // 하단 상태 표시 또는 회사정보
             VStack(alignment: .leading, spacing: 5) {
-                Text("시스템 보호 활성화됨")
+                Text(t("main.footer.title"))
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.green)
-                Text("Mac 안전 모드 가동 중")
+                    .foregroundColor(Theme.accent)
+                Text(t("main.footer.sub"))
                     .font(.system(size: 9))
                     .foregroundColor(.secondary)
             }

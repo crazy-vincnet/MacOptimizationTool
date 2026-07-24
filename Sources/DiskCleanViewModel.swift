@@ -50,20 +50,20 @@ class DiskCleanViewModel: ObservableObject {
         categories = [
             JunkCategory(
                 id: "userCaches",
-                name: "사용자 캐시 파일",
-                description: "앱 임시 보관 데이터로, 삭제 시 재다운로드 혹은 로드됩니다.",
+                name: t("disk.cat.userCaches.name"),
+                description: t("disk.cat.userCaches.desc"),
                 urls: [userLibrary.appendingPathComponent("Caches")]
             ),
             JunkCategory(
                 id: "userLogs",
-                name: "사용자 시스템 로그",
-                description: "앱 크래시나 작동 추적 일지 파일로, 보관할 필요가 없습니다.",
+                name: t("disk.cat.userLogs.name"),
+                description: t("disk.cat.userLogs.desc"),
                 urls: [userLibrary.appendingPathComponent("Logs")]
             ),
             JunkCategory(
                 id: "systemCaches",
-                name: "시스템 캐시 & 로그",
-                description: "OS 공용으로 저장된 로그 및 공유 자원 임시 파일입니다.",
+                name: t("disk.cat.systemCaches.name"),
+                description: t("disk.cat.systemCaches.desc"),
                 urls: [
                     URL(fileURLWithPath: "/Library/Caches"),
                     URL(fileURLWithPath: "/Library/Logs")
@@ -71,14 +71,14 @@ class DiskCleanViewModel: ObservableObject {
             ),
             JunkCategory(
                 id: "xcodeData",
-                name: "Xcode 개발자 DerivedData",
-                description: "Xcode 개발 찌꺼기 파일로 개발 시 언제든지 재생성되는 용량 먹는 데이터입니다.",
+                name: t("disk.cat.xcodeData.name"),
+                description: t("disk.cat.xcodeData.desc"),
                 urls: [userLibrary.appendingPathComponent("Developer/Xcode/DerivedData")]
             ),
             JunkCategory(
                 id: "trash",
-                name: "시스템 휴지통",
-                description: "사용자가 임의로 삭제하여 휴지통에 들어간 실제 파일들입니다.",
+                name: t("disk.cat.trash.name"),
+                description: t("disk.cat.trash.desc"),
                 urls: [userHome.appendingPathComponent(".Trash")]
             )
         ]
@@ -215,8 +215,8 @@ class DiskCleanViewModel: ObservableObject {
         openPanel.allowsMultipleSelection = true
         openPanel.canChooseDirectories = true
         openPanel.canChooseFiles = true
-        openPanel.title = "호환성 검사할 파일 또는 폴더 선택"
-        openPanel.prompt = "선택 완료"
+        openPanel.title = t("wincompat.panelTitle")
+        openPanel.prompt = t("wincompat.panelPrompt")
         
         openPanel.begin { [weak self] response in
             guard let self = self else { return }

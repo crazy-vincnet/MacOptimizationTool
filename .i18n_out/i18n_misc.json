@@ -1,0 +1,19 @@
+{
+  "menu.scanning": {"ko":"스캔 중...","en":"Scanning...","zh":"扫描中...","ja":"スキャン中..."},
+  "menu.openMain": {"ko":"메인 화면 열기","en":"Open Main Window","zh":"打开主窗口","ja":"メイン画面を開く"},
+  "menu.quit": {"ko":"프로그램 완전히 종료","en":"Quit Completely","zh":"完全退出","ja":"完全に終了"},
+  "menu.notif.title": {"ko":"메모리 최적화 완료","en":"Memory Optimization Complete","zh":"内存优化完成","ja":"メモリ最適化完了"},
+  "menu.notif.bodyPrefix": {"ko":"성공적으로 ","en":"Successfully reclaimed ","zh":"成功释放了 ","ja":"正常に "},
+  "menu.notif.bodySuffix": {"ko":"의 메모리를 해제했습니다.","en":" of memory.","zh":" 的内存。","ja":" のメモリを解放しました。"},
+  "main.footer.title": {"ko":"시스템 보호 활성화됨","en":"System Protection Active","zh":"系统保护已启用","ja":"システム保護が有効"},
+  "main.footer.sub": {"ko":"Mac 안전 모드 가동 중","en":"Mac Safe Mode Running","zh":"Mac 安全模式运行中","ja":"Mac セーフモード稼働中"},
+  "common.ok": {"ko":"확인","en":"OK","zh":"确定","ja":"確認"},
+  "common.allowed": {"ko":"허용됨","en":"Allowed","zh":"已允许","ja":"許可済み"},
+  "common.actionRequired": {"ko":"권한 필요","en":"Action Required","zh":"需要授权","ja":"許可が必要"},
+  "common.calculating": {"ko":"계산 중...","en":"Calculating...","zh":"计算中...","ja":"計算中..."},
+  "large.panelTitle": {"ko":"스캔할 대상 폴더 선택","en":"Choose a folder to scan","zh":"选择要扫描的文件夹","ja":"スキャンするフォルダを選択"},
+  "dup.panelTitle": {"ko":"중복 스캔할 대상 폴더 선택","en":"Choose a folder to scan for duplicates","zh":"选择要扫描重复文件的文件夹","ja":"重複をスキャンするフォルダを選択"},
+  "settings.panelTitle": {"ko":"기본 스캔 시작 폴더 설정","en":"Set default scan folder","zh":"设置默认扫描文件夹","ja":"デフォルトのスキャンフォルダを設定"},
+  "wincompat.panelTitle": {"ko":"호환성 검사할 파일 또는 폴더 선택","en":"Choose files or folders to check","zh":"选择要检查的文件或文件夹","ja":"チェックするファイルまたはフォルダを選択"},
+  "wincompat.panelPrompt": {"ko":"선택 완료","en":"Select","zh":"选择","ja":"選択"}
+}

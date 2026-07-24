@@ -1,0 +1,98 @@
+{
+  "maint.header.title": {
+    "ko": "시스템 유지보수",
+    "en": "System Maintenance",
+    "zh": "系统维护",
+    "ja": "システムメンテナンス"
+  },
+  "maint.header.subtitle": {
+    "ko": "Mac 시스템 백그라운드 데이터베이스를 최적화하여 렌더링, 네트워크 및 반응 속도를 개선합니다.",
+    "en": "Optimize your Mac's background system databases to improve rendering, network, and responsiveness.",
+    "zh": "优化 Mac 系统后台数据库，提升渲染、网络和响应速度。",
+    "ja": "Mac のシステムバックグラウンドデータベースを最適化し、レンダリング、ネットワーク、応答速度を改善します。"
+  },
+  "maint.runAll": {
+    "ko": "전체 유지보수 실행",
+    "en": "Run All Maintenance",
+    "zh": "运行全部维护",
+    "ja": "すべてのメンテナンスを実行"
+  },
+  "maint.run": {
+    "ko": "실행",
+    "en": "Run",
+    "zh": "运行",
+    "ja": "実行"
+  },
+  "maint.status.idle": {
+    "ko": "대기 중",
+    "en": "Idle",
+    "zh": "待机中",
+    "ja": "待機中"
+  },
+  "maint.status.running": {
+    "ko": "작업 진행 중...",
+    "en": "In progress...",
+    "zh": "正在处理...",
+    "ja": "処理中..."
+  },
+  "maint.status.done": {
+    "ko": "완료됨",
+    "en": "Completed",
+    "zh": "已完成",
+    "ja": "完了"
+  },
+  "maint.status.error": {
+    "ko": "오류",
+    "en": "Error",
+    "zh": "错误",
+    "ja": "エラー"
+  },
+  "maint.task.dns.name": {
+    "ko": "DNS 캐시 초기화",
+    "en": "Flush DNS Cache",
+    "zh": "清除 DNS 缓存",
+    "ja": "DNS キャッシュのクリア"
+  },
+  "maint.task.dns.desc": {
+    "ko": "네트워크 접속이 느려지거나 웹페이지가 열리지 않을 때 로컬 DNS 주소 캐시를 비웁니다.",
+    "en": "Clears the local DNS address cache when network access is slow or web pages won't load.",
+    "zh": "当网络访问变慢或网页无法打开时，清空本地 DNS 地址缓存。",
+    "ja": "ネットワーク接続が遅い、またはウェブページが開かないときにローカルの DNS アドレスキャッシュをクリアします。"
+  },
+  "maint.task.launchServices.name": {
+    "ko": "연결 프로그램 데이터베이스 재구성",
+    "en": "Rebuild Launch Services Database",
+    "zh": "重建默认应用数据库",
+    "ja": "関連付けアプリのデータベースを再構築"
+  },
+  "maint.task.launchServices.desc": {
+    "ko": "우클릭 '다음으로 열기' 목록에 중복 앱이 나오거나 파일 연결 오류를 복구합니다.",
+    "en": "Fixes duplicate apps in the right-click 'Open With' list and file association errors.",
+    "zh": "修复右键“打开方式”列表中出现的重复应用或文件关联错误。",
+    "ja": "右クリック「このアプリケーションで開く」に重複するアプリが表示される問題やファイル関連付けエラーを修復します。"
+  },
+  "maint.task.fontCache.name": {
+    "ko": "시스템 폰트 캐시 정리",
+    "en": "Clean System Font Cache",
+    "zh": "清理系统字体缓存",
+    "ja": "システムフォントキャッシュの整理"
+  },
+  "maint.task.fontCache.desc": {
+    "ko": "화면의 텍스트가 깨져 보이거나 폰트 렌더링 에러가 있을 때 폰트 캐시를 청소합니다.",
+    "en": "Cleans the font cache when on-screen text appears garbled or font rendering errors occur.",
+    "zh": "当屏幕文字显示异常或出现字体渲染错误时，清理字体缓存。",
+    "ja": "画面のテキストが文字化けする、またはフォントのレンダリングエラーが発生したときにフォントキャッシュをクリアします。"
+  },
+  "maint.task.spotlight.name": {
+    "ko": "Spotlight 검색 인덱스 재빌드",
+    "en": "Rebuild Spotlight Search Index",
+    "zh": "重建 Spotlight 搜索索引",
+    "ja": "Spotlight 検索インデックスの再構築"
+  },
+  "maint.task.spotlight.desc": {
+    "ko": "Finder나 Spotlight에서 파일 검색이 정상 작동하지 않거나 느릴 때 인덱싱을 강제 재수행합니다.",
+    "en": "Forces re-indexing when file search in Finder or Spotlight doesn't work properly or is slow.",
+    "zh": "当 Finder 或 Spotlight 中的文件搜索无法正常工作或缓慢时，强制重新建立索引。",
+    "ja": "Finder や Spotlight でのファイル検索が正常に動作しない、または遅いときにインデックス作成を強制的に再実行します。"
+  }
+}

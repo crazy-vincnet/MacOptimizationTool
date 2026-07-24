@@ -1,0 +1,176 @@
+{
+  "dup.title": {
+    "ko": "중복 파일 정리",
+    "en": "Duplicate File Cleanup",
+    "zh": "重复文件清理",
+    "ja": "重複ファイルの整理"
+  },
+  "dup.subtitle": {
+    "ko": "디스크 크기 및 바이너리 해시 비교를 기반으로 완벽히 일치하는 복제 파일을 스캔하여 안전하게 정리합니다.",
+    "en": "Scans for perfectly matching duplicate files based on disk size and binary hash comparison, then safely cleans them up.",
+    "zh": "基于磁盘大小和二进制哈希比较扫描完全一致的重复文件，并安全地清理它们。",
+    "ja": "ディスクサイズとバイナリハッシュの比較に基づいて完全に一致する重複ファイルをスキャンし、安全に整理します。"
+  },
+  "dup.target_folder": {
+    "ko": "스캔 대상 폴더",
+    "en": "Scan Target Folder",
+    "zh": "扫描目标文件夹",
+    "ja": "スキャン対象フォルダ"
+  },
+  "dup.change_folder": {
+    "ko": "폴더 변경",
+    "en": "Change Folder",
+    "zh": "更改文件夹",
+    "ja": "フォルダを変更"
+  },
+  "dup.scan_start": {
+    "ko": "중복 파일 탐색 시작",
+    "en": "Start Duplicate Scan",
+    "zh": "开始查找重复文件",
+    "ja": "重複ファイルの検索を開始"
+  },
+  "dup.ready_title": {
+    "ko": "중복 파일 정리 준비 완료",
+    "en": "Ready to Clean Up Duplicates",
+    "zh": "重复文件清理准备就绪",
+    "ja": "重複ファイル整理の準備完了"
+  },
+  "dup.ready_desc": {
+    "ko": "상단의 폴더를 지정하신 후\n'중복 파일 탐색 시작' 버튼을 눌러 스캔을 시작하세요.",
+    "en": "After selecting a folder above,\npress the 'Start Duplicate Scan' button to begin scanning.",
+    "zh": "在上方指定文件夹后，\n点击“开始查找重复文件”按钮以开始扫描。",
+    "ja": "上部でフォルダを指定してから、\n「重複ファイルの検索を開始」ボタンを押してスキャンを開始してください。"
+  },
+  "dup.comparing": {
+    "ko": "파일 크기 및 이진 해시 비교 중...",
+    "en": "Comparing file sizes and binary hashes...",
+    "zh": "正在比较文件大小和二进制哈希...",
+    "ja": "ファイルサイズとバイナリハッシュを比較中..."
+  },
+  "dup.no_groups": {
+    "ko": "감지된 중복 파일 그룹이 없습니다.",
+    "en": "No duplicate file groups were detected.",
+    "zh": "未检测到重复文件组。",
+    "ja": "検出された重複ファイルグループはありません。"
+  },
+  "dup.size_each": {
+    "ko": "개당 크기",
+    "en": "Size each",
+    "zh": "每个大小",
+    "ja": "1件あたりのサイズ"
+  },
+  "dup.modified": {
+    "ko": "수정일",
+    "en": "Modified",
+    "zh": "修改日期",
+    "ja": "更新日"
+  },
+  "dup.original": {
+    "ko": "원본 보존",
+    "en": "Keep Original",
+    "zh": "保留原始",
+    "ja": "オリジナル保持"
+  },
+  "dup.copy": {
+    "ko": "복제본",
+    "en": "Duplicate",
+    "zh": "副本",
+    "ja": "複製"
+  },
+  "dup.to_delete_prefix": {
+    "ko": "삭제할 복제 파일: ",
+    "en": "Files to delete: ",
+    "zh": "待删除的重复文件: ",
+    "ja": "削除する重複ファイル: "
+  },
+  "dup.to_delete_mid": {
+    "ko": "개 (",
+    "en": " (",
+    "zh": " 个 (",
+    "ja": " 件 ("
+  },
+  "dup.to_delete_suffix": {
+    "ko": ")",
+    "en": ")",
+    "zh": ")",
+    "ja": ")"
+  },
+  "dup.delete_button": {
+    "ko": "선택한 중복 복사본 휴지통으로 이동",
+    "en": "Move Selected Duplicates to Trash",
+    "zh": "将选中的重复副本移到废纸篓",
+    "ja": "選択した重複コピーをゴミ箱に移動"
+  },
+  "dup.scanning_overlay": {
+    "ko": "폴더 내 고속 중복 해시 스캔 중...",
+    "en": "Fast-scanning the folder for duplicate hashes...",
+    "zh": "正在快速扫描文件夹中的重复哈希...",
+    "ja": "フォルダ内の重複ハッシュを高速スキャン中..."
+  },
+  "dup.deleting_overlay": {
+    "ko": "중복 복사본 파일 안전 제거 중...",
+    "en": "Safely removing duplicate copies...",
+    "zh": "正在安全移除重复副本文件...",
+    "ja": "重複コピーファイルを安全に削除中..."
+  },
+  "dup.confirm_title_prefix": {
+    "ko": "선택한 ",
+    "en": "Move the selected ",
+    "zh": "将选中的 ",
+    "ja": "選択した "
+  },
+  "dup.confirm_title_suffix": {
+    "ko": "개 중복 복사본을 휴지통으로 이동합니다",
+    "en": " duplicate copies to the Trash",
+    "zh": " 个重复副本移到废纸篓",
+    "ja": " 件の重複コピーをゴミ箱に移動します"
+  },
+  "dup.move_to_trash": {
+    "ko": "휴지통으로 이동",
+    "en": "Move to Trash",
+    "zh": "移到废纸篓",
+    "ja": "ゴミ箱に移動"
+  },
+  "dup.cancel": {
+    "ko": "취소",
+    "en": "Cancel",
+    "zh": "取消",
+    "ja": "キャンセル"
+  },
+  "dup.confirm_message": {
+    "ko": "각 그룹당 원본 1개는 보존됩니다. 이동된 파일은 휴지통에서 복구할 수 있습니다.",
+    "en": "One original per group is preserved. Moved files can be recovered from the Trash.",
+    "zh": "每组保留 1 个原始文件。已移动的文件可以从废纸篓中恢复。",
+    "ja": "各グループにつきオリジナル1件は保持されます。移動したファイルはゴミ箱から復元できます。"
+  },
+  "dup.success_title": {
+    "ko": "중복 파일 정리 완료",
+    "en": "Duplicate Cleanup Complete",
+    "zh": "重复文件清理完成",
+    "ja": "重複ファイルの整理完了"
+  },
+  "dup.success_msg_prefix": {
+    "ko": "총 ",
+    "en": "Moved ",
+    "zh": "已将共 ",
+    "ja": "合計 "
+  },
+  "dup.success_msg_mid": {
+    "ko": "개의 중복 복제본 파일 (",
+    "en": " duplicate copies (",
+    "zh": " 个重复副本文件 (",
+    "ja": " 件の重複コピーファイル ("
+  },
+  "dup.success_msg_suffix": {
+    "ko": ")을 휴지통으로 이동했습니다.",
+    "en": ") to the Trash.",
+    "zh": ") 移到了废纸篓。",
+    "ja": ") をゴミ箱に移動しました。"
+  },
+  "dup.ok": {
+    "ko": "확인",
+    "en": "OK",
+    "zh": "确定",
+    "ja": "確認"
+  }
+}

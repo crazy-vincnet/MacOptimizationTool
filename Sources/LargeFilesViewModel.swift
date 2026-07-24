@@ -38,7 +38,7 @@ class LargeFilesViewModel: ObservableObject {
         openPanel.canChooseDirectories = true
         openPanel.canChooseFiles = false
         openPanel.allowsMultipleSelection = false
-        openPanel.title = "스캔할 대상 폴더 선택"
+        openPanel.title = t("large.panelTitle")
         
         openPanel.begin { [weak self] response in
             guard let self = self else { return }

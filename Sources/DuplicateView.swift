@@ -9,8 +9,8 @@ struct DuplicateView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // 상단 고정 헤더
                 PageHeader(
-                    title: "중복 파일 정리",
-                    subtitle: "디스크 크기 및 바이너리 해시 비교를 기반으로 완벽히 일치하는 복제 파일을 스캔하여 안전하게 정리합니다.",
+                    title: t("dup.title"),
+                    subtitle: t("dup.subtitle"),
                     icon: "doc.on.doc.fill"
                 )
                 .padding(.horizontal, 30)
@@ -20,7 +20,7 @@ struct DuplicateView: View {
                 // 검색 조건 카드
                 HStack(spacing: 20) {
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("스캔 대상 폴더")
+                        Text(t("dup.target_folder"))
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(.secondary)
                         
@@ -32,7 +32,7 @@ struct DuplicateView: View {
                             
                             Spacer()
                             
-                            Button("폴더 변경") {
+                            Button(t("dup.change_folder")) {
                                 viewModel.selectFolder()
                             }
                             .buttonStyle(SecondaryButtonStyle())
@@ -45,7 +45,7 @@ struct DuplicateView: View {
                     Button(action: {
                         viewModel.scanDuplicates()
                     }) {
-                        Label("중복 파일 탐색 시작", systemImage: "doc.on.doc.fill")
+                        Label(t("dup.scan_start"), systemImage: "doc.on.doc.fill")
                     }
                     .buttonStyle(PrimaryActionButtonStyle())
                     .disabled(viewModel.isScanning)
@@ -64,11 +64,11 @@ struct DuplicateView: View {
                             .padding(.bottom, 5)
                             .shadow(color: Theme.accent.opacity(0.2), radius: 8)
                         
-                        Text("중복 파일 정리 준비 완료")
+                        Text(t("dup.ready_title"))
                             .font(.headline)
                             .fontWeight(.bold)
-                        
-                        Text("상단의 폴더를 지정하신 후\n'중복 파일 탐색 시작' 버튼을 눌러 스캔을 시작하세요.")
+
+                        Text(t("dup.ready_desc"))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -84,7 +84,7 @@ struct DuplicateView: View {
                         Image(systemName: "square.split.2x2")
                             .font(.system(size: 40))
                             .foregroundColor(.secondary.opacity(0.6))
-                        Text(viewModel.isScanning ? "파일 크기 및 이진 해시 비교 중..." : "감지된 중복 파일 그룹이 없습니다.")
+                        Text(viewModel.isScanning ? t("dup.comparing") : t("dup.no_groups"))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -109,7 +109,7 @@ struct DuplicateView: View {
 
                                             Spacer()
 
-                                            Text("개당 크기: \(ByteCountFormatter.string(fromByteCount: group.size, countStyle: .file))")
+                                            Text("\(t("dup.size_each")): \(ByteCountFormatter.string(fromByteCount: group.size, countStyle: .file))")
                                                 .font(.caption)
                                                 .foregroundColor(Theme.textSecondary)
                                         }
@@ -138,7 +138,7 @@ struct DuplicateView: View {
                                                             .lineLimit(1)
                                                             .help(inst.url.path)
                                                         
-                                                        Text("수정일: \(inst.lastModified.formatted(date: .numeric, time: .shortened))")
+                                                        Text("\(t("dup.modified")): \(inst.lastModified.formatted(date: .numeric, time: .shortened))")
                                                             .font(.caption2)
                                                             .foregroundColor(.secondary)
                                                     }
@@ -146,7 +146,7 @@ struct DuplicateView: View {
                                                     Spacer()
                                                     
                                                     if instIndex == 0 {
-                                                        Text("원본 보존")
+                                                        Text(t("dup.original"))
                                                             .font(.system(size: 10, weight: .bold))
                                                             .foregroundColor(Theme.accentDeep)
                                                             .padding(.horizontal, 6)
@@ -154,7 +154,7 @@ struct DuplicateView: View {
                                                             .background(Theme.accent.opacity(0.14))
                                                             .cornerRadius(4)
                                                     } else {
-                                                        Text("복제본")
+                                                        Text(t("dup.copy"))
                                                             .font(.system(size: 10))
                                                             .foregroundColor(Theme.warning)
                                                             .padding(.horizontal, 6)
@@ -182,7 +182,7 @@ struct DuplicateView: View {
                         }
                         
                         HStack {
-                            Text("삭제할 복제 파일: \(selectedCount)개 (\(ByteCountFormatter.string(fromByteCount: totalReclaimedSize, countStyle: .file)))")
+                            Text("\(t("dup.to_delete_prefix"))\(selectedCount)\(t("dup.to_delete_mid"))\(ByteCountFormatter.string(fromByteCount: totalReclaimedSize, countStyle: .file))\(t("dup.to_delete_suffix"))")
                                 .font(.subheadline)
                                 .foregroundColor(Theme.textSecondary)
 
@@ -193,7 +193,7 @@ struct DuplicateView: View {
                             }) {
                                 HStack {
                                     Image(systemName: "trash.fill")
-                                    Text("선택한 중복 복사본 휴지통으로 이동")
+                                    Text(t("dup.delete_button"))
                                 }
                             }
                             .buttonStyle(DangerActionButtonStyle(enabled: selectedCount > 0))
@@ -209,29 +209,29 @@ struct DuplicateView: View {
             
             // 로딩 오버레이
             if viewModel.isScanning {
-                ProgressOverlay(message: "폴더 내 고속 중복 해시 스캔 중...")
+                ProgressOverlay(message: t("dup.scanning_overlay"))
             }
             if viewModel.isDeleting {
-                ProgressOverlay(message: "중복 복사본 파일 안전 제거 중...")
+                ProgressOverlay(message: t("dup.deleting_overlay"))
             }
         }
         .confirmationDialog(
-            "선택한 \(viewModel.groups.flatMap({ $0.instances }).filter({ $0.isSelected }).count)개 중복 복사본을 휴지통으로 이동합니다",
+            "\(t("dup.confirm_title_prefix"))\(viewModel.groups.flatMap({ $0.instances }).filter({ $0.isSelected }).count)\(t("dup.confirm_title_suffix"))",
             isPresented: $showDeleteConfirm,
             titleVisibility: .visible
         ) {
-            Button("휴지통으로 이동", role: .destructive) {
+            Button(t("dup.move_to_trash"), role: .destructive) {
                 viewModel.deleteSelectedDuplicates()
             }
-            Button("취소", role: .cancel) {}
+            Button(t("dup.cancel"), role: .cancel) {}
         } message: {
-            Text("각 그룹당 원본 1개는 보존됩니다. 이동된 파일은 휴지통에서 복구할 수 있습니다.")
+            Text(t("dup.confirm_message"))
         }
         .alert(isPresented: $viewModel.showDeleteSuccess) {
             Alert(
-                title: Text("중복 파일 정리 완료"),
-                message: Text("총 \(viewModel.deletedCount)개의 중복 복제본 파일 (\(ByteCountFormatter.string(fromByteCount: viewModel.deletedSize, countStyle: .file)))을 휴지통으로 이동했습니다."),
-                dismissButton: .default(Text("확인"))
+                title: Text(t("dup.success_title")),
+                message: Text("\(t("dup.success_msg_prefix"))\(viewModel.deletedCount)\(t("dup.success_msg_mid"))\(ByteCountFormatter.string(fromByteCount: viewModel.deletedSize, countStyle: .file))\(t("dup.success_msg_suffix"))"),
+                dismissButton: .default(Text(t("dup.ok")))
             )
         }
         .onAppear {

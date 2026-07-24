@@ -8,8 +8,8 @@ struct MaintenanceView: View {
             // 상단 고정 헤더
             HStack(alignment: .center, spacing: 16) {
                 PageHeader(
-                    title: "시스템 유지보수",
-                    subtitle: "Mac 시스템 백그라운드 데이터베이스를 최적화하여 렌더링, 네트워크 및 반응 속도를 개선합니다.",
+                    title: t("maint.header.title"),
+                    subtitle: t("maint.header.subtitle"),
                     icon: "wrench.and.screwdriver.fill"
                 )
 
@@ -18,7 +18,7 @@ struct MaintenanceView: View {
                 }) {
                     HStack(spacing: 6) {
                         Image(systemName: "play.fill")
-                        Text("전체 유지보수 실행")
+                        Text(t("maint.runAll"))
                     }
                 }
                 .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isAnyTaskRunning))
@@ -74,7 +74,7 @@ struct MaintenanceView: View {
                                 Button(action: {
                                     viewModel.runTask(id: task.id)
                                 }) {
-                                    Text("실행")
+                                    Text(t("maint.run"))
                                 }
                                 .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isAnyTaskRunning))
                                 .disabled(viewModel.isAnyTaskRunning)

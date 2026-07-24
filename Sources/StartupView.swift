@@ -9,15 +9,15 @@ struct StartupView: View {
                 // 상단 고정 헤더
                 HStack(alignment: .center, spacing: 14) {
                     PageHeader(
-                        title: "시작 프로그램",
-                        subtitle: "Mac 로그인 시 백그라운드에서 백그라운드 데몬 및 서브 프로세스로 실행되는 에이전트 목록을 조율합니다.",
+                        title: t("startup.title"),
+                        subtitle: t("startup.subtitle"),
                         icon: "cpu"
                     )
 
                     Button(action: {
                         viewModel.scanStartupItems()
                     }) {
-                        Label("새로고침", systemImage: "arrow.clockwise")
+                        Label(t("startup.refresh"), systemImage: "arrow.clockwise")
                     }
                     .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isScanning))
                     .disabled(viewModel.isScanning)
@@ -31,7 +31,7 @@ struct StartupView: View {
                     Image(systemName: "info.circle.fill")
                         .foregroundColor(Theme.accent)
                         .font(.title3)
-                    Text("불필요한 시작 프로그램을 끄면 Mac의 부팅 속도가 대폭 향상되고, 메모리(RAM) 대기 가용량이 증가합니다. 시스템 파일의 권한 요구사항에 따라 일부 항목 변경 시 OS 권한 알림이 뜰 수 있습니다.")
+                    Text(t("startup.infoBanner"))
                         .font(.subheadline)
                         .foregroundColor(Theme.textSecondary)
                 }
@@ -45,7 +45,7 @@ struct StartupView: View {
                         Image(systemName: "cpu.fill")
                             .font(.system(size: 40))
                             .foregroundColor(Theme.accent.opacity(0.6))
-                        Text(viewModel.isScanning ? "백그라운드 에이전트 분석 중..." : "등록된 시작 프로그램 에이전트가 없습니다.")
+                        Text(viewModel.isScanning ? t("startup.analyzing") : t("startup.emptyList"))
                             .font(.subheadline)
                             .foregroundColor(Theme.textSecondary)
                     }
@@ -78,7 +78,7 @@ struct StartupView: View {
                                 Spacer()
 
                                 // 구분 배너
-                                Text(item.type)
+                                Text(displayType(item.type))
                                     .font(.system(size: 10, weight: .semibold))
                                     .foregroundColor(Theme.textSecondary)
                                     .padding(.horizontal, 8)
@@ -92,7 +92,7 @@ struct StartupView: View {
                                     Image(systemName: "lock.fill")
                                         .foregroundColor(Theme.textSecondary)
                                         .font(.system(size: 11))
-                                        .help("시스템 권한이 필요한 항목으로 비활성화할 수 없습니다.")
+                                        .help(t("startup.protectedHelp"))
                                 }
 
                                 // 활성 여부 토글 버튼
@@ -121,14 +121,14 @@ struct StartupView: View {
             
             // 로딩 오버레이
             if viewModel.isScanning {
-                ProgressOverlay(message: "시스템 내 백그라운드 구동 목록 파싱 중...")
+                ProgressOverlay(message: t("startup.parsing"))
             }
         }
         .alert(isPresented: $viewModel.showSuccessAlert) {
             Alert(
-                title: Text("시작 프로그램 변경"),
+                title: Text(t("startup.alertTitle")),
                 message: Text(viewModel.alertMessage),
-                dismissButton: .default(Text("확인"))
+                dismissButton: .default(Text(t("startup.confirm")))
             )
         }
         .onAppear {
@@ -143,6 +143,16 @@ struct StartupView: View {
         case "사용자 에이전트": return "person.circle.fill"
         case "시스템 에이전트": return "laptopcomputer"
         default: return "cpu"
+        }
+    }
+
+    // item.type is a stable identifier (compared in iconForType); translate only at the display site.
+    private func displayType(_ type: String) -> String {
+        switch type {
+        case "사용자 에이전트": return t("startup.typeUserAgent")
+        case "시스템 에이전트": return t("startup.typeSystemAgent")
+        case "시스템 데몬": return t("startup.typeSystemDaemon")
+        default: return type
         }
     }
 }

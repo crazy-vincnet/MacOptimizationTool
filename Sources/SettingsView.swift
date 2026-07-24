@@ -59,7 +59,7 @@ struct SettingsView: View {
                                             Circle()
                                                 .fill(viewModel.hasFullDiskAccess ? Theme.accent : Theme.danger)
                                                 .frame(width: 8, height: 8)
-                                            Text(viewModel.hasFullDiskAccess ? (langManager.currentLanguage == .korean ? "허용됨" : "Allowed") : (langManager.currentLanguage == .korean ? "권한 필요" : "Action Required"))
+                                            Text(viewModel.hasFullDiskAccess ? t("common.allowed") : t("common.actionRequired"))
                                                 .font(.caption)
                                                 .fontWeight(.bold)
                                                 .foregroundColor(viewModel.hasFullDiskAccess ? Theme.accent : Theme.danger)
@@ -103,7 +103,7 @@ struct SettingsView: View {
                                             Circle()
                                                 .fill(viewModel.notificationPermissionGranted ? Theme.accent : Theme.danger)
                                                 .frame(width: 8, height: 8)
-                                            Text(viewModel.notificationPermissionGranted ? (langManager.currentLanguage == .korean ? "허용됨" : "Allowed") : (langManager.currentLanguage == .korean ? "권한 필요" : "Action Required"))
+                                            Text(viewModel.notificationPermissionGranted ? t("common.allowed") : t("common.actionRequired"))
                                                 .font(.caption)
                                                 .fontWeight(.bold)
                                                 .foregroundColor(viewModel.notificationPermissionGranted ? Theme.accent : Theme.danger)
@@ -327,7 +327,7 @@ struct SettingsView: View {
             Alert(
                 title: Text(t("settings.checkUpdate")),
                 message: Text(viewModel.updateAlertMessage),
-                dismissButton: .default(Text("확인"))
+                dismissButton: .default(Text(t("common.ok")))
             )
         }
     }

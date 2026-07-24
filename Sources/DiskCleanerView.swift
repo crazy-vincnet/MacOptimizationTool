@@ -9,8 +9,8 @@ struct DiskCleanerView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // 상단 고정 헤더
                 PageHeader(
-                    title: "디스크 정리",
-                    subtitle: "사용하지 않는 시스템 캐시, 임시 파일, 로그를 삭제하여 디스크 공간을 확보합니다.",
+                    title: t("disk.pageTitle"),
+                    subtitle: t("disk.pageSubtitle"),
                     icon: "opticaldisc.fill"
                 )
                 .padding(.horizontal, Theme.pagePadding)
@@ -27,11 +27,11 @@ struct DiskCleanerView: View {
                             .padding(.bottom, 10)
                             .shadow(color: Theme.accent.opacity(0.25), radius: 12)
 
-                        Text("디스크 스캔 준비 완료")
+                        Text(t("disk.emptyTitle"))
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(Theme.textPrimary)
 
-                        Text("시스템 캐시, 사용자 로그, 임시 보관 파일 및 휴지통을 스캔하여\n불필요하게 낭비되는 공간을 찾아냅니다.")
+                        Text(t("disk.emptyDesc"))
                             .font(.subheadline)
                             .foregroundColor(Theme.textSecondary)
                             .multilineTextAlignment(.center)
@@ -44,7 +44,7 @@ struct DiskCleanerView: View {
                         }) {
                             HStack {
                                 Image(systemName: "play.fill")
-                                Text("스캔 시작")
+                                Text(t("common.scanStart"))
                             }
                         }
                         .buttonStyle(PrimaryActionButtonStyle())
@@ -58,7 +58,7 @@ struct DiskCleanerView: View {
                             // 총 용량 대시카드
                             HStack {
                                 VStack(alignment: .leading, spacing: 5) {
-                                    Text("정리 가능 공간")
+                                    Text(t("disk.reclaimableSpace"))
                                         .font(.subheadline)
                                         .foregroundColor(Theme.textSecondary)
                                     Text(ByteCountFormatter.string(fromByteCount: viewModel.categories.reduce(0) { $0 + ($1.isSelected ? $1.size : 0) }, countStyle: .file))
@@ -70,7 +70,7 @@ struct DiskCleanerView: View {
                                 Button(action: {
                                     viewModel.scanJunk()
                                 }) {
-                                    Label("재스캔", systemImage: "arrow.clockwise")
+                                    Label(t("common.scanRestart"), systemImage: "arrow.clockwise")
                                 }
                                 .buttonStyle(SecondaryButtonStyle())
                             }
@@ -161,7 +161,7 @@ struct DiskCleanerView: View {
                                                 .padding(.vertical, 8)
                                                 .background(Theme.accent.opacity(0.04))
                                             } else {
-                                                Text("비어 있음")
+                                                Text(t("disk.subItemsEmpty"))
                                                     .font(.caption)
                                                     .foregroundColor(Theme.textSecondary)
                                                     .padding(.vertical, 8)
@@ -182,7 +182,7 @@ struct DiskCleanerView: View {
                                 HStack(spacing: 8) {
                                     Spacer()
                                     Image(systemName: "sparkles")
-                                    Text("선택 항목 안전하게 청소 실행 (정리 가능: \(ByteCountFormatter.string(fromByteCount: viewModel.totalJunkSize, countStyle: .file)))")
+                                    Text("\(t("disk.cleanExecute")) (\(t("disk.reclaimableLabel")): \(ByteCountFormatter.string(fromByteCount: viewModel.totalJunkSize, countStyle: .file)))")
                                     Spacer()
                                 }
                             }
@@ -197,30 +197,30 @@ struct DiskCleanerView: View {
             
             // 로딩 오버레이
             if viewModel.isScanning {
-                ProgressOverlay(message: "디스크 내 불필요 파일 스캔 중...")
+                ProgressOverlay(message: t("disk.progressScanning"))
             }
-            
+
             if viewModel.isCleaning {
-                ProgressOverlay(message: "불필요 캐시 및 로그 파일 삭제 중...")
+                ProgressOverlay(message: t("disk.progressCleaning"))
             }
         }
         .confirmationDialog(
-            "선택한 항목을 휴지통으로 이동합니다",
+            t("disk.confirmTitle"),
             isPresented: $showCleanConfirm,
             titleVisibility: .visible
         ) {
-            Button("휴지통으로 이동 (\(ByteCountFormatter.string(fromByteCount: viewModel.totalJunkSize, countStyle: .file)))", role: .destructive) {
+            Button("\(t("disk.moveToTrash")) (\(ByteCountFormatter.string(fromByteCount: viewModel.totalJunkSize, countStyle: .file)))", role: .destructive) {
                 viewModel.cleanJunk()
             }
-            Button("취소", role: .cancel) {}
+            Button(t("disk.cancel"), role: .cancel) {}
         } message: {
-            Text("삭제된 파일은 휴지통에서 복구할 수 있습니다.")
+            Text(t("disk.confirmMessage"))
         }
         .alert(isPresented: $viewModel.showCleanSuccess) {
             Alert(
-                title: Text("디스크 정리 완료"),
-                message: Text("성공적으로 \(ByteCountFormatter.string(fromByteCount: viewModel.cleanedSize, countStyle: .file))의 디스크 공간을 확보했습니다!"),
-                dismissButton: .default(Text("확인"))
+                title: Text(t("disk.successTitle")),
+                message: Text("\(t("disk.successMessagePrefix"))\(ByteCountFormatter.string(fromByteCount: viewModel.cleanedSize, countStyle: .file))\(t("disk.successMessageSuffix"))"),
+                dismissButton: .default(Text(t("disk.ok")))
             )
         }
         .onAppear {

@@ -43,9 +43,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
         
         // 실시간 정보 표시 아이템
-        let cpuItem = NSMenuItem(title: "CPU 사용량: 스캔 중...", action: nil, keyEquivalent: "")
+        let cpuItem = NSMenuItem(title: "\(t("dash.cpu")): \(t("menu.scanning"))", action: nil, keyEquivalent: "")
         cpuItem.isEnabled = false
-        let ramItem = NSMenuItem(title: "메모리 사용량: 스캔 중...", action: nil, keyEquivalent: "")
+        let ramItem = NSMenuItem(title: "\(t("dash.memory")): \(t("menu.scanning"))", action: nil, keyEquivalent: "")
         ramItem.isEnabled = false
         
         menu.addItem(cpuItem)
@@ -54,17 +54,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
         
         // 빠른 청소 및 메인 실행 제어
-        let purgeItem = NSMenuItem(title: "메모리 즉시 최적화", action: #selector(purgeMemoryFromMenuBar), keyEquivalent: "m")
+        let purgeItem = NSMenuItem(title: t("dash.optimize"), action: #selector(purgeMemoryFromMenuBar), keyEquivalent: "m")
         purgeItem.target = self
         menu.addItem(purgeItem)
-        
-        let openAppItem = NSMenuItem(title: "메인 화면 열기", action: #selector(openMainWindow), keyEquivalent: "o")
+
+        let openAppItem = NSMenuItem(title: t("menu.openMain"), action: #selector(openMainWindow), keyEquivalent: "o")
         openAppItem.target = self
         menu.addItem(openAppItem)
-        
+
         menu.addItem(NSMenuItem.separator())
-        
-        let quitItem = NSMenuItem(title: "프로그램 완전히 종료", action: #selector(quitApp), keyEquivalent: "q")
+
+        let quitItem = NSMenuItem(title: t("menu.quit"), action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
         
@@ -73,8 +73,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // AsyncStream 기반 비동기 텔레메트리 모니터링 가동 (Timer 대비 CPU 오버헤드 최소화)
         telemetryTask = Task { @MainActor in
             for await data in HardwareStatsHelper.startTelemetryStream() {
-                cpuItem.title = String(format: "CPU 사용량: %.1f%%", data.cpuUsage)
-                ramItem.title = String(format: "메모리 사용량: %.1f%% (%@ / %@)",
+                cpuItem.title = String(format: "\(t("dash.cpu")): %.1f%%", data.cpuUsage)
+                ramItem.title = String(format: "\(t("dash.memory")): %.1f%% (%@ / %@)",
                                        data.ramStats.percent,
                                        ByteCountFormatter.string(fromByteCount: data.ramStats.used, countStyle: .file),
                                        ByteCountFormatter.string(fromByteCount: data.ramStats.total, countStyle: .file))
@@ -97,8 +97,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             // 현대적인 UNUserNotificationCenter 알림 전송 (Async/Await 표준 사용)
             let content = UNMutableNotificationContent()
-            content.title = "메모리 최적화 완료"
-            content.body = "성공적으로 \(ByteCountFormatter.string(fromByteCount: reclaimed, countStyle: .file))의 메모리를 해제했습니다."
+            content.title = t("menu.notif.title")
+            content.body = "\(t("menu.notif.bodyPrefix"))\(ByteCountFormatter.string(fromByteCount: reclaimed, countStyle: .file))\(t("menu.notif.bodySuffix"))"
             content.sound = .default
             
             let request = UNNotificationRequest(

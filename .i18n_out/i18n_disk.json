@@ -1,0 +1,170 @@
+{
+  "disk.pageTitle": {
+    "ko": "디스크 정리",
+    "en": "Disk Cleanup",
+    "zh": "磁盘清理",
+    "ja": "ディスククリーンアップ"
+  },
+  "disk.pageSubtitle": {
+    "ko": "사용하지 않는 시스템 캐시, 임시 파일, 로그를 삭제하여 디스크 공간을 확보합니다.",
+    "en": "Free up disk space by removing unused system caches, temporary files, and logs.",
+    "zh": "通过删除未使用的系统缓存、临时文件和日志来释放磁盘空间。",
+    "ja": "使用されていないシステムキャッシュ、一時ファイル、ログを削除してディスク容量を確保します。"
+  },
+  "disk.emptyTitle": {
+    "ko": "디스크 스캔 준비 완료",
+    "en": "Ready to Scan Your Disk",
+    "zh": "磁盘扫描准备就绪",
+    "ja": "ディスクスキャンの準備完了"
+  },
+  "disk.emptyDesc": {
+    "ko": "시스템 캐시, 사용자 로그, 임시 보관 파일 및 휴지통을 스캔하여\n불필요하게 낭비되는 공간을 찾아냅니다.",
+    "en": "Scan system caches, user logs, temporary files, and the Trash\nto find space that is being wasted unnecessarily.",
+    "zh": "扫描系统缓存、用户日志、临时文件和废纸篓，\n找出被无谓浪费的空间。",
+    "ja": "システムキャッシュ、ユーザーログ、一時ファイル、ゴミ箱をスキャンして\n無駄に消費されている領域を見つけ出します。"
+  },
+  "disk.reclaimableSpace": {
+    "ko": "정리 가능 공간",
+    "en": "Reclaimable Space",
+    "zh": "可释放空间",
+    "ja": "解放可能な容量"
+  },
+  "disk.subItemsEmpty": {
+    "ko": "비어 있음",
+    "en": "Empty",
+    "zh": "空",
+    "ja": "空です"
+  },
+  "disk.cleanExecute": {
+    "ko": "선택 항목 안전하게 청소 실행",
+    "en": "Safely Clean Selected Items",
+    "zh": "安全清理所选项目",
+    "ja": "選択項目を安全にクリーンアップ"
+  },
+  "disk.reclaimableLabel": {
+    "ko": "정리 가능",
+    "en": "Reclaimable",
+    "zh": "可释放",
+    "ja": "解放可能"
+  },
+  "disk.progressScanning": {
+    "ko": "디스크 내 불필요 파일 스캔 중...",
+    "en": "Scanning disk for unnecessary files...",
+    "zh": "正在扫描磁盘中的多余文件…",
+    "ja": "ディスク内の不要なファイルをスキャン中…"
+  },
+  "disk.progressCleaning": {
+    "ko": "불필요 캐시 및 로그 파일 삭제 중...",
+    "en": "Deleting unnecessary caches and log files...",
+    "zh": "正在删除多余的缓存和日志文件…",
+    "ja": "不要なキャッシュとログファイルを削除中…"
+  },
+  "disk.confirmTitle": {
+    "ko": "선택한 항목을 휴지통으로 이동합니다",
+    "en": "Move Selected Items to the Trash",
+    "zh": "将所选项目移到废纸篓",
+    "ja": "選択した項目をゴミ箱に移動します"
+  },
+  "disk.moveToTrash": {
+    "ko": "휴지통으로 이동",
+    "en": "Move to Trash",
+    "zh": "移到废纸篓",
+    "ja": "ゴミ箱に移動"
+  },
+  "disk.cancel": {
+    "ko": "취소",
+    "en": "Cancel",
+    "zh": "取消",
+    "ja": "キャンセル"
+  },
+  "disk.confirmMessage": {
+    "ko": "삭제된 파일은 휴지통에서 복구할 수 있습니다.",
+    "en": "Deleted files can be restored from the Trash.",
+    "zh": "已删除的文件可从废纸篓中恢复。",
+    "ja": "削除したファイルはゴミ箱から復元できます。"
+  },
+  "disk.successTitle": {
+    "ko": "디스크 정리 완료",
+    "en": "Disk Cleanup Complete",
+    "zh": "磁盘清理完成",
+    "ja": "ディスククリーンアップ完了"
+  },
+  "disk.successMessagePrefix": {
+    "ko": "성공적으로 ",
+    "en": "Successfully reclaimed ",
+    "zh": "已成功释放 ",
+    "ja": "正常に "
+  },
+  "disk.successMessageSuffix": {
+    "ko": "의 디스크 공간을 확보했습니다!",
+    "en": " of disk space!",
+    "zh": " 的磁盘空间！",
+    "ja": " のディスク容量を確保しました！"
+  },
+  "disk.ok": {
+    "ko": "확인",
+    "en": "OK",
+    "zh": "确定",
+    "ja": "OK"
+  },
+  "disk.cat.userCaches.name": {
+    "ko": "사용자 캐시 파일",
+    "en": "User Cache Files",
+    "zh": "用户缓存文件",
+    "ja": "ユーザーキャッシュファイル"
+  },
+  "disk.cat.userCaches.desc": {
+    "ko": "앱 임시 보관 데이터로, 삭제 시 재다운로드 혹은 로드됩니다.",
+    "en": "Temporary app data that will be re-downloaded or reloaded after deletion.",
+    "zh": "应用的临时存储数据，删除后会重新下载或重新加载。",
+    "ja": "アプリの一時保存データで、削除すると再ダウンロードまたは再読み込みされます。"
+  },
+  "disk.cat.userLogs.name": {
+    "ko": "사용자 시스템 로그",
+    "en": "User System Logs",
+    "zh": "用户系统日志",
+    "ja": "ユーザーシステムログ"
+  },
+  "disk.cat.userLogs.desc": {
+    "ko": "앱 크래시나 작동 추적 일지 파일로, 보관할 필요가 없습니다.",
+    "en": "Log files tracking app crashes and activity that don't need to be kept.",
+    "zh": "记录应用崩溃和运行情况的日志文件，无需保留。",
+    "ja": "アプリのクラッシュや動作を記録したログファイルで、保管する必要はありません。"
+  },
+  "disk.cat.systemCaches.name": {
+    "ko": "시스템 캐시 & 로그",
+    "en": "System Caches & Logs",
+    "zh": "系统缓存和日志",
+    "ja": "システムキャッシュとログ"
+  },
+  "disk.cat.systemCaches.desc": {
+    "ko": "OS 공용으로 저장된 로그 및 공유 자원 임시 파일입니다.",
+    "en": "Logs and shared-resource temporary files stored by the OS system-wide.",
+    "zh": "操作系统全局存储的日志和共享资源临时文件。",
+    "ja": "OS が共通で保存したログや共有リソースの一時ファイルです。"
+  },
+  "disk.cat.xcodeData.name": {
+    "ko": "Xcode 개발자 DerivedData",
+    "en": "Xcode Developer DerivedData",
+    "zh": "Xcode 开发者 DerivedData",
+    "ja": "Xcode 開発者 DerivedData"
+  },
+  "disk.cat.xcodeData.desc": {
+    "ko": "Xcode 개발 찌꺼기 파일로 개발 시 언제든지 재생성되는 용량 먹는 데이터입니다.",
+    "en": "Xcode build leftovers—space-hungry data that is regenerated any time during development.",
+    "zh": "Xcode 开发的残留文件，是开发时随时会重新生成的占用空间的数据。",
+    "ja": "Xcode 開発の残骸ファイルで、開発時にいつでも再生成される容量を消費するデータです。"
+  },
+  "disk.cat.trash.name": {
+    "ko": "시스템 휴지통",
+    "en": "System Trash",
+    "zh": "系统废纸篓",
+    "ja": "システムのゴミ箱"
+  },
+  "disk.cat.trash.desc": {
+    "ko": "사용자가 임의로 삭제하여 휴지통에 들어간 실제 파일들입니다.",
+    "en": "Actual files that the user deleted and moved into the Trash.",
+    "zh": "用户主动删除并移入废纸篓的实际文件。",
+    "ja": "ユーザーが手動で削除してゴミ箱に入れた実際のファイルです。"
+  }
+}

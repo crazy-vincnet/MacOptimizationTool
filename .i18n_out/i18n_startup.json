@@ -1,0 +1,110 @@
+{
+  "startup.title": {
+    "ko": "시작 프로그램",
+    "en": "Startup Programs",
+    "zh": "启动项",
+    "ja": "起動プログラム"
+  },
+  "startup.subtitle": {
+    "ko": "Mac 로그인 시 백그라운드에서 백그라운드 데몬 및 서브 프로세스로 실행되는 에이전트 목록을 조율합니다.",
+    "en": "Manage the list of agents that run as background daemons and sub-processes when your Mac logs in.",
+    "zh": "管理 Mac 登录时以后台守护进程和子进程运行的代理列表。",
+    "ja": "Mac ログイン時にバックグラウンドのデーモンやサブプロセスとして実行されるエージェントの一覧を管理します。"
+  },
+  "startup.refresh": {
+    "ko": "새로고침",
+    "en": "Refresh",
+    "zh": "刷新",
+    "ja": "更新"
+  },
+  "startup.infoBanner": {
+    "ko": "불필요한 시작 프로그램을 끄면 Mac의 부팅 속도가 대폭 향상되고, 메모리(RAM) 대기 가용량이 증가합니다. 시스템 파일의 권한 요구사항에 따라 일부 항목 변경 시 OS 권한 알림이 뜰 수 있습니다.",
+    "en": "Turning off unnecessary startup programs greatly improves your Mac's boot speed and increases available standby memory (RAM). Depending on the permission requirements of system files, changing some items may trigger an OS permission prompt.",
+    "zh": "关闭不必要的启动项可大幅提升 Mac 的启动速度，并增加可用的待机内存 (RAM)。根据系统文件的权限要求，更改某些项目时可能会弹出操作系统权限提示。",
+    "ja": "不要な起動プログラムをオフにすると、Mac の起動速度が大幅に向上し、待機可能なメモリ (RAM) が増加します。システムファイルの権限要件によっては、一部の項目を変更する際に OS の権限確認が表示される場合があります。"
+  },
+  "startup.analyzing": {
+    "ko": "백그라운드 에이전트 분석 중...",
+    "en": "Analyzing background agents...",
+    "zh": "正在分析后台代理...",
+    "ja": "バックグラウンドエージェントを分析中..."
+  },
+  "startup.emptyList": {
+    "ko": "등록된 시작 프로그램 에이전트가 없습니다.",
+    "en": "No registered startup program agents.",
+    "zh": "没有已注册的启动项代理。",
+    "ja": "登録された起動プログラムエージェントはありません。"
+  },
+  "startup.protectedHelp": {
+    "ko": "시스템 권한이 필요한 항목으로 비활성화할 수 없습니다.",
+    "en": "This item requires system privileges and cannot be disabled.",
+    "zh": "此项目需要系统权限，无法禁用。",
+    "ja": "システム権限が必要な項目のため無効化できません。"
+  },
+  "startup.parsing": {
+    "ko": "시스템 내 백그라운드 구동 목록 파싱 중...",
+    "en": "Parsing the system's background startup list...",
+    "zh": "正在解析系统内的后台启动列表...",
+    "ja": "システム内のバックグラウンド起動リストを解析中..."
+  },
+  "startup.alertTitle": {
+    "ko": "시작 프로그램 변경",
+    "en": "Startup Program Change",
+    "zh": "启动项更改",
+    "ja": "起動プログラムの変更"
+  },
+  "startup.confirm": {
+    "ko": "확인",
+    "en": "OK",
+    "zh": "确定",
+    "ja": "OK"
+  },
+  "startup.typeUserAgent": {
+    "ko": "사용자 에이전트",
+    "en": "User Agent",
+    "zh": "用户代理",
+    "ja": "ユーザーエージェント"
+  },
+  "startup.typeSystemAgent": {
+    "ko": "시스템 에이전트",
+    "en": "System Agent",
+    "zh": "系统代理",
+    "ja": "システムエージェント"
+  },
+  "startup.typeSystemDaemon": {
+    "ko": "시스템 데몬",
+    "en": "System Daemon",
+    "zh": "系统守护进程",
+    "ja": "システムデーモン"
+  },
+  "startup.systemProtectedMsg": {
+    "ko": "은(는) 시스템 영역(/Library)에 있어 관리자 권한이 필요합니다. macOS '시스템 설정 > 일반 > 로그인 항목'에서 관리하세요.",
+    "en": " is in the system area (/Library) and requires administrator privileges. Manage it in macOS 'System Settings > General > Login Items'.",
+    "zh": " 位于系统区域 (/Library)，需要管理员权限。请在 macOS「系统设置 > 通用 > 登录项」中管理。",
+    "ja": " はシステム領域 (/Library) にあり、管理者権限が必要です。macOS「システム設定 > 一般 > ログイン項目」で管理してください。"
+  },
+  "startup.enabledMsg": {
+    "ko": " 항목의 자동 실행을 활성화했습니다.",
+    "en": " item's automatic launch has been enabled.",
+    "zh": " 项目的自动启动已启用。",
+    "ja": " 項目の自動実行を有効にしました。"
+  },
+  "startup.disabledMsg": {
+    "ko": " 항목의 자동 실행을 비활성화했습니다.",
+    "en": " item's automatic launch has been disabled.",
+    "zh": " 项目的自动启动已禁用。",
+    "ja": " 項目の自動実行を無効にしました。"
+  },
+  "startup.changeFailPrefix": {
+    "ko": "상태 변경 실패: ",
+    "en": "Status change failed: ",
+    "zh": "状态更改失败：",
+    "ja": "状態変更に失敗しました: "
+  },
+  "startup.changeFailSuffix": {
+    "ko": " 파일을 수정할 수 없습니다.",
+    "en": " file could not be modified.",
+    "zh": " 文件无法修改。",
+    "ja": " ファイルを変更できません。"
+  }
+}

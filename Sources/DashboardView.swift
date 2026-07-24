@@ -46,18 +46,18 @@ struct DashboardView: View {
     // CPU 온도의 서멀 심각도 로컬라이징 변환
     private var cpuThermalStatus: String {
         switch ProcessInfo.processInfo.thermalState {
-        case .nominal: return langManager.currentLanguage == .korean ? "정상" : "Normal"
-        case .fair: return langManager.currentLanguage == .korean ? "보통" : "Fair"
-        case .serious: return langManager.currentLanguage == .korean ? "높음" : "Serious"
-        case .critical: return langManager.currentLanguage == .korean ? "위험" : "Critical"
-        @unknown default: return langManager.currentLanguage == .korean ? "정상" : "Normal"
+        case .nominal: return t("dash.thermal.normal")
+        case .fair: return t("dash.thermal.fair")
+        case .serious: return t("dash.thermal.serious")
+        case .critical: return t("dash.thermal.critical")
+        @unknown default: return t("dash.thermal.normal")
         }
     }
     
     private func thermalColor(_ status: String) -> Color {
-        if status == "정상" || status == "Normal" {
+        if status == t("dash.thermal.normal") {
             return Theme.accent
-        } else if status == "보통" || status == "Fair" {
+        } else if status == t("dash.thermal.fair") {
             return Theme.warning
         } else {
             return Theme.danger
@@ -105,7 +105,7 @@ struct DashboardView: View {
                         VStack(spacing: 16) {
                             HStack(spacing: 16) {
                                 // CPU 상태 카드
-                                DashboardCard(title: langManager.currentLanguage == .korean ? "CPU 상태" : "CPU Status", icon: "cpu", gradientColors: [Theme.accentSoft, Theme.accent]) {
+                                DashboardCard(title: t("dash.cpuStatus"), icon: "cpu", gradientColors: [Theme.accentSoft, Theme.accent]) {
                                     VStack {
                                         ZStack {
                                             Circle()
@@ -127,7 +127,7 @@ struct DashboardView: View {
                                                 Text("\(Int(cpuUsedPercent))%")
                                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                                                     .foregroundColor(Theme.textPrimary)
-                                                Text(langManager.currentLanguage == .korean ? "사용 중" : "Used")
+                                                Text(t("dash.used"))
                                                     .font(.system(size: 8))
                                                     .foregroundColor(.secondary)
                                             }
@@ -141,10 +141,10 @@ struct DashboardView: View {
                                                 .lineLimit(1)
                                             
                                             HStack(spacing: 6) {
-                                                Text("\(langManager.currentLanguage == .korean ? "사용자" : "User"): \(Int(cpuUserPercent))%")
+                                                Text("\(t("dash.user")): \(Int(cpuUserPercent))%")
                                                 Text("•")
                                                     .foregroundColor(.secondary.opacity(0.4))
-                                                Text("\(langManager.currentLanguage == .korean ? "시스템" : "Sys"): \(Int(cpuSysPercent))%")
+                                                Text("\(t("dash.sys")): \(Int(cpuSysPercent))%")
                                             }
                                             .font(.system(size: 9))
                                             .foregroundColor(.secondary)
@@ -158,7 +158,7 @@ struct DashboardView: View {
                                 }
                                 
                                 // GPU 상태 카드
-                                DashboardCard(title: langManager.currentLanguage == .korean ? "GPU 상태" : "GPU Status", icon: "display", gradientColors: [Theme.accent, Theme.accentDeep]) {
+                                DashboardCard(title: t("dash.gpuStatus"), icon: "display", gradientColors: [Theme.accent, Theme.accentDeep]) {
                                     VStack {
                                         ZStack {
                                             Circle()
@@ -179,7 +179,7 @@ struct DashboardView: View {
                                                 Text("ON")
                                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                                                     .foregroundColor(Theme.accent)
-                                                Text(langManager.currentLanguage == .korean ? "활성" : "Active")
+                                                Text(t("dash.active"))
                                                     .font(.system(size: 8))
                                                     .foregroundColor(.secondary)
                                             }
@@ -192,7 +192,7 @@ struct DashboardView: View {
                                                 .foregroundColor(Theme.textPrimary)
                                                 .lineLimit(1)
                                             
-                                            Text(isUnifiedGPU ? (langManager.currentLanguage == .korean ? "통합 메모리 아키텍처" : "Unified Memory") : (langManager.currentLanguage == .korean ? "외장 그래픽" : "Discrete GPU"))
+                                            Text(isUnifiedGPU ? t("dash.unifiedMemory") : t("dash.discreteGPU"))
                                                 .font(.system(size: 9))
                                                 .foregroundColor(.secondary)
                                             
@@ -229,7 +229,7 @@ struct DashboardView: View {
                                                 Text("\(Int(memoryUsedPercent))%")
                                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                                                     .foregroundColor(Theme.textPrimary)
-                                                Text(langManager.currentLanguage == .korean ? "사용 중" : "Used")
+                                                Text(t("dash.used"))
                                                     .font(.system(size: 8))
                                                     .foregroundColor(.secondary)
                                             }
@@ -237,7 +237,7 @@ struct DashboardView: View {
                                         .padding(.vertical, 8)
                                         
                                         VStack(spacing: 3) {
-                                            Text("\(langManager.currentLanguage == .korean ? "여유" : "Free"): \(formattedMemoryFree) / \(formattedMemoryTotal)")
+                                            Text("\(t("dash.free")): \(formattedMemoryFree) / \(formattedMemoryTotal)")
                                                 .font(.system(size: 10, weight: .bold))
                                                 .foregroundColor(Theme.textPrimary)
                                             
@@ -298,7 +298,7 @@ struct DashboardView: View {
                                                 Text("\(Int(diskUsedPercent))%")
                                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                                                     .foregroundColor(Theme.textPrimary)
-                                                Text(langManager.currentLanguage == .korean ? "사용 중" : "Used")
+                                                Text(t("dash.used"))
                                                     .font(.system(size: 8))
                                                     .foregroundColor(.secondary)
                                             }
@@ -311,10 +311,10 @@ struct DashboardView: View {
                                                 .foregroundColor(Theme.textPrimary)
                                             
                                             HStack(spacing: 6) {
-                                                Text("\(langManager.currentLanguage == .korean ? "사용됨" : "Used"): \(formattedDiskUsed)")
+                                                Text("\(t("dash.usedDisk")): \(formattedDiskUsed)")
                                                 Text("•")
                                                     .foregroundColor(.secondary.opacity(0.4))
-                                                Text("\(langManager.currentLanguage == .korean ? "전체" : "Total"): \(formattedDiskTotal)")
+                                                Text("\(t("dash.total")): \(formattedDiskTotal)")
                                             }
                                             .font(.system(size: 9))
                                             .foregroundColor(.secondary)
@@ -325,7 +325,7 @@ struct DashboardView: View {
                                                     .foregroundColor(Theme.accent)
                                                     .padding(.top, 1)
                                             } else {
-                                                Text(langManager.currentLanguage == .korean ? "배터리 상태: 전원 연결됨" : "Battery: Power Adapter Connected")
+                                                Text(t("dash.batteryPowerAdapter"))
                                                     .font(.system(size: 9, weight: .medium))
                                                     .foregroundColor(.secondary)
                                                     .padding(.top, 1)
@@ -338,7 +338,7 @@ struct DashboardView: View {
                         
                         // 빠른 링크/팁 섹션
                         VStack(alignment: .leading, spacing: 12) {
-                            Text(langManager.currentLanguage == .korean ? "추천 최적화" : "Recommended Optimization")
+                            Text(t("dash.recommendedOptimization"))
                                 .font(.headline)
                                 .foregroundColor(Theme.textPrimary)
                             
@@ -353,10 +353,10 @@ struct DashboardView: View {
                                     )
 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(langManager.currentLanguage == .korean ? "앱 잔여 파일 정리" : "App Leftovers Removal")
+                                    Text(t("dash.appLeftoversTitle"))
                                         .fontWeight(.medium)
                                         .foregroundColor(Theme.textPrimary)
-                                    Text(langManager.currentLanguage == .korean ? "사용하지 않는 앱을 삭제하고 숨은 찌꺼기 파일을 지워 공간을 확보하세요." : "Delete unused applications and clean hidden leftover files to reclaim space.")
+                                    Text(t("dash.appLeftoversDesc"))
                                         .font(.caption)
                                         .foregroundColor(Theme.textSecondary)
                                 }
@@ -381,7 +381,7 @@ struct DashboardView: View {
                         ProgressView()
                             .controlSize(.large)
                             .tint(Theme.accent)
-                        Text(langManager.currentLanguage == .korean ? "메모리 가상 영역 최적화 및 캐시 회수 중..." : "Optimizing virtual memory and purging caches...")
+                        Text(t("dash.optimizingMemory"))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(Theme.textPrimary)
                     }
@@ -391,9 +391,9 @@ struct DashboardView: View {
         }
         .alert(isPresented: $showMemoryOptimizedAlert) {
             Alert(
-                title: Text(langManager.currentLanguage == .korean ? "메모리 최적화 완료" : "Memory Optimized"),
-                message: Text(langManager.currentLanguage == .korean ? "성공적으로 \(freedMemoryString)의 캐시 및 비활성 공간을 수거하여 시스템 성능을 끌어올렸습니다." : "Successfully reclaimed \(freedMemoryString) of inactive cache memory to boost system responsiveness."),
-                dismissButton: .default(Text(langManager.currentLanguage == .korean ? "확인" : "OK"))
+                title: Text(t("dash.memoryOptimizedTitle")),
+                message: Text("\(t("dash.reclaimedPrefix"))\(freedMemoryString)\(t("dash.reclaimedSuffix"))"),
+                dismissButton: .default(Text(t("dash.ok")))
             )
         }
         .onAppear {
