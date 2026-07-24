@@ -99,34 +99,54 @@ class StartupViewModel: ObservableObject {
     
     func toggleItem(_ item: StartupItem) {
         guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+
+        // 시스템 영역(/Library)은 관리자 권한이 필요하고 rename 이 조용히 실패한다.
+        // 시도 후 실패 메시지 대신, 처음부터 명확히 차단한다.
+        if item.isSystemProtected {
+            alertMessage = "'\(item.name)'은(는) 시스템 영역(/Library)에 있어 관리자 권한이 필요합니다. macOS '시스템 설정 > 일반 > 로그인 항목'에서 관리하세요."
+            showSuccessAlert = true
+            return
+        }
+
         let currentStatus = items[index].isEnabled
         let targetURL = item.url
-        
-        var destinationURL: URL
+
+        let destinationURL: URL
         if currentStatus {
             destinationURL = targetURL.deletingPathExtension().appendingPathExtension("plist.bak")
         } else {
             destinationURL = targetURL.deletingPathExtension().deletingPathExtension().appendingPathExtension("plist")
         }
-        
-        let isAccessed = targetURL.startAccessingSecurityScopedResource()
-        defer {
-            if isAccessed {
-                targetURL.stopAccessingSecurityScopedResource()
-            }
-        }
-        
+
         do {
-            try fileManager.moveItem(at: targetURL, to: destinationURL)
-            items[index].isEnabled = !currentStatus
+            if currentStatus {
+                // 비활성화: 먼저 launchd 에서 내린 뒤 .bak 으로 이름 변경
+                Self.runLaunchctl(load: false, plistPath: targetURL.path)
+                try fileManager.moveItem(at: targetURL, to: destinationURL)
+            } else {
+                // 활성화: .plist 로 복원한 뒤 launchd 에 등록
+                try fileManager.moveItem(at: targetURL, to: destinationURL)
+                Self.runLaunchctl(load: true, plistPath: destinationURL.path)
+            }
+
             scanStartupItems() // 리로드
-            
-            alertMessage = "'\(item.name)' 항목의 자동 실행 설정을 \(currentStatus ? "비활성화" : "활성화")했습니다."
+            alertMessage = "'\(item.name)' 항목의 자동 실행을 \(currentStatus ? "비활성화" : "활성화")했습니다."
             showSuccessAlert = true
         } catch {
             print("시작 프로그램 변경 에러: \(error.localizedDescription)")
-            alertMessage = "상태 변경 실패: 시스템 영역 (/Library) 수정을 위해서는 권한이 필요할 수 있습니다."
+            alertMessage = "상태 변경 실패: '\(item.name)' 파일을 수정할 수 없습니다. (\(error.localizedDescription))"
             showSuccessAlert = true
         }
+    }
+
+    /// 사용자 LaunchAgent 를 launchd 에 즉시 반영 (root 불필요). 실패해도 rename 자체는 유효.
+    nonisolated private static func runLaunchctl(load: Bool, plistPath: String) {
+        let p = Process()
+        p.launchPath = "/bin/launchctl"
+        p.arguments = [load ? "load" : "unload", plistPath]
+        p.standardError = FileHandle.nullDevice
+        p.standardOutput = FileHandle.nullDevice
+        try? p.run()
+        p.waitUntilExit()
     }
 }

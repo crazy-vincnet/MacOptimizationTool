@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import AppKit
 import UserNotifications
+import ServiceManagement
 
 @MainActor
 class SettingsViewModel: ObservableObject {
@@ -26,6 +27,30 @@ class SettingsViewModel: ObservableObject {
     @Published var runAtLogin: Bool {
         didSet {
             UserDefaults.standard.set(runAtLogin, forKey: "runAtLogin")
+            applyLoginItemState()
+        }
+    }
+
+    /// UserDefaults 저장에 그치지 않고 실제 macOS 로그인 항목으로 등록/해제한다. (이전에는 no-op 버그)
+    private func applyLoginItemState() {
+        let service = SMAppService.mainApp
+        do {
+            if runAtLogin {
+                if service.status != .enabled {
+                    try service.register()
+                }
+            } else {
+                if service.status == .enabled {
+                    try service.unregister()
+                }
+            }
+        } catch {
+            // 서명되지 않은 수동 빌드에서는 실패할 수 있음 -> 상태를 실제 시스템 값으로 되돌린다.
+            print("로그인 항목 등록/해제 실패: \(error.localizedDescription)")
+            let actuallyEnabled = (SMAppService.mainApp.status == .enabled)
+            if runAtLogin != actuallyEnabled {
+                runAtLogin = actuallyEnabled
+            }
         }
     }
     
@@ -71,8 +96,9 @@ class SettingsViewModel: ObservableObject {
             self.enableNotifications = UserDefaults.standard.bool(forKey: "enableNotifications")
         }
         
-        self.runAtLogin = UserDefaults.standard.bool(forKey: "runAtLogin")
-        
+        // 실제 시스템 로그인 항목 등록 상태를 신뢰 소스로 사용 (UserDefaults 와 어긋날 수 있음)
+        self.runAtLogin = (SMAppService.mainApp.status == .enabled)
+
         self.selectedLanguage = LanguageManager.shared.currentLanguage
         
         loadDefaultScanFolder()
