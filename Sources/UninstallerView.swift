@@ -5,6 +5,7 @@ struct UninstallerView: View {
     @StateObject private var viewModel = UninstallerViewModel()
     @State private var isTargeted = false
     @State private var searchText = ""
+    @State private var showDeleteConfirm = false
     
     // 전체 선택 상태를 제어하기 위한 계산 프로퍼티
     private var isAllSelected: Bool {
@@ -479,7 +480,7 @@ struct UninstallerView: View {
                     }
                     
                     Button(action: {
-                        viewModel.deleteSelectedItems()
+                        showDeleteConfirm = true
                     }) {
                         HStack {
                             Image(systemName: "trash.fill")
@@ -492,6 +493,18 @@ struct UninstallerView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(.red)
                     .disabled(selectedCount == 0)
+                    .confirmationDialog(
+                        "\(viewModel.selectedApp?.name ?? "앱") 관련 \(selectedCount)개 항목을 휴지통으로 이동합니다",
+                        isPresented: $showDeleteConfirm,
+                        titleVisibility: .visible
+                    ) {
+                        Button("휴지통으로 이동 (\(readableSelectedSize))", role: .destructive) {
+                            viewModel.deleteSelectedItems()
+                        }
+                        Button("취소", role: .cancel) {}
+                    } message: {
+                        Text("삭제된 항목은 휴지통에서 복구할 수 있습니다.")
+                    }
                 }
             }
             .padding(.top, 5)

@@ -227,7 +227,7 @@ class UninstallerViewModel: ObservableObject {
             // B. 시스템 디렉토리 스캔
             for (dirURL, category) in scanDirectories {
                 let scanPath = dirURL.standardized.path
-                if Self.isBlacklistedStatic(scanPath) {
+                if FileSafety.isProtectedExact(scanPath) {
                     continue
                 }
                 
@@ -249,7 +249,7 @@ class UninstallerViewModel: ObservableObject {
                 
                 for itemURL in contents {
                     let itemPath = itemURL.standardized.path
-                    if Self.isBlacklistedStatic(itemPath) {
+                    if FileSafety.isProtectedExact(itemPath) {
                         continue
                     }
                     
@@ -267,36 +267,6 @@ class UninstallerViewModel: ObservableObject {
         
         self.leftoverItems = items
         self.isScanning = false
-    }
-    
-    nonisolated private static func isBlacklistedStatic(_ path: String) -> Bool {
-        let cleanPath = (path as NSString).standardizingPath.lowercased()
-        let systemBlacklist = [
-            "/", "/system", "/library", "/applications", "/users",
-            "/private", "/var", "/etc", "/bin", "/sbin", "/usr", "/dev", "/volumes"
-        ]
-        
-        if systemBlacklist.contains(cleanPath) {
-            return true
-        }
-        
-        let homePath = FileManager.default.homeDirectoryForCurrentUser.standardized.path.lowercased()
-        let userBlacklist = [
-            homePath,
-            homePath + "/library",
-            homePath + "/desktop",
-            homePath + "/documents",
-            homePath + "/downloads",
-            homePath + "/applications",
-            homePath + "/movies",
-            homePath + "/music",
-            homePath + "/pictures"
-        ]
-        
-        if userBlacklist.contains(cleanPath) {
-            return true
-        }
-        return false
     }
     
     nonisolated private static func matchesStatic(fileName: String, appName: String, bundleID: String?) -> Bool {
@@ -324,19 +294,26 @@ class UninstallerViewModel: ObservableObject {
             return false
         }
         
+        // 앱 이름 매칭은 경계(구분자) 기준으로만 허용한다.
+        // 단순 substring contains 는 무관한 다른 앱의 파일을 오탐하므로 제거.
         if lowerAppName.count >= 4 {
-            let delimiters = [".", "-", "_", " "]
+            let delimiters: [Character] = [".", "-", "_", " "]
+
+            // "AppName" + 구분자 로 시작 (예: "myapp.helper.plist")
             for delim in delimiters {
-                if lowerName.hasPrefix(lowerAppName + delim) {
+                if lowerName.hasPrefix(lowerAppName + String(delim)) {
                     return true
                 }
             }
-            
-            if lowerAppName.count >= 5 && lowerName.contains(lowerAppName) {
+
+            // 구분자로 나눈 토큰 중 하나가 앱 이름과 정확히 일치할 때만 허용.
+            // (com.vendor.myapp / myapp-2024.log 등은 잡고, "myapplication" 오탐은 배제)
+            let tokens = lowerName.split(whereSeparator: { delimiters.contains($0) })
+            if tokens.contains(where: { String($0) == lowerAppName }) {
                 return true
             }
         }
-        
+
         return false
     }
     
@@ -384,32 +361,18 @@ class UninstallerViewModel: ObservableObject {
         
         Task {
             let totalCleaned = await Task.detached(priority: .userInitiated) { () -> Int64 in
-                let localFM = FileManager.default
                 var cleaned: Int64 = 0
-                
+
                 for item in itemsToDelete {
                     let url = item.url
-                    let path = url.standardized.path
-                    
-                    if Self.isBlacklistedStatic(path) {
-                        print("보안 경고: 블랙리스트 보호 경로 삭제 차단: \(path)")
-                        continue
-                    }
-                    
                     let isAccessed = url.startAccessingSecurityScopedResource()
                     defer {
                         if isAccessed {
                             url.stopAccessingSecurityScopedResource()
                         }
                     }
-                    
-                    if localFM.fileExists(atPath: url.path) {
-                        do {
-                            try localFM.trashItem(at: url, resultingItemURL: nil)
-                            cleaned += item.size
-                        } catch {
-                            print("삭제 실패 (휴지통 이동 오류): \(url.path), 에러: \(error.localizedDescription)")
-                        }
+                    if FileSafety.moveToTrash(url) {
+                        cleaned += item.size
                     }
                 }
                 return cleaned

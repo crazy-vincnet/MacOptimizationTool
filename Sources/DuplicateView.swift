@@ -2,7 +2,8 @@ import SwiftUI
 
 struct DuplicateView: View {
     @StateObject private var viewModel = DuplicateViewModel()
-    
+    @State private var showDeleteConfirm = false
+
     var body: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
@@ -214,11 +215,11 @@ struct DuplicateView: View {
                             Spacer()
                             
                             Button(action: {
-                                viewModel.deleteSelectedDuplicates()
+                                showDeleteConfirm = true
                             }) {
                                 HStack {
                                     Image(systemName: "trash.fill")
-                                    Text("선택한 중복 복사본 삭제")
+                                    Text("선택한 중복 복사본 휴지통으로 이동")
                                         .fontWeight(.bold)
                                 }
                                 .foregroundColor(.white)
@@ -249,10 +250,22 @@ struct DuplicateView: View {
                 ProgressOverlay(message: "중복 복사본 파일 안전 제거 중...")
             }
         }
+        .confirmationDialog(
+            "선택한 \(viewModel.groups.flatMap({ $0.instances }).filter({ $0.isSelected }).count)개 중복 복사본을 휴지통으로 이동합니다",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("휴지통으로 이동", role: .destructive) {
+                viewModel.deleteSelectedDuplicates()
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("각 그룹당 원본 1개는 보존됩니다. 이동된 파일은 휴지통에서 복구할 수 있습니다.")
+        }
         .alert(isPresented: $viewModel.showDeleteSuccess) {
             Alert(
                 title: Text("중복 파일 정리 완료"),
-                message: Text("총 \(viewModel.deletedCount)개의 중복 복제본 파일 (\(ByteCountFormatter.string(fromByteCount: viewModel.deletedSize, countStyle: .file)))을 안전하게 삭제하여 공간을 추가로 확보했습니다."),
+                message: Text("총 \(viewModel.deletedCount)개의 중복 복제본 파일 (\(ByteCountFormatter.string(fromByteCount: viewModel.deletedSize, countStyle: .file)))을 휴지통으로 이동했습니다."),
                 dismissButton: .default(Text("확인"))
             )
         }

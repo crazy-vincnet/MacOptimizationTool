@@ -164,8 +164,9 @@ class LargeFilesViewModel: ObservableObject {
             var count = 0
             var totalSize: Int64 = 0
             
-            await Task.detached(priority: .userInitiated) {
-                let fm = FileManager.default
+            let result = await Task.detached(priority: .userInitiated) { () -> (Int, Int64) in
+                var localCount = 0
+                var localSize: Int64 = 0
                 for item in itemsToDelete {
                     let isAccessed = item.url.startAccessingSecurityScopedResource()
                     defer {
@@ -173,18 +174,15 @@ class LargeFilesViewModel: ObservableObject {
                             item.url.stopAccessingSecurityScopedResource()
                         }
                     }
-                    
-                    do {
-                        if !Self.isBlacklistedStatic(item.url.path) {
-                            try fm.removeItem(at: item.url)
-                            count += 1
-                            totalSize += item.size
-                        }
-                    } catch {
-                        print("대용량 파일 삭제 실패 (\(item.name)): \(error.localizedDescription)")
+                    if FileSafety.moveToTrash(item.url, treeProtection: true) {
+                        localCount += 1
+                        localSize += item.size
                     }
                 }
+                return (localCount, localSize)
             }.value
+            count = result.0
+            totalSize = result.1
             
             self.deletedCount = count
             self.deletedSize = totalSize
@@ -192,14 +190,5 @@ class LargeFilesViewModel: ObservableObject {
             self.showDeleteSuccess = true
             self.scanFiles()
         }
-    }
-    
-    nonisolated private static func isBlacklistedStatic(_ path: String) -> Bool {
-        let cleanPath = (path as NSString).standardizingPath.lowercased()
-        let blacklistedPaths = [
-            "/system", "/library", "/bin", "/sbin", "/usr", "/private", "/cores",
-            "/users/shared/library", "/etc", "/var"
-        ]
-        return blacklistedPaths.contains { cleanPath.hasPrefix($0) }
     }
 }

@@ -475,17 +475,8 @@ struct DashboardView: View {
             (Double(statsBefore.active_count) + Double(statsBefore.wire_count) + Double(statsBefore.compressor_page_count)) * Double(pageSize) : 0
         
         Task {
-            let (freedBytes, freedStr) = await Task.detached(priority: .userInitiated) { () -> (Double, String) in
-                // 1. 512MB의 임시 메모리를 확보 후 즉시 쓰기작업을 수행하여 macOS의 VM 서브시스템이 비활성 캐시를 가상 스왑으로 버리거나 압축하도록 강제합니다.
-                let bufferSize = 512 * 1024 * 1024 // 512MB
-                let tempBuffer: UnsafeMutableRawPointer? = malloc(bufferSize)
-                if let ptr = tempBuffer {
-                    memset(ptr, 0, bufferSize)
-                    try? await Task.sleep(nanoseconds: 600_000_000) // 0.6초 대기
-                    free(ptr)
-                }
-                
-                // 2. macOS 빌트인 시스템 명령어 purge 실행
+            let (_, freedStr) = await Task.detached(priority: .userInitiated) { () -> (Double, String) in
+                // macOS 빌트인 purge 실행 (임의 버퍼 할당 트릭 제거)
                 let process = Process()
                 process.launchPath = "/usr/sbin/purge"
                 try? process.run()

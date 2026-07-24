@@ -85,20 +85,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func purgeMemoryFromMenuBar() {
         Task(priority: .userInitiated) {
             let sizeBefore = HardwareStatsHelper.getRAMStats().free
-            
-            // 512MB RAM 임시 청소 버퍼 할당
-            let bufferSize = 512 * 1024 * 1024
-            if let buffer = malloc(bufferSize) {
-                memset(buffer, 0, bufferSize)
-                
-                let p = Process()
-                p.launchPath = "/usr/sbin/purge"
-                try? p.run()
-                p.waitUntilExit()
-                
-                free(buffer)
-            }
-            
+
+            // macOS 빌트인 purge 로 비활성 메모리 회수 (임의 버퍼 할당 트릭 제거)
+            let p = Process()
+            p.launchPath = "/usr/sbin/purge"
+            try? p.run()
+            p.waitUntilExit()
+
             let sizeAfter = HardwareStatsHelper.getRAMStats().free
             let reclaimed = max(0, sizeAfter - sizeBefore)
             

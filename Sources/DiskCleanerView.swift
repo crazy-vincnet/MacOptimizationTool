@@ -2,7 +2,8 @@ import SwiftUI
 
 struct DiskCleanerView: View {
     @StateObject private var viewModel = DiskCleanViewModel()
-    
+    @State private var showCleanConfirm = false
+
     var body: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
@@ -198,7 +199,7 @@ struct DiskCleanerView: View {
                             
                             // 하단 정리 실행 버튼
                             Button(action: {
-                                viewModel.cleanJunk()
+                                showCleanConfirm = true
                             }) {
                                 HStack {
                                     Spacer()
@@ -230,6 +231,18 @@ struct DiskCleanerView: View {
             if viewModel.isCleaning {
                 ProgressOverlay(message: "불필요 캐시 및 로그 파일 삭제 중...")
             }
+        }
+        .confirmationDialog(
+            "선택한 항목을 휴지통으로 이동합니다",
+            isPresented: $showCleanConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("휴지통으로 이동 (\(ByteCountFormatter.string(fromByteCount: viewModel.totalJunkSize, countStyle: .file)))", role: .destructive) {
+                viewModel.cleanJunk()
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("삭제된 파일은 휴지통에서 복구할 수 있습니다.")
         }
         .alert(isPresented: $viewModel.showCleanSuccess) {
             Alert(

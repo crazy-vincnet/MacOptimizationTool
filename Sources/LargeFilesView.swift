@@ -2,7 +2,8 @@ import SwiftUI
 
 struct LargeFilesView: View {
     @StateObject private var viewModel = LargeFilesViewModel()
-    
+    @State private var showDeleteConfirm = false
+
     var body: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
@@ -227,11 +228,11 @@ struct LargeFilesView: View {
                             Spacer()
                             
                             Button(action: {
-                                viewModel.deleteSelectedFiles()
+                                showDeleteConfirm = true
                             }) {
                                 HStack {
                                     Image(systemName: "trash.fill")
-                                    Text("선택 파일 영구 삭제")
+                                    Text("선택 파일 휴지통으로 이동")
                                         .fontWeight(.bold)
                                 }
                                 .foregroundColor(.white)
@@ -262,10 +263,22 @@ struct LargeFilesView: View {
                 ProgressOverlay(message: "선택한 대용량 파일 삭제 진행 중...")
             }
         }
+        .confirmationDialog(
+            "선택한 \(viewModel.files.filter { $0.isSelected }.count)개 파일을 휴지통으로 이동합니다",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("휴지통으로 이동", role: .destructive) {
+                viewModel.deleteSelectedFiles()
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("삭제된 파일은 휴지통에서 복구할 수 있습니다.")
+        }
         .alert(isPresented: $viewModel.showDeleteSuccess) {
             Alert(
                 title: Text("파일 정리 완료"),
-                message: Text("총 \(viewModel.deletedCount)개의 파일 (\(ByteCountFormatter.string(fromByteCount: viewModel.deletedSize, countStyle: .file)))을 안전하게 영구 삭제하여 디스크를 복구했습니다."),
+                message: Text("총 \(viewModel.deletedCount)개의 파일 (\(ByteCountFormatter.string(fromByteCount: viewModel.deletedSize, countStyle: .file)))을 휴지통으로 이동했습니다."),
                 dismissButton: .default(Text("확인"))
             )
         }

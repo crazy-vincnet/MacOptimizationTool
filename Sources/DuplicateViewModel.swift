@@ -84,8 +84,7 @@ class DuplicateViewModel: ObservableObject {
         isScanning = true
         showDeleteSuccess = false
         
-        let foundGroups = await Task.detached(priority: .userInitiated) { [weak self] () -> [DuplicateGroup] in
-            guard let self = self else { return [] }
+        let foundGroups = await Task.detached(priority: .userInitiated) { () -> [DuplicateGroup] in
             let fm = FileManager.default
             
             let isAccessed = rootURL.startAccessingSecurityScopedResource()
@@ -133,7 +132,7 @@ class DuplicateViewModel: ObservableObject {
                 if urls.count > 1 {
                     for url in urls {
                         if Task.isCancelled { break }
-                        if let hash = self.getQuickHash(for: url) {
+                        if let hash = FileSafety.fullFileHash(for: url) {
                             let key = "\(size)_\(hash)"
                             potentialDuplicates[key, default: []].append(url)
                         }
@@ -186,22 +185,6 @@ class DuplicateViewModel: ObservableObject {
         }
     }
     
-    // 파일의 첫 8KB를 이용해 FNV-1a 64-bit 비임의성 결정론적 체크섬 산출
-    nonisolated private func getQuickHash(for url: URL) -> String? {
-        guard let file = try? FileHandle(forReadingFrom: url) else { return nil }
-        defer { try? file.close() }
-        
-        let headerData = file.readData(ofLength: 8192)
-        guard !headerData.isEmpty else { return nil }
-        
-        var hash: UInt64 = 14695981039346656037
-        for byte in headerData {
-            hash ^= UInt64(byte)
-            hash = hash.multipliedReportingOverflow(by: 1099511628211).partialValue
-        }
-        return String(hash)
-    }
-    
     func deleteSelectedDuplicates() {
         var itemsToDelete: [DuplicateFileInstance] = []
         for group in groups {
@@ -212,10 +195,8 @@ class DuplicateViewModel: ObservableObject {
         isDeleting = true
         
         Task {
-            var count = 0
-            
-            await Task.detached(priority: .userInitiated) {
-                let fm = FileManager.default
+            let count = await Task.detached(priority: .userInitiated) { () -> Int in
+                var localCount = 0
                 for item in itemsToDelete {
                     let isAccessed = item.url.startAccessingSecurityScopedResource()
                     defer {
@@ -223,16 +204,13 @@ class DuplicateViewModel: ObservableObject {
                             item.url.stopAccessingSecurityScopedResource()
                         }
                     }
-                    
-                    do {
-                        try fm.removeItem(at: item.url)
-                        count += 1
-                    } catch {
-                        print("중복 파일 제거 실패 (\(item.url.lastPathComponent)): \(error.localizedDescription)")
+                    if FileSafety.moveToTrash(item.url, treeProtection: true) {
+                        localCount += 1
                     }
                 }
+                return localCount
             }.value
-            
+
             self.deletedCount = count
             self.isDeleting = false
             self.showDeleteSuccess = true

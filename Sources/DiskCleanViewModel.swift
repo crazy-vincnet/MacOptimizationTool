@@ -183,7 +183,6 @@ class DiskCleanViewModel: ObservableObject {
         
         Task {
             let totalCleaned = await Task.detached(priority: .userInitiated) { () -> Int64 in
-                let fm = FileManager.default
                 var cleaned: Int64 = 0
                 
                 for item in itemsToDelete {
@@ -195,14 +194,8 @@ class DiskCleanViewModel: ObservableObject {
                         }
                     }
                     
-                    do {
-                        let path = url.standardized.path
-                        if !Self.isBlacklistedStatic(path) {
-                            try fm.removeItem(at: url)
-                            cleaned += item.size
-                        }
-                    } catch {
-                        print("파일 제거 실패: \(url.path), 에러: \(error.localizedDescription)")
+                    if FileSafety.moveToTrash(url) {
+                        cleaned += item.size
                     }
                 }
                 return cleaned
@@ -314,37 +307,6 @@ class DiskCleanViewModel: ObservableObject {
         self.fixedHistory = result.1
         self.isFixingFilenames = false
         self.showFixSuccess = true
-    }
-    
-    nonisolated private static func isBlacklistedStatic(_ path: String) -> Bool {
-        let cleanPath = (path as NSString).standardizingPath.lowercased()
-        let systemBlacklist = [
-            "/", "/system", "/library", "/applications", "/users",
-            "/private", "/var", "/etc", "/bin", "/sbin", "/usr", "/dev", "/volumes"
-        ]
-        
-        if systemBlacklist.contains(cleanPath) {
-            return true
-        }
-        
-        let homePath = FileManager.default.homeDirectoryForCurrentUser.standardized.path.lowercased()
-        let userBlacklist = [
-            homePath,
-            homePath + "/library",
-            homePath + "/desktop",
-            homePath + "/documents",
-            homePath + "/downloads",
-            homePath + "/applications",
-            homePath + "/movies",
-            homePath + "/music",
-            homePath + "/pictures"
-        ]
-        
-        if userBlacklist.contains(cleanPath) {
-            return true
-        }
-        
-        return false
     }
     
     nonisolated private static func getDirectorySizeStatic(at url: URL) -> Int64 {
