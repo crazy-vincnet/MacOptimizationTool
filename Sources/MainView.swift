@@ -54,16 +54,18 @@ struct MainView: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            // 사이드바 영역
+            // 사이드바 영역 (글래스)
             sidebarView
-                .frame(width: 220)
-                .background(.ultraThinMaterial)
-            
+                .frame(width: 236)
+                .background(.regularMaterial)
+                .overlay(alignment: .trailing) {
+                    Rectangle().fill(Theme.hairlineSoft).frame(width: 1)
+                }
+
             // 메인 콘텐츠 영역
             ZStack {
-                Color(NSColor.windowBackgroundColor)
-                    .edgesIgnoringSafeArea(.all)
-                
+                Theme.appBackground.ignoresSafeArea()
+
                 Group {
                     switch selectedTab {
                     case .dashboard:
@@ -100,18 +102,18 @@ struct MainView: View {
             // 앱 타이틀
             HStack(spacing: 12) {
                 Image(systemName: "bolt.shield.fill")
-                    .font(.title)
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.green, .teal],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(Theme.textOnAccent)
+                    .frame(width: 40, height: 40)
+                    .background(
+                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            .fill(Theme.accentGradient)
                     )
-                
+                    .shadow(color: Theme.accent.opacity(0.3), radius: 6, y: 3)
+
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Mac Clean Optimizer")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
                     Text("v1.0.0")
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
@@ -184,21 +186,15 @@ struct MainView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
                 .fill(
-                    isSelected ? 
-                    AnyShapeStyle(
-                        LinearGradient(
-                            colors: [.green, Color(red: 0.1, green: 0.7, blue: 0.4)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    ) : 
-                    AnyShapeStyle(
-                        hoveredTab == tab ? Color.gray.opacity(0.15) : Color.clear
-                    )
+                    isSelected ?
+                    AnyShapeStyle(Theme.accentGradient) :
+                    AnyShapeStyle(hoveredTab == tab ? Color.primary.opacity(0.06) : Color.clear)
                 )
+                .shadow(color: isSelected ? Theme.accent.opacity(0.28) : .clear, radius: 8, y: 3)
         )
+        .contentShape(Rectangle())
         .onHover { isHovered in
             if tab.isEnabled {
                 hoveredTab = isHovered ? tab : nil

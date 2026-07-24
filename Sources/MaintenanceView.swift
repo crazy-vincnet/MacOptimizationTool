@@ -6,16 +6,13 @@ struct MaintenanceView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // 상단 고정 헤더
-            HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("시스템 유지보수")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                    Text("Mac 시스템 백그라운드 데이터베이스를 최적화하여 렌더링, 네트워크 및 반응 속도를 개선합니다.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                Spacer()
-                
+            HStack(alignment: .center, spacing: 16) {
+                PageHeader(
+                    title: "시스템 유지보수",
+                    subtitle: "Mac 시스템 백그라운드 데이터베이스를 최적화하여 렌더링, 네트워크 및 반응 속도를 개선합니다.",
+                    icon: "wrench.and.screwdriver.fill"
+                )
+
                 Button(action: {
                     viewModel.runAllTasks()
                 }) {
@@ -23,25 +20,12 @@ struct MaintenanceView: View {
                         Image(systemName: "play.fill")
                         Text("전체 유지보수 실행")
                     }
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(
-                        LinearGradient(
-                            colors: [.blue, .purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .cornerRadius(8)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isAnyTaskRunning))
                 .disabled(viewModel.isAnyTaskRunning)
-                .opacity(viewModel.isAnyTaskRunning ? 0.6 : 1.0)
             }
-            .padding(.horizontal, 30)
-            .padding(.top, 30)
+            .padding(.horizontal, Theme.pagePadding)
+            .padding(.top, Theme.pagePadding)
             .padding(.bottom, 25)
             
             // 본문 영역
@@ -61,11 +45,11 @@ struct MaintenanceView: View {
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(task.name)
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.primary)
+                                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                                    .foregroundColor(Theme.textPrimary)
                                 Text(task.description)
                                     .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(Theme.textSecondary)
                                     .lineLimit(2)
                             }
                             
@@ -79,44 +63,28 @@ struct MaintenanceView: View {
                                         .frame(width: 20, height: 20)
                                 } else if task.isCompleted {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.green)
+                                        .foregroundColor(Theme.accent)
                                         .font(.title3)
                                 }
-                                
+
                                 Text(task.statusMessage)
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(task.isCompleted ? .green : .secondary)
-                                
+                                    .foregroundColor(task.isCompleted ? Theme.accent : Theme.textSecondary)
+
                                 Button(action: {
                                     viewModel.runTask(id: task.id)
                                 }) {
                                     Text("실행")
-                                        .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(.primary)
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 6)
-                                        .background(Color(NSColor.controlBackgroundColor))
-                                        .cornerRadius(6)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                                        )
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isAnyTaskRunning))
                                 .disabled(viewModel.isAnyTaskRunning)
-                                .opacity(viewModel.isAnyTaskRunning ? 0.5 : 1.0)
                             }
                         }
-                        .padding(18)
-                        .background(RoundedRectangle(cornerRadius: 14).fill(Color(NSColor.controlBackgroundColor).opacity(0.3)))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.gray.opacity(0.08), lineWidth: 1)
-                        )
+                        .glassCard(padding: 18, radius: Theme.radiusCard, highlighted: task.isCompleted)
                     }
                 }
-                .padding(.horizontal, 30)
-                .padding(.bottom, 30)
+                .padding(.horizontal, Theme.pagePadding)
+                .padding(.bottom, Theme.pagePadding)
             }
         }
     }

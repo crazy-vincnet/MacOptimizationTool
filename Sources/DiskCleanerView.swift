@@ -8,18 +8,13 @@ struct DiskCleanerView: View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
                 // 상단 고정 헤더
-                HStack(alignment: .center) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("디스크 정리")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                        Text("사용하지 않는 시스템 캐시, 임시 파일, 로그를 삭제하여 디스크 공간을 확보합니다.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 30)
-                .padding(.top, 30)
+                PageHeader(
+                    title: "디스크 정리",
+                    subtitle: "사용하지 않는 시스템 캐시, 임시 파일, 로그를 삭제하여 디스크 공간을 확보합니다.",
+                    icon: "opticaldisc.fill"
+                )
+                .padding(.horizontal, Theme.pagePadding)
+                .padding(.top, Theme.pagePadding)
                 .padding(.bottom, 20)
                 
                 // 디스크 최적화 본문
@@ -28,23 +23,22 @@ struct DiskCleanerView: View {
                         Spacer()
                         Image(systemName: "opticaldisc.fill")
                             .font(.system(size: 70))
-                            .foregroundColor(.green.opacity(0.8))
+                            .foregroundStyle(Theme.accentGradient)
                             .padding(.bottom, 10)
-                            .shadow(color: .green.opacity(0.2), radius: 10)
-                        
+                            .shadow(color: Theme.accent.opacity(0.25), radius: 12)
+
                         Text("디스크 스캔 준비 완료")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                        
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundColor(Theme.textPrimary)
+
                         Text("시스템 캐시, 사용자 로그, 임시 보관 파일 및 휴지통을 스캔하여\n불필요하게 낭비되는 공간을 찾아냅니다.")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Theme.textSecondary)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                             .frame(maxWidth: 450)
                             .padding(.horizontal, 20)
-                        
+
                         Button(action: {
                             viewModel.scanJunk()
                         }) {
@@ -52,16 +46,9 @@ struct DiskCleanerView: View {
                                 Image(systemName: "play.fill")
                                 Text("스캔 시작")
                             }
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 28)
-                            .padding(.vertical, 12)
-                            .background(Color.green)
-                            .cornerRadius(10)
-                            .shadow(color: .green.opacity(0.3), radius: 8)
                         }
-                        .buttonStyle(.plain)
-                        
+                        .buttonStyle(PrimaryActionButtonStyle())
+
                         Spacer()
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -73,29 +60,21 @@ struct DiskCleanerView: View {
                                 VStack(alignment: .leading, spacing: 5) {
                                     Text("정리 가능 공간")
                                         .font(.subheadline)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(Theme.textSecondary)
                                     Text(ByteCountFormatter.string(fromByteCount: viewModel.categories.reduce(0) { $0 + ($1.isSelected ? $1.size : 0) }, countStyle: .file))
                                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                                        .foregroundColor(.green)
+                                        .foregroundStyle(Theme.accentGradient)
                                 }
                                 Spacer()
-                                
+
                                 Button(action: {
                                     viewModel.scanJunk()
                                 }) {
                                     Label("재스캔", systemImage: "arrow.clockwise")
-                                        .fontWeight(.medium)
-                                        .padding(.horizontal, 15)
-                                        .padding(.vertical, 8)
-                                        .background(Color(NSColor.controlBackgroundColor))
-                                        .cornerRadius(8)
-                                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.2), lineWidth: 1))
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(SecondaryButtonStyle())
                             }
-                            .padding(25)
-                            .background(RoundedRectangle(cornerRadius: 16).fill(Color(NSColor.controlBackgroundColor).opacity(0.6)))
-                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.gray.opacity(0.1), lineWidth: 1))
+                            .glassCard(padding: 25)
                             
                             // 카테고리별 목록
                             VStack(spacing: 12) {
@@ -109,7 +88,7 @@ struct DiskCleanerView: View {
                                                 viewModel.toggleCategorySelection(at: index)
                                             }) {
                                                 Image(systemName: cat.isSelected ? "checkmark.square.fill" : "square")
-                                                    .foregroundColor(cat.isSelected ? .green : .secondary)
+                                                    .foregroundColor(cat.isSelected ? Theme.accent : Theme.textSecondary)
                                                     .font(.title3)
                                             }
                                             .buttonStyle(.plain)
@@ -123,20 +102,20 @@ struct DiskCleanerView: View {
                                                     VStack(alignment: .leading, spacing: 4) {
                                                         Text(cat.name)
                                                             .fontWeight(.bold)
-                                                            .foregroundColor(.primary)
+                                                            .foregroundColor(Theme.textPrimary)
                                                         Text(cat.description)
                                                             .font(.caption)
-                                                            .foregroundColor(.secondary)
+                                                            .foregroundColor(Theme.textSecondary)
                                                     }
                                                     Spacer()
-                                                    
+
                                                     Text(ByteCountFormatter.string(fromByteCount: cat.size, countStyle: .file))
                                                         .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                                        .foregroundColor(.secondary)
+                                                        .foregroundColor(Theme.textSecondary)
                                                         .padding(.trailing, 8)
-                                                    
+
                                                     Image(systemName: cat.isExpanded ? "chevron.down" : "chevron.right")
-                                                        .foregroundColor(.secondary)
+                                                        .foregroundColor(Theme.textSecondary)
                                                         .font(.system(size: 11, weight: .bold))
                                                 }
                                             }
@@ -159,39 +138,38 @@ struct DiskCleanerView: View {
                                                                 viewModel.toggleSubItemSelection(categoryIndex: index, subItemIndex: subIndex)
                                                             }) {
                                                                 Image(systemName: item.isSelected ? "checkmark.square.fill" : "square")
-                                                                    .foregroundColor(item.isSelected ? .green : .secondary)
+                                                                    .foregroundColor(item.isSelected ? Theme.accent : Theme.textSecondary)
                                                             }
                                                             .buttonStyle(.plain)
-                                                            
+
                                                             Text(item.name)
                                                                 .font(.subheadline)
-                                                                .foregroundColor(.primary)
+                                                                .foregroundColor(Theme.textPrimary)
                                                                 .lineLimit(1)
                                                                 .help(item.id)
-                                                            
+
                                                             Spacer()
-                                                            
+
                                                             Text(ByteCountFormatter.string(fromByteCount: item.size, countStyle: .file))
                                                                 .font(.system(size: 11, design: .rounded))
-                                                                .foregroundColor(.secondary)
+                                                                .foregroundColor(Theme.textSecondary)
                                                         }
                                                         .padding(.vertical, 4)
                                                         .padding(.horizontal, 24)
                                                     }
                                                 }
                                                 .padding(.vertical, 8)
-                                                .background(Color.gray.opacity(0.03))
+                                                .background(Theme.accent.opacity(0.04))
                                             } else {
                                                 Text("비어 있음")
                                                     .font(.caption)
-                                                    .foregroundColor(.secondary)
+                                                    .foregroundColor(Theme.textSecondary)
                                                     .padding(.vertical, 8)
                                                     .padding(.horizontal, 24)
                                             }
                                         }
                                     }
-                                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(NSColor.controlBackgroundColor).opacity(0.4)))
-                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.08), lineWidth: 1))
+                                    .glassCard(padding: 0, radius: Theme.radiusControl)
                                 }
                             }
                             
@@ -201,21 +179,15 @@ struct DiskCleanerView: View {
                             Button(action: {
                                 showCleanConfirm = true
                             }) {
-                                HStack {
+                                HStack(spacing: 8) {
                                     Spacer()
                                     Image(systemName: "sparkles")
                                     Text("선택 항목 안전하게 청소 실행 (정리 가능: \(ByteCountFormatter.string(fromByteCount: viewModel.totalJunkSize, countStyle: .file)))")
-                                        .fontWeight(.bold)
                                     Spacer()
                                 }
-                                .foregroundColor(.white)
-                                .padding(.vertical, 14)
-                                .background(viewModel.totalJunkSize > 0 ? Color.green : Color.gray.opacity(0.3))
-                                .cornerRadius(12)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(PrimaryActionButtonStyle(enabled: viewModel.totalJunkSize > 0))
                             .disabled(viewModel.totalJunkSize == 0)
-                            .shadow(color: viewModel.totalJunkSize > 0 ? .green.opacity(0.2) : .clear, radius: 8)
                         }
                         .padding(.horizontal, 30)
                         .padding(.bottom, 30)
@@ -264,20 +236,23 @@ struct ProgressOverlay: View {
     
     var body: some View {
         ZStack {
-            Color.black.opacity(0.3)
+            Color.black.opacity(0.18)
                 .edgesIgnoringSafeArea(.all)
-            
-            VStack(spacing: 15) {
+
+            VStack(spacing: 16) {
                 ProgressView()
                     .scaleEffect(1.2)
-                
+                    .tint(Theme.accent)
+
                 Text(message)
-                    .font(.system(size: 13, weight: .semibold))
-                
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundColor(Theme.textPrimary)
+
                 if let p = progress {
                     VStack(spacing: 4) {
                         ProgressView(value: p)
                             .progressViewStyle(.linear)
+                            .tint(Theme.accent)
                             .frame(width: 200)
                         Text("\(Int(p * 100))%")
                             .font(.system(size: 10, weight: .bold, design: .rounded))
@@ -285,10 +260,7 @@ struct ProgressOverlay: View {
                     }
                 }
             }
-            .padding(25)
-            .background(RoundedRectangle(cornerRadius: 16).fill(Color(NSColor.windowBackgroundColor)))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.gray.opacity(0.15), lineWidth: 1))
-            .shadow(color: Color.black.opacity(0.15), radius: 20)
+            .glassCard(padding: 28, highlighted: true)
         }
     }
 }

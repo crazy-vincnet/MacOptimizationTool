@@ -56,58 +56,46 @@ struct DashboardView: View {
     
     private func thermalColor(_ status: String) -> Color {
         if status == "정상" || status == "Normal" {
-            return .green
+            return Theme.accent
         } else if status == "보통" || status == "Fair" {
-            return .orange
+            return Theme.warning
         } else {
-            return .red
+            return Theme.danger
         }
     }
-    
+
     var body: some View {
         ZStack {
-            // 밝은 테마 미니멀 배경 색상
-            Color(red: 0.96, green: 0.97, blue: 0.98)
-                .edgesIgnoringSafeArea(.all)
-            
             VStack(alignment: .leading, spacing: 0) {
                 // 헤더 및 새로고침 버튼 (고정 영역)
                 HStack(alignment: .center) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(t("dash.title"))
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(.black)
-                        Text(t("dash.subtitle"))
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
+                    PageHeader(title: t("dash.title"),
+                               subtitle: t("dash.subtitle"),
+                               icon: "gauge.with.dots.needle.67percent")
+
                     // 수동 새로고침 버튼
                     Button(action: {
                         withAnimation(.spring()) {
                             updateSystemStats()
                         }
                     }) {
-                        ZStack {
-                            Color.white
-                            Image(systemName: "arrow.clockwise")
-                                .foregroundColor(.green)
-                                .font(.system(size: 14, weight: .bold))
-                        }
-                        .frame(width: 32, height: 32)
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.12), lineWidth: 1)
-                        )
-                        .shadow(color: Color.black.opacity(0.03), radius: 3)
+                        Image(systemName: "arrow.clockwise")
+                            .foregroundStyle(Theme.accentGradient)
+                            .font(.system(size: 14, weight: .bold))
+                            .frame(width: 34, height: 34)
+                            .background(
+                                RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
+                                    .fill(.ultraThinMaterial)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
+                                    .stroke(Theme.hairlineSoft, lineWidth: 1)
+                            )
                     }
                     .buttonStyle(.plain)
                 }
-                .padding(.horizontal, 30)
-                .padding(.top, 30)
+                .padding(.horizontal, Theme.pagePadding)
+                .padding(.top, Theme.pagePadding)
                 .padding(.bottom, 20)
                 
                 // 스크롤 가능 콘텐츠 영역
@@ -117,21 +105,17 @@ struct DashboardView: View {
                         VStack(spacing: 16) {
                             HStack(spacing: 16) {
                                 // CPU 상태 카드
-                                DashboardCard(title: langManager.currentLanguage == .korean ? "CPU 상태" : "CPU Status", icon: "cpu", gradientColors: [.green, Color(red: 0.4, green: 0.85, blue: 0.6)]) {
+                                DashboardCard(title: langManager.currentLanguage == .korean ? "CPU 상태" : "CPU Status", icon: "cpu", gradientColors: [Theme.accentSoft, Theme.accent]) {
                                     VStack {
                                         ZStack {
                                             Circle()
-                                                .stroke(Color.green.opacity(0.08), lineWidth: 10)
+                                                .stroke(Theme.accent.opacity(0.10), lineWidth: 10)
                                                 .frame(width: 80, height: 80)
                                             
                                             Circle()
                                                 .trim(from: 0, to: animateRing ? (cpuUsedPercent / 100.0) : 0)
                                                 .stroke(
-                                                    LinearGradient(
-                                                        colors: [.green, Color(red: 0.4, green: 0.85, blue: 0.6)],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ),
+                                                    Theme.accentGradient,
                                                     style: StrokeStyle(lineWidth: 10, lineCap: .round)
                                                 )
                                                 .frame(width: 80, height: 80)
@@ -142,7 +126,7 @@ struct DashboardView: View {
                                             VStack(spacing: 2) {
                                                 Text("\(Int(cpuUsedPercent))%")
                                                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                                                    .foregroundColor(.black)
+                                                    .foregroundColor(Theme.textPrimary)
                                                 Text(langManager.currentLanguage == .korean ? "사용 중" : "Used")
                                                     .font(.system(size: 8))
                                                     .foregroundColor(.secondary)
@@ -153,7 +137,7 @@ struct DashboardView: View {
                                         VStack(spacing: 3) {
                                             Text(cpuName)
                                                 .font(.system(size: 11, weight: .bold))
-                                                .foregroundColor(.black)
+                                                .foregroundColor(Theme.textPrimary)
                                                 .lineLimit(1)
                                             
                                             HStack(spacing: 6) {
@@ -174,21 +158,17 @@ struct DashboardView: View {
                                 }
                                 
                                 // GPU 상태 카드
-                                DashboardCard(title: langManager.currentLanguage == .korean ? "GPU 상태" : "GPU Status", icon: "display", gradientColors: [.green, .teal]) {
+                                DashboardCard(title: langManager.currentLanguage == .korean ? "GPU 상태" : "GPU Status", icon: "display", gradientColors: [Theme.accent, Theme.accentDeep]) {
                                     VStack {
                                         ZStack {
                                             Circle()
-                                                .stroke(Color.green.opacity(0.08), lineWidth: 10)
+                                                .stroke(Theme.accent.opacity(0.10), lineWidth: 10)
                                                 .frame(width: 80, height: 80)
                                             
                                             Circle()
                                                 .trim(from: 0, to: animateRing ? 1.0 : 0)
                                                 .stroke(
-                                                    LinearGradient(
-                                                        colors: [.green, .teal],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ),
+                                                    Theme.accentGradient,
                                                     style: StrokeStyle(lineWidth: 10, lineCap: .round)
                                                 )
                                                 .frame(width: 80, height: 80)
@@ -198,7 +178,7 @@ struct DashboardView: View {
                                             VStack(spacing: 2) {
                                                 Text("ON")
                                                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                                                    .foregroundColor(.green)
+                                                    .foregroundColor(Theme.accent)
                                                 Text(langManager.currentLanguage == .korean ? "활성" : "Active")
                                                     .font(.system(size: 8))
                                                     .foregroundColor(.secondary)
@@ -209,7 +189,7 @@ struct DashboardView: View {
                                         VStack(spacing: 3) {
                                             Text(gpuName)
                                                 .font(.system(size: 11, weight: .bold))
-                                                .foregroundColor(.black)
+                                                .foregroundColor(Theme.textPrimary)
                                                 .lineLimit(1)
                                             
                                             Text(isUnifiedGPU ? (langManager.currentLanguage == .korean ? "통합 메모리 아키텍처" : "Unified Memory") : (langManager.currentLanguage == .korean ? "외장 그래픽" : "Discrete GPU"))
@@ -218,7 +198,7 @@ struct DashboardView: View {
                                             
                                             Text("\(t("dash.temp")): \(String(format: "%.1f", gpuTemperature))°C")
                                                 .font(.system(size: 9, weight: .semibold))
-                                                .foregroundColor(.green)
+                                                .foregroundColor(Theme.accent)
                                                 .padding(.top, 2)
                                         }
                                     }
@@ -227,21 +207,17 @@ struct DashboardView: View {
                             
                             HStack(spacing: 16) {
                                 // 메모리 상태 카드
-                                DashboardCard(title: t("dash.memory"), icon: "memorychip", gradientColors: [.green, Color(red: 0.1, green: 0.7, blue: 0.4)]) {
+                                DashboardCard(title: t("dash.memory"), icon: "memorychip", gradientColors: [Theme.accentSoft, Theme.accent]) {
                                     VStack {
                                         ZStack {
                                             Circle()
-                                                .stroke(Color.green.opacity(0.08), lineWidth: 10)
+                                                .stroke(Theme.accent.opacity(0.10), lineWidth: 10)
                                                 .frame(width: 80, height: 80)
                                             
                                             Circle()
                                                 .trim(from: 0, to: animateRing ? (memoryUsedPercent / 100.0) : 0)
                                                 .stroke(
-                                                    LinearGradient(
-                                                        colors: [.green, Color(red: 0.1, green: 0.7, blue: 0.4)],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ),
+                                                    Theme.accentGradient,
                                                     style: StrokeStyle(lineWidth: 10, lineCap: .round)
                                                 )
                                                 .frame(width: 80, height: 80)
@@ -252,7 +228,7 @@ struct DashboardView: View {
                                             VStack(spacing: 2) {
                                                 Text("\(Int(memoryUsedPercent))%")
                                                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                                                    .foregroundColor(.black)
+                                                    .foregroundColor(Theme.textPrimary)
                                                 Text(langManager.currentLanguage == .korean ? "사용 중" : "Used")
                                                     .font(.system(size: 8))
                                                     .foregroundColor(.secondary)
@@ -263,7 +239,7 @@ struct DashboardView: View {
                                         VStack(spacing: 3) {
                                             Text("\(langManager.currentLanguage == .korean ? "여유" : "Free"): \(formattedMemoryFree) / \(formattedMemoryTotal)")
                                                 .font(.system(size: 10, weight: .bold))
-                                                .foregroundColor(.black)
+                                                .foregroundColor(Theme.textPrimary)
                                             
                                             HStack(spacing: 4) {
                                                 Text("App: \(formattedMemoryApp)")
@@ -287,17 +263,11 @@ struct DashboardView: View {
                                                     Text(t("dash.optimize"))
                                                 }
                                                 .font(.system(size: 10, weight: .bold))
-                                                .foregroundColor(.white)
+                                                .foregroundColor(Theme.textOnAccent)
                                                 .padding(.horizontal, 12)
                                                 .padding(.vertical, 5)
-                                                .background(
-                                                    LinearGradient(
-                                                        colors: [.green, Color(red: 0.1, green: 0.7, blue: 0.4)],
-                                                        startPoint: .leading,
-                                                        endPoint: .trailing
-                                                    )
-                                                )
-                                                .cornerRadius(6)
+                                                .background(Theme.accentGradientFlat)
+                                                .cornerRadius(Theme.radiusChip)
                                             }
                                             .buttonStyle(.plain)
                                             .padding(.top, 4)
@@ -306,21 +276,17 @@ struct DashboardView: View {
                                 }
                                 
                                 // 디스크 공간 카드
-                                DashboardCard(title: t("dash.disk"), icon: "harddrive", gradientColors: [.green, .mint]) {
+                                DashboardCard(title: t("dash.disk"), icon: "harddrive", gradientColors: [Theme.accent, Theme.accentSoft]) {
                                     VStack {
                                         ZStack {
                                             Circle()
-                                                .stroke(Color.green.opacity(0.08), lineWidth: 10)
+                                                .stroke(Theme.accent.opacity(0.10), lineWidth: 10)
                                                 .frame(width: 80, height: 80)
                                             
                                             Circle()
                                                 .trim(from: 0, to: animateRing ? (diskUsedPercent / 100.0) : 0)
                                                 .stroke(
-                                                    LinearGradient(
-                                                        colors: [.green, .mint],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ),
+                                                    Theme.accentGradient,
                                                     style: StrokeStyle(lineWidth: 10, lineCap: .round)
                                                 )
                                                 .frame(width: 80, height: 80)
@@ -331,7 +297,7 @@ struct DashboardView: View {
                                             VStack(spacing: 2) {
                                                 Text("\(Int(diskUsedPercent))%")
                                                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                                                    .foregroundColor(.black)
+                                                    .foregroundColor(Theme.textPrimary)
                                                 Text(langManager.currentLanguage == .korean ? "사용 중" : "Used")
                                                     .font(.system(size: 8))
                                                     .foregroundColor(.secondary)
@@ -342,7 +308,7 @@ struct DashboardView: View {
                                         VStack(spacing: 3) {
                                             Text("\(t("dash.free")): \(formattedDiskFree)")
                                                 .font(.system(size: 11, weight: .bold))
-                                                .foregroundColor(.black)
+                                                .foregroundColor(Theme.textPrimary)
                                             
                                             HStack(spacing: 6) {
                                                 Text("\(langManager.currentLanguage == .korean ? "사용됨" : "Used"): \(formattedDiskUsed)")
@@ -356,7 +322,7 @@ struct DashboardView: View {
                                             if let battTemp = batteryTemperature {
                                                 Text("\(t("dash.battery")) Temp: \(String(format: "%.1f", battTemp))°C")
                                                     .font(.system(size: 9, weight: .medium))
-                                                    .foregroundColor(.green)
+                                                    .foregroundColor(Theme.accent)
                                                     .padding(.top, 1)
                                             } else {
                                                 Text(langManager.currentLanguage == .korean ? "배터리 상태: 전원 연결됨" : "Battery: Power Adapter Connected")
@@ -374,31 +340,29 @@ struct DashboardView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text(langManager.currentLanguage == .korean ? "추천 최적화" : "Recommended Optimization")
                                 .font(.headline)
-                                .foregroundColor(.black)
+                                .foregroundColor(Theme.textPrimary)
                             
                             HStack(spacing: 15) {
                                 Image(systemName: "app.badge.checkmark.fill")
                                     .font(.title2)
-                                    .foregroundColor(.green)
+                                    .foregroundStyle(Theme.accentGradient)
                                     .frame(width: 40, height: 40)
-                                    .background(Color.green.opacity(0.12))
-                                    .cornerRadius(10)
-                                
+                                    .background(
+                                        RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
+                                            .fill(Theme.accent.opacity(0.12))
+                                    )
+
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(langManager.currentLanguage == .korean ? "앱 잔여 파일 정리" : "App Leftovers Removal")
                                         .fontWeight(.medium)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Theme.textPrimary)
                                     Text(langManager.currentLanguage == .korean ? "사용하지 않는 앱을 삭제하고 숨은 찌꺼기 파일을 지워 공간을 확보하세요." : "Delete unused applications and clean hidden leftover files to reclaim space.")
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(Theme.textSecondary)
                                 }
                                 Spacer()
                             }
-                            .padding()
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.08), lineWidth: 1))
-                            .shadow(color: Color.black.opacity(0.02), radius: 5)
+                            .glassCard()
                         }
                     }
                     .padding(.horizontal, 30)
@@ -409,27 +373,19 @@ struct DashboardView: View {
             // 메모리 최적화 중 진행 오버레이
             if isOptimizingMemory {
                 ZStack {
-                    Color.white.opacity(0.4)
+                    Color.black.opacity(0.08)
                         .background(.ultraThinMaterial)
                         .edgesIgnoringSafeArea(.all)
-                    
+
                     VStack(spacing: 15) {
                         ProgressView()
                             .controlSize(.large)
+                            .tint(Theme.accent)
                         Text(langManager.currentLanguage == .korean ? "메모리 가상 영역 최적화 및 캐시 회수 중..." : "Optimizing virtual memory and purging caches...")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(Theme.textPrimary)
                     }
-                    .padding(25)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.gray.opacity(0.12), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.08), radius: 20)
+                    .glassCard(padding: 25)
                 }
             }
         }
@@ -696,22 +652,13 @@ struct DashboardCard<Content: View>: View {
                     .font(.title3)
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.black)
+                    .foregroundColor(Theme.textPrimary)
                 Spacer()
             }
             
             content
                 .frame(maxWidth: .infinity)
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.02), radius: 8, x: 0, y: 4)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.gray.opacity(0.08), lineWidth: 1)
-        )
+        .glassCard()
     }
 }

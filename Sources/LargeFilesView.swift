@@ -8,18 +8,13 @@ struct LargeFilesView: View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
                 // 상단 고정 헤더
-                HStack(alignment: .center) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("대용량 & 오래된 파일")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                        Text("디스크를 낭비하는 대용량 동영상, 빌드 파일 및 수개월 동안 열어보지 않은 오래된 자료를 안전하게 추출합니다.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 30)
-                .padding(.top, 30)
+                PageHeader(
+                    title: "대용량 & 오래된 파일",
+                    subtitle: "디스크를 낭비하는 대용량 동영상, 빌드 파일 및 수개월 동안 열어보지 않은 오래된 자료를 안전하게 추출합니다.",
+                    icon: "externaldrive.badge.timemachine"
+                )
+                .padding(.horizontal, Theme.pagePadding)
+                .padding(.top, Theme.pagePadding)
                 .padding(.bottom, 20)
                 
                 // 검색 조건 카드
@@ -29,29 +24,22 @@ struct LargeFilesView: View {
                         VStack(alignment: .leading, spacing: 5) {
                             Text("스캔 대상 폴더")
                                 .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.secondary)
-                            
+                                .foregroundColor(Theme.textSecondary)
+
                             HStack {
                                 Text(viewModel.targetFolderPath)
                                     .font(.system(size: 12, design: .monospaced))
                                     .lineLimit(1)
-                                    .foregroundColor(.primary)
-                                
+                                    .foregroundColor(Theme.textPrimary)
+
                                 Spacer()
-                                
+
                                 Button("폴더 변경") {
                                     viewModel.selectFolder()
                                 }
-                                .buttonStyle(.plain)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(Color(NSColor.controlBackgroundColor))
-                                .cornerRadius(6)
-                                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray.opacity(0.2), lineWidth: 1))
+                                .buttonStyle(SecondaryButtonStyle())
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(RoundedRectangle(cornerRadius: 8).fill(Color(NSColor.controlBackgroundColor).opacity(0.3)))
+                            .glassCard(padding: 10, radius: Theme.radiusControl)
                         }
                         .frame(maxWidth: .infinity)
                         
@@ -59,7 +47,7 @@ struct LargeFilesView: View {
                         VStack(alignment: .leading, spacing: 5) {
                             Text("최소 파일 크기")
                                 .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Theme.textSecondary)
                             
                             Picker("", selection: $viewModel.sizeThresholdMB) {
                                 Text("100 MB").tag(100.0)
@@ -75,7 +63,7 @@ struct LargeFilesView: View {
                         VStack(alignment: .leading, spacing: 5) {
                             Text("방치 기간")
                                 .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Theme.textSecondary)
                             
                             Picker("", selection: $viewModel.ageThresholdMonths) {
                                 Text("기간 무관").tag(0)
@@ -92,26 +80,12 @@ struct LargeFilesView: View {
                         viewModel.scanFiles()
                     }) {
                         Label("대용량 파일 검색 시작", systemImage: "magnifyingglass")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 10)
-                            .background(
-                                LinearGradient(
-                                    colors: [.green, Color(red: 0.1, green: 0.7, blue: 0.4)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(8)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isScanning))
                     .disabled(viewModel.isScanning)
                 }
-                .padding(20)
-                .background(RoundedRectangle(cornerRadius: 14).fill(Color(NSColor.controlBackgroundColor).opacity(0.5)))
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.gray.opacity(0.1), lineWidth: 1))
-                .padding(.horizontal, 30)
+                .glassCard()
+                .padding(.horizontal, Theme.pagePadding)
                 .padding(.bottom, 20)
                 
                 // 파일 리스트 테이블 영역 또는 스캔 준비 화면
@@ -120,17 +94,18 @@ struct LargeFilesView: View {
                         Spacer()
                         Image(systemName: "folder.badge.gearshape")
                             .font(.system(size: 55))
-                            .foregroundColor(.green.opacity(0.8))
+                            .foregroundStyle(Theme.accentGradient)
                             .padding(.bottom, 5)
-                            .shadow(color: .green.opacity(0.2), radius: 8)
-                        
+                            .shadow(color: Theme.accent.opacity(0.2), radius: 8)
+
                         Text("대용량 & 오래된 파일 탐색 준비 완료")
                             .font(.headline)
                             .fontWeight(.bold)
-                        
+                            .foregroundColor(Theme.textPrimary)
+
                         Text("상단의 폴더와 파일 크기, 방치 기간을 지정하신 후\n'대용량 파일 검색 시작' 버튼을 눌러 스캔을 시작하세요.")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Theme.textSecondary)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                             .frame(maxWidth: 450)
@@ -143,10 +118,10 @@ struct LargeFilesView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "doc.text.magnifyingglass")
                             .font(.system(size: 40))
-                            .foregroundColor(.secondary.opacity(0.6))
+                            .foregroundColor(Theme.textSecondary.opacity(0.6))
                         Text(viewModel.isScanning ? "대용량 파일을 분석하고 있습니다..." : "탐색 조건에 맞는 대용량 파일이 없습니다.")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Theme.textSecondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -167,10 +142,10 @@ struct LargeFilesView: View {
                                 .frame(width: 100, alignment: .trailing)
                         }
                         .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Theme.textSecondary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(Color(NSColor.controlBackgroundColor).opacity(0.4))
+                        .background(Theme.accent.opacity(0.06))
                         
                         // 리스트 본문
                         List {
@@ -181,7 +156,7 @@ struct LargeFilesView: View {
                                         viewModel.files[index].isSelected.toggle()
                                     }) {
                                         Image(systemName: file.isSelected ? "checkmark.square.fill" : "square")
-                                            .foregroundColor(file.isSelected ? .green : .secondary)
+                                            .foregroundColor(file.isSelected ? Theme.accent : Theme.textSecondary)
                                     }
                                     .buttonStyle(.plain)
                                     .frame(width: 24)
@@ -195,12 +170,12 @@ struct LargeFilesView: View {
                                     
                                     Text(file.lastModified.formatted(date: .numeric, time: .omitted))
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(Theme.textSecondary)
                                         .frame(width: 140, alignment: .leading)
-                                    
+
                                     Text(file.url.path)
                                         .font(.caption2)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(Theme.textSecondary)
                                         .lineLimit(1)
                                         .truncationMode(.middle)
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -208,7 +183,7 @@ struct LargeFilesView: View {
                                     
                                     Text(ByteCountFormatter.string(fromByteCount: file.size, countStyle: .file))
                                         .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(Theme.textPrimary)
                                         .frame(width: 100, alignment: .trailing)
                                 }
                                 .padding(.vertical, 4)
@@ -223,35 +198,24 @@ struct LargeFilesView: View {
                         HStack {
                             Text("선택됨: \(selectedCount)개 (\(ByteCountFormatter.string(fromByteCount: selectedSize, countStyle: .file)))")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
+                                .foregroundColor(Theme.textSecondary)
+
                             Spacer()
-                            
+
                             Button(action: {
                                 showDeleteConfirm = true
                             }) {
-                                HStack {
-                                    Image(systemName: "trash.fill")
-                                    Text("선택 파일 휴지통으로 이동")
-                                        .fontWeight(.bold)
-                                }
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
-                                .background(selectedCount > 0 ? Color.red : Color.gray.opacity(0.3))
-                                .cornerRadius(8)
+                                Label("선택 파일 휴지통으로 이동", systemImage: "trash.fill")
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(DangerActionButtonStyle(enabled: selectedCount > 0))
                             .disabled(selectedCount == 0)
                         }
                         .padding(16)
-                        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
-                        .overlay(Rectangle().stroke(Color.gray.opacity(0.15), lineWidth: 1))
+                        .background(.ultraThinMaterial)
                     }
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(NSColor.controlBackgroundColor).opacity(0.2)))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.1), lineWidth: 1))
-                    .padding(.horizontal, 30)
-                    .padding(.bottom, 30)
+                    .glassCard(padding: 0, radius: Theme.radiusControl)
+                    .padding(.horizontal, Theme.pagePadding)
+                    .padding(.bottom, Theme.pagePadding)
                 }
             }
             
