@@ -4,6 +4,7 @@ import MacOptimizationCore
 enum SettingsSection: String, CaseIterable, Identifiable {
     case permissions
     case autoOpt
+    case processGuard
     case scanPaths
     case theme
     case language
@@ -15,6 +16,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         switch self {
         case .permissions: return t("settings.permissions")
         case .autoOpt: return t("settings.autoOpt")
+        case .processGuard: return t("settings.processGuard")
         case .scanPaths: return t("settings.scanSettings")
         case .theme: return t("settings.themeSettings")
         case .language: return t("settings.langSettings")
@@ -26,6 +28,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         switch self {
         case .permissions: return "lock.shield.fill"
         case .autoOpt: return "cpu.fill"
+        case .processGuard: return "gauge.with.needle"
         case .scanPaths: return "folder.badge.gearshape.fill"
         case .theme: return "sun.max.fill"
         case .language: return "globe"
@@ -37,6 +40,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @ObservedObject private var langManager = LanguageManager.shared
+    @ObservedObject private var processGuard = ProcessGuardManager.shared
     @State private var selectedSection: SettingsSection = .permissions
     
     var body: some View {
@@ -64,6 +68,8 @@ struct SettingsView: View {
                             permissionsCard
                         case .autoOpt:
                             autoOptCard
+                        case .processGuard:
+                            processGuardCard
                         case .scanPaths:
                             scanPathsCard
                         case .theme:
@@ -374,7 +380,97 @@ struct SettingsView: View {
         .glassCard()
     }
 
-    // MARK: - 3. Scan Paths Card
+    // MARK: - 3. Process Guard Card
+    private var processGuardCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            settingsCardHeader(title: t("settings.processGuard"), icon: "gauge.with.needle")
+
+            HStack(alignment: .center, spacing: 14) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.title3)
+                    .foregroundColor(Theme.textSecondary)
+                    .frame(width: 24)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(t("settings.guardEnable"))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Theme.textPrimary)
+                    Text(t("settings.guardEnableDesc"))
+                        .font(.system(size: 11))
+                        .foregroundColor(Theme.textSecondary)
+                }
+
+                Spacer()
+
+                Toggle("", isOn: $processGuard.isGuardEnabled)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+            }
+
+            if processGuard.isGuardEnabled {
+                Divider().background(Theme.hairline)
+
+                VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text(t("settings.guardCPUThresh"))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(Theme.textSecondary)
+                            Text("\(Int(processGuard.cpuThresholdPercent))%")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Theme.accent)
+                        }
+                        Slider(value: $processGuard.cpuThresholdPercent, in: 100...600, step: 10)
+                            .tint(Theme.accent)
+                        Text(t("settings.guardCPUThreshDesc"))
+                            .font(.system(size: 11))
+                            .foregroundColor(Theme.textSecondary)
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text(t("settings.guardMemThresh"))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(Theme.textSecondary)
+                            Text(String(format: "%.1f GB", processGuard.memoryThresholdMB / 1024.0))
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Theme.accent)
+                        }
+                        Slider(value: $processGuard.memoryThresholdMB, in: 2048...32768, step: 512)
+                            .tint(Theme.accent)
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text(t("settings.guardSustain"))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(Theme.textSecondary)
+                            Text(String(format: t("settings.guardSustainValue"), processGuard.sustainedWindowDescription))
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Theme.accent)
+                        }
+                        Slider(
+                            value: Binding(
+                                get: { Double(processGuard.sustainedSamples) },
+                                set: { processGuard.sustainedSamples = Int($0) }
+                            ),
+                            in: 2...20,
+                            step: 1
+                        )
+                        .tint(Theme.accent)
+                        Text(t("settings.guardSustainDesc"))
+                            .font(.system(size: 11))
+                            .foregroundColor(Theme.textSecondary)
+                    }
+                }
+                .padding(.leading, 38)
+                .transition(.opacity)
+            }
+        }
+        .glassCard()
+    }
+
+    // MARK: - 4. Scan Paths Card
     private var scanPathsCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             settingsCardHeader(title: t("settings.scanSettings"), icon: "folder.badge.gearshape.fill")

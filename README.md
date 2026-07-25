@@ -2,14 +2,14 @@
 
 ![App Icon](AppIcon.png)
 
-# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.6.1
+# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.7.0
 
 **macOS 전용 프리미엄 고성능 시스템 최적화, 디스크 정리, 자원 가드 및 개인정보 보호 종합 툴키트**
 
 [![macOS](https://img.shields.io/badge/macOS-13.0%2B-000000?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos)
 [![Swift](https://img.shields.io/badge/Swift-6.0-F05138?style=for-the-badge&logo=swift&logoColor=white)](https://swift.org)
 [![Tests](https://img.shields.io/badge/Tests-56%20passing-3ECF8E?style=for-the-badge)](Tests)
-[![Version](https://img.shields.io/badge/Version-v1.6.1-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
+[![Version](https://img.shields.io/badge/Version-v1.7.0-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
 [![License](https://img.shields.io/badge/License-MIT-059669?style=for-the-badge)](LICENSE)
 
 ---
@@ -24,7 +24,7 @@
 5. [변경 이력 (Changelog)](#-변경-이력-changelog)
 6. [라이선스 및 저작권 (License & Copyright)](#-라이선스-및-저작권-license--copyright)
 
-> **v1.6.1 릴리스 안내** — v1.6.0 의 보안 감사 결과(보안 3건·버그 8건 수정, SwiftPM 전환, 테스트 56개, CI)에 더해, CI 가 잡아낸 동시성 안전성 결함 3건을 수정했습니다.
+> **v1.7.0 릴리스 안내** — 프로세스 자원 폭주 경고가 너무 자주 뜨던 문제를 해결했습니다. 감지 기능은 **기본 꺼짐**이 되었고, 임계값·지속 시간 조건을 설정에서 직접 조절할 수 있습니다.
 > 전체 감사 내역은 [`CODE_REVIEW.md`](CODE_REVIEW.md), 변경 요약은 [`CHANGELOG.md`](CHANGELOG.md) 를 참고하세요.
 
 ---
@@ -34,7 +34,7 @@
 ### 📊 1. 실시간 시스템 대시보드 & 자원 가드 (Real-time Dashboard & Resource Guard)
 - **1초 단위 실시간 자원 감시**: CPU 사용량, GPU 로드, RAM(앱/Wired/압축 메모리), 디스크 여유 공간, 시스템 온도 및 배터리 전원 상태 실시간 표시.
 - **원클릭 메모리 즉시 최적화**: macOS 빌트인 `purge` 기법과 연결하여 비활성 메모리 및 캐시 영역을 원클릭으로 안전 환수.
-- **프로세스 폭주 파수꾼 (`ProcessGuardManager`)**: CPU 점유율 85% 이상 독점 앱 실시간 감지 및 경고 팝업, 원클릭 강제 종료 기능 제공.
+- **프로세스 폭주 파수꾼 (`ProcessGuardManager`)**: 자원을 과하게 오래 점유하는 앱을 감지해 경고 팝업과 원클릭 강제 종료를 제공합니다. **기본 꺼짐**이며, 설정 > 프로세스 감시에서 CPU 임계값(기본 250%, 코어 합산)·메모리 임계값(기본 8GB)·지속 시간 조건(기본 약 2분)을 직접 조절합니다.
 
 ### 🛡️ 2. 시스템 전체 디스크 접근 권한 온보딩 (Full Disk Access Onboarding)
 - **TCC `FileHandle` 정밀 샌드박스 검사기 (`PermissionManager`)**: POSIX chmod 체크 대신 실시간 TCC 샌드박스 오픈 테스트를 통해 권한 부여 상태를 정확하게 판별.
@@ -163,7 +163,7 @@ SwiftPM 릴리스 빌드(`swift build -c release`), `xattr` 정리, ad-hoc 코�
 
 ### 3. GitHub Release 자동 게시
 ```bash
-./release.sh v1.6.1 "릴리즈 노트 내용"
+./release.sh v1.7.0 "릴리즈 노트 내용"
 ```
 버전 커밋, Git 태그 생성, DMG 패키징, `gh release create`를 통해 GitHub Release 게시 및 DMG 첨부를 자동 진행합니다.
 릴리스 노트에는 DMG 의 SHA-256 체크섬이 함께 게시되며, 인앱 업데이터는 이 값으로 무결성을 검증합니다.
@@ -230,7 +230,20 @@ MacOptimizationTool/
 
 버전별 상세 변경 사항은 [`CHANGELOG.md`](CHANGELOG.md) 에 정리되어 있습니다.
 
-### v1.6.1 (최신)
+### v1.7.0 (최신)
+
+프로세스 감시 경고 빈도를 낮추고, 감시 동작을 사용자 설정으로 옮긴 릴리스입니다.
+
+| 분류 | 내용 |
+|---|---|
+| ⚙️ 변경 | 프로세스 자원 폭주 감지 **기본 꺼짐** 전환 (기존: 첫 실행 시 자동 켜짐) |
+| ⚙️ 변경 | 임계값 완화 — CPU 85% → 250%(코어 합산), 메모리 2.5GB → 8GB, 스캔 주기 5초 → 30초 |
+| ⚙️ 변경 | 연속 4회(약 2분) 초과 시에만 경고 — 순간 스파이크 무시 |
+| ✨ 추가 | 설정 > 프로세스 감시 섹션 (토글 + CPU/메모리/지속시간 조절, 4개 국어) |
+| 🐛 수정 | 감시가 꺼진 상태에서도 5초마다 `ps` 스캔이 돌던 문제, 종료된 PID 가 알림 이력에 누적되던 문제 |
+| 📦 배포 | DMG 설치 창 배경·레이아웃 적용, 작업 디렉터리를 iCloud 동기화 폴더 밖으로 이동, `--deep` 서명 제거 |
+
+### v1.6.1
 
 CI 가 잡아낸 Swift 동시성 안전성 결함 3건을 수정한 패치 릴리스입니다. 동작 변경은 없습니다.
 
