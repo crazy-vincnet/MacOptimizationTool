@@ -6,7 +6,8 @@ final class SparkleUpdaterManager: NSObject, ObservableObject {
     static let shared = SparkleUpdaterManager()
 
     @Published var canCheckForUpdates: Bool = true
-    @Published var feedURLString: String = "https://lab98.studio/mac-clean-optimizer/appcast.xml"
+    @Published var feedURLString: String = "https://raw.githubusercontent.com/crazy-vincnet/MacOptimizationTool/main/appcast.xml"
+
 
     private override init() {
         super.init()
