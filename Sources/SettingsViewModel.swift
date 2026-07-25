@@ -74,6 +74,9 @@ class SettingsViewModel: ObservableObject {
     @Published var isCheckingUpdate = false
     @Published var showUpdateAlert = false
     @Published var updateAlertMessage = ""
+    @Published var updateURL: URL? = nil
+    @Published var hasNewVersion: Bool = false
+
     
     private let fileManager = FileManager.default
     
@@ -274,17 +277,27 @@ class SettingsViewModel: ObservableObject {
     }
 
     
-    /// Sparkle 2 기반 자동 업데이트 확인
+    /// Sparkle 2 / GitHub Release 기반 자동 업데이트 확인
     func checkForUpdates() {
         isCheckingUpdate = true
         
-        SparkleUpdaterManager.shared.checkForUpdates { [weak self] message in
+        SparkleUpdaterManager.shared.checkForUpdates { [weak self] result in
             Task { @MainActor in
-                self?.updateAlertMessage = message
+                self?.updateAlertMessage = result.message
+                self?.updateURL = result.downloadURL
+                self?.hasNewVersion = result.hasNewVersion
                 self?.isCheckingUpdate = false
                 self?.showUpdateAlert = true
             }
         }
     }
+
+    /// 웹 브라우저 이동 없이 인앱 직접 다운로드 및 .dmg 디스크 마운트 실행
+    func startInAppUpdate() {
+        guard let url = updateURL else { return }
+        SparkleUpdaterManager.shared.startDirectDownloadAndInstall(from: url)
+    }
+
+
 
 }

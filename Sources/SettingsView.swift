@@ -80,12 +80,46 @@ struct SettingsView: View {
             .padding(.bottom, Theme.pagePadding)
         }
         .alert(isPresented: $viewModel.showUpdateAlert) {
-            Alert(
-                title: Text(t("settings.checkUpdate")),
-                message: Text(viewModel.updateAlertMessage),
-                dismissButton: .default(Text(t("common.ok")))
-            )
+            if viewModel.updateURL != nil && viewModel.hasNewVersion {
+                Alert(
+                    title: Text(t("settings.checkUpdate")),
+                    message: Text(viewModel.updateAlertMessage),
+                    primaryButton: .default(Text("지금 자동 다운로드 & 설치"), action: {
+                        viewModel.startInAppUpdate()
+                    }),
+                    secondaryButton: .cancel(Text(t("disk.cancel")))
+                )
+            } else {
+                Alert(
+                    title: Text(t("settings.checkUpdate")),
+                    message: Text(viewModel.updateAlertMessage),
+                    dismissButton: .default(Text(t("common.ok")))
+                )
+            }
         }
+        .overlay {
+            if SparkleUpdaterManager.shared.isDownloading {
+                ZStack {
+                    Theme.bgCardHover.opacity(0.85)
+                        .edgesIgnoringSafeArea(.all)
+
+                    VStack(spacing: 16) {
+                        ProgressView(value: SparkleUpdaterManager.shared.downloadProgress)
+                            .progressViewStyle(.linear)
+                            .tint(Theme.accent)
+                            .frame(width: 260)
+
+                        Text(SparkleUpdaterManager.shared.statusMessage)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Theme.textPrimary)
+                    }
+                    .padding(24)
+                    .glassCard(padding: 24, radius: Theme.radiusCard)
+                }
+            }
+        }
+
+
     }
 
     // MARK: - Left Sidebar Navigation Menu
