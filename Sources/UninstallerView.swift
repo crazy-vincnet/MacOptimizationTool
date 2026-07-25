@@ -110,7 +110,15 @@ struct UninstallerView: View {
                 }
             }
         }
+        .alert(isPresented: $viewModel.showAuthError) {
+            Alert(
+                title: Text("보안 삭제 취소됨"),
+                message: Text("관리자 암호가 올바르지 않거나 인증이 취소되었습니다.\n앱 및 찌꺼기 파일이 전혀 삭제되지 않고 안전하게 보호되었습니다."),
+                dismissButton: .default(Text("확인"))
+            )
+        }
     }
+
     
     // 미선택 상태: 드롭존 + 설치된 앱 검색 리스트
     private var unselectedStateView: some View {

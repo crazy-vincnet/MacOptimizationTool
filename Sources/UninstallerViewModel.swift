@@ -375,41 +375,38 @@ class UninstallerViewModel: ObservableObject {
         return size
     }
     
+    @Published var showAuthError: Bool = false
+
     func deleteSelectedItems() {
         guard !leftoverItems.isEmpty else { return }
         
         isCleaning = true
         showCleanSuccess = false
+        showAuthError = false
         
-        let itemsToDelete = leftoverItems.filter { $0.isSelected }
+        let itemsToDelete = leftoverItems.filter { $0.isSelected }.map { (url: $0.url, size: $0.size) }
         
         Task {
-            let totalCleaned = await Task.detached(priority: .userInitiated) { () -> Int64 in
-                var cleaned: Int64 = 0
-
-                for item in itemsToDelete {
-                    let url = item.url
-                    let isAccessed = url.startAccessingSecurityScopedResource()
-                    defer {
-                        if isAccessed {
-                            url.stopAccessingSecurityScopedResource()
-                        }
-                    }
-                    if FileSafety.moveToTrash(url) {
-                        cleaned += item.size
-                    }
-                }
-                return cleaned
+            let (totalCleaned, isSuccess) = await Task.detached(priority: .userInitiated) { () -> (Int64, Bool) in
+                return FileSafety.deleteBatch(items: itemsToDelete)
             }.value
             
-            self.cleanedSize = totalCleaned
-            self.selectedApp = nil
-            self.leftoverItems = []
-            self.isCleaning = false
-            self.showCleanSuccess = true
-            self.fetchInstalledApps()
+            if isSuccess {
+                self.cleanedSize = totalCleaned
+                self.selectedApp = nil
+                self.leftoverItems = []
+                self.isCleaning = false
+                self.showCleanSuccess = true
+                self.fetchInstalledApps()
+            } else {
+                // 비밀번호 불일치 또는 사용자가 인증 취소 시 메인 앱 포함 어떤 파일도 지우지 않고 안전 중단
+                self.isCleaning = false
+                self.showCleanSuccess = false
+                self.showAuthError = true
+            }
         }
     }
+
     
     func reset() {
         selectedApp = nil
