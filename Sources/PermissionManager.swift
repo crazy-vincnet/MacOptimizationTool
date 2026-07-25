@@ -14,11 +14,12 @@ final class PermissionManager: ObservableObject {
         checkPermissions()
     }
 
-    /// macOS 전체 디스크 접근 권한(Full Disk Access) 정밀 상태 검사
+    /// macOS 전체 디스크 접근 권한(Full Disk Access) 정밀 TCC 하드웨어 상태 검사
+    /// isReadableFile(POSIX chmod) 대신 실시간 FileHandle open/read 테스트를 통해 TCC 차단 여부를 정밀 확인합니다.
     static func checkFDA() -> Bool {
         let home = FileManager.default.homeDirectoryForCurrentUser
         
-        let protectedPaths = [
+        let targetPaths = [
             "/Library/Preferences/com.apple.TimeMachine.plist",
             home.appendingPathComponent("Library/Safari/Bookmarks.plist").path,
             home.appendingPathComponent("Library/Safari/History.db").path,
@@ -26,26 +27,31 @@ final class PermissionManager: ObservableObject {
             home.appendingPathComponent("Library/Cookies/Cookies.binarycookies").path,
             home.appendingPathComponent("Library/Preferences/com.apple.TimeMachine.plist").path
         ]
-        
-        for path in protectedPaths {
-            if FileManager.default.fileExists(atPath: path) && FileManager.default.isReadableFile(atPath: path) {
-                return true
+
+        for path in targetPaths {
+            if FileManager.default.fileExists(atPath: path) {
+                let url = URL(fileURLWithPath: path)
+                if let handle = try? FileHandle(forReadingFrom: url) {
+                    try? handle.close()
+                    return true
+                }
             }
         }
 
-        // TCC 전용 보호 디렉토리 접근 시도
-        let protectedDirs = [
+        // TCC 디렉터리 열람 카운트 시도
+        let targetDirs = [
             home.appendingPathComponent("Library/Safari").path,
-            home.appendingPathComponent("Library/Mail").path,
-            home.appendingPathComponent("Library/Application Support/com.apple.TCC").path
+            home.appendingPathComponent("Library/Mail").path
         ]
-        
-        for dir in protectedDirs {
-            if let contents = try? FileManager.default.contentsOfDirectory(atPath: dir), !contents.isEmpty {
-                return true
+
+        for dir in targetDirs {
+            if let enumerator = FileManager.default.enumerator(atPath: dir) {
+                if enumerator.nextObject() != nil {
+                    return true
+                }
             }
         }
-        
+
         return false
     }
 
