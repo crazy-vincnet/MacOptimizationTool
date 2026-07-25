@@ -112,18 +112,20 @@ class UninstallerViewModel: ObservableObject {
         let appsToProcess = self.installedApps
         
         for app in appsToProcess {
+            // SelectedAppInfo 는 NSImage 를 담고 있어 Sendable 이 아니다. URL 만 백그라운드로 넘긴다.
+            let appURL = app.url
             Task {
                 let size = await Task.detached(priority: .utility) { () -> Int64 in
-                    let isAccessed = app.url.startAccessingSecurityScopedResource()
+                    let isAccessed = appURL.startAccessingSecurityScopedResource()
                     defer {
                         if isAccessed {
-                            app.url.stopAccessingSecurityScopedResource()
+                            appURL.stopAccessingSecurityScopedResource()
                         }
                     }
-                    return Self.getDirectorySizeStatic(at: app.url)
+                    return Self.getDirectorySizeStatic(at: appURL)
                 }.value
-                
-                if let index = self.installedApps.firstIndex(where: { $0.url == app.url }) {
+
+                if let index = self.installedApps.firstIndex(where: { $0.url == appURL }) {
                     let oldApp = self.installedApps[index]
                     self.installedApps[index] = SelectedAppInfo(
                         url: oldApp.url,
@@ -239,11 +241,17 @@ class UninstallerViewModel: ObservableObject {
         
         let totalDirs = scanDirectories.count
 
+        // 클로저가 SelectedAppInfo(비Sendable) 전체를 캡처하지 않도록 필요한 값만 꺼낸다.
+        let appURL = app.url
+        let appSize = app.size
+        let appName = app.name
+        let appBundleID = app.bundleID
+
         let items = await Task.detached(priority: .userInitiated) { [weak self] () -> [LeftoverItem] in
             let localFM = FileManager.default
             var results: [LeftoverItem] = []
             
-            results.append(LeftoverItem(url: app.url, size: app.size, category: .appBundle, isSelected: true))
+            results.append(LeftoverItem(url: appURL, size: appSize, category: .appBundle, isSelected: true))
             
             for (idx, (dirURL, category)) in scanDirectories.enumerated() {
                 let scanPath = dirURL.standardized.path
@@ -283,7 +291,7 @@ class UninstallerViewModel: ObservableObject {
                     }
                     
                     let fileName = itemURL.lastPathComponent
-                    if LeftoverMatcher.matches(fileName: fileName, appName: app.name, bundleID: app.bundleID) {
+                    if LeftoverMatcher.matches(fileName: fileName, appName: appName, bundleID: appBundleID) {
                         let size = Self.getDirectorySizeStatic(at: itemURL)
                         if !results.contains(where: { $0.url.standardized.path == itemPath }) {
                             results.append(LeftoverItem(url: itemURL, size: size, category: category, isSelected: true))
