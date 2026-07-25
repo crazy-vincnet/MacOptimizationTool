@@ -6,6 +6,16 @@
     <description>Most recent updates to Mac Clean Optimizer</description>
     <language>ko</language>
     <item>
+      <title>Mac Clean Optimizer v1.0.1</title>
+      <sparkle:releaseNotesLink>https://github.com/crazy-vincnet/MacOptimizationTool/releases/tag/v1.0.1</sparkle:releaseNotesLink>
+      <pubDate>Sat, 25 Jul 2026 15:55:00 +0900</pubDate>
+      <enclosure url="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.0.1/MacCleanOptimizer_Setup.dmg"
+                 sparkle:version="1.0.1"
+                 sparkle:shortVersionString="1.0.1"
+                 length="15423800"
+                 type="application/octet-stream" />
+    </item>
+    <item>
       <title>Mac Clean Optimizer v1.0.0</title>
       <sparkle:releaseNotesLink>https://github.com/crazy-vincnet/MacOptimizationTool/releases/tag/v1.0.0</sparkle:releaseNotesLink>
       <pubDate>Sat, 25 Jul 2026 15:47:00 +0900</pubDate>
@@ -15,6 +25,5 @@
                  length="15423800"
                  type="application/octet-stream" />
     </item>
-
   </channel>
 </rss>

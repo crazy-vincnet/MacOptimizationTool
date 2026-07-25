@@ -35,7 +35,8 @@ cat <<EOF > "$APP_DIR/Contents/Info.plist"
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>1.0.1</string>
+
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleIconFile</key>
@@ -78,7 +79,9 @@ mkdir -p "$STAGING_DIR"
 
 echo "-> 스테이징 폴더에 앱 및 /Applications 바로가기 링크 생성..."
 cp -R "$APP_DIR" "$STAGING_DIR/"
+xattr -cr "$STAGING_DIR"
 ln -s /Applications "$STAGING_DIR/Applications"
+
 
 # 3. hdiutil 기반 .dmg 디스크 이미지 패키징
 echo "-> macOS 네이티브 hdiutil로 고압축 .dmg 생성 중..."
