@@ -92,11 +92,15 @@ final class OldDownloadsViewModel: ObservableObject {
                 let now = Date()
                 var list: [OldDownloadItem] = []
 
+                // 패키지 내부 파일(.app, .framework 내부 무한 탐색)을 건너뛰고 권한 에러 시 멈추지 않는 에러 핸들러 지정
+                let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants]
+                let keys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey, .isDirectoryKey, .isPackageKey]
+
                 guard let enumerator = fm.enumerator(
                     at: downloadsURL,
-                    includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey, .isDirectoryKey],
-                    options: [.skipsHiddenFiles],
-                    errorHandler: nil
+                    includingPropertiesForKeys: keys,
+                    options: options,
+                    errorHandler: { _, _ in return true }
                 ) else { return [] }
 
                 var localScanned = 0
@@ -104,16 +108,26 @@ final class OldDownloadsViewModel: ObservableObject {
 
                 while let fileURL = enumerator.nextObject() as? URL {
                     localScanned += 1
-
                     let path = fileURL.standardized.path
 
                     if FileSafety.isProtectedExact(path) { continue }
 
-                    guard let vals = try? fileURL.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey, .isDirectoryKey]),
-                          let isDir = vals.isDirectory, !isDir,
-                          let size = vals.fileSize, size > 0,
+                    guard let vals = try? fileURL.resourceValues(forKeys: Set(keys)),
+                          let isDir = vals.isDirectory,
+                          let isPkg = vals.isPackage,
                           let modDate = vals.contentModificationDate else { continue }
 
+                    // 폴더나 패키지 내부 깊은 탐색은 스킵
+                    let isDirectoryOrPkg = isDir || isPkg
+                    
+                    let size: Int64
+                    if isDirectoryOrPkg {
+                        size = Self.calculateSizeStatic(at: fileURL)
+                    } else {
+                        size = Int64(vals.fileSize ?? 0)
+                    }
+
+                    guard size > 0 else { continue }
 
                     let days = Calendar.current.dateComponents([.day], from: modDate, to: now).day ?? 0
                     if days >= thresholdDays {
@@ -121,7 +135,7 @@ final class OldDownloadsViewModel: ObservableObject {
                         let ext = fileURL.pathExtension.lowercased()
                         let category: OldDownloadCategory
 
-                        if ["dmg", "pkg", "zip", "iso", "tar", "gz", "7z", "rar"].contains(ext) {
+                        if ["dmg", "pkg", "zip", "iso", "tar", "gz", "7z", "rar", "app"].contains(ext) {
                             category = .installers
                         } else if ["mov", "mp4", "mkv", "avi", "mp3", "flac"].contains(ext) {
                             category = .media
@@ -133,7 +147,7 @@ final class OldDownloadsViewModel: ObservableObject {
                             url: fileURL,
                             name: fileURL.lastPathComponent,
                             path: path,
-                            size: Int64(size),
+                            size: size,
                             category: category,
                             daysOld: days,
                             modificationDate: modDate,
@@ -142,7 +156,7 @@ final class OldDownloadsViewModel: ObservableObject {
                         list.append(item)
                     }
 
-                    if localScanned % 50 == 0 {
+                    if localScanned % 15 == 0 {
                         let filename = fileURL.lastPathComponent
                         let countScanned = localScanned
                         let countMatched = localMatched
@@ -151,7 +165,7 @@ final class OldDownloadsViewModel: ObservableObject {
                             self?.matchedCount = countMatched
                             self?.currentScanPath = filename
                             self?.scanStatusText = "다운로드 스캔 중... (\(countScanned)개 검사, \(countMatched)개 방치 파일 발견)"
-                            self?.scanProgress = min(0.95, Double(countScanned) / 3000.0 * 0.95)
+                            self?.scanProgress = min(0.95, Double(countScanned) / 1000.0 * 0.95)
                         }
                     }
                 }
@@ -190,5 +204,36 @@ final class OldDownloadsViewModel: ObservableObject {
             self.showCleanSuccess = true
             self.scanOldDownloads()
         }
+    }
+
+    nonisolated private static func calculateSizeStatic(at url: URL) -> Int64 {
+        let fm = FileManager.default
+        var isDir: ObjCBool = false
+        guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return 0 }
+        
+        if !isDir.boolValue {
+            var statInfo = stat()
+            if lstat(url.path, &statInfo) == 0 {
+                return Int64(statInfo.st_size)
+            }
+            return 0
+        }
+        
+        guard let enumerator = fm.enumerator(
+            at: url,
+            includingPropertiesForKeys: [.fileSizeKey, .isDirectoryKey],
+            options: [.skipsHiddenFiles, .skipsPackageDescendants],
+            errorHandler: nil
+        ) else { return 0 }
+        
+        var total: Int64 = 0
+        for case let fileURL as URL in enumerator {
+            if let vals = try? fileURL.resourceValues(forKeys: [.fileSizeKey, .isDirectoryKey]),
+               let isDirectory = vals.isDirectory, !isDirectory,
+               let fileSize = vals.fileSize {
+                total += Int64(fileSize)
+            }
+        }
+        return total
     }
 }
