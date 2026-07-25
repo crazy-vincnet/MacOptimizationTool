@@ -17,76 +17,27 @@ struct LargeFilesView: View {
                 .padding(.top, Theme.pagePadding)
                 .padding(.bottom, 20)
                 
-                // 검색 조건 카드
-                VStack(spacing: 16) {
-                    HStack(spacing: 20) {
-                        // 스캔 대상 폴더 선택
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(t("large.targetFolder"))
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(Theme.textSecondary)
+                // 검색 조건 카드 (Supabase Studio Clean Layout)
+                VStack(spacing: 14) {
+                    targetFolderPicker
 
-                            HStack {
-                                Text(viewModel.targetFolderPath)
-                                    .font(.system(size: 12, design: .monospaced))
-                                    .lineLimit(1)
-                                    .foregroundColor(Theme.textPrimary)
+                    HStack(alignment: .bottom, spacing: 16) {
+                        sizePicker
+                        agePicker
 
-                                Spacer()
-
-                                Button(t("large.changeFolder")) {
-                                    viewModel.selectFolder()
-                                }
-                                .buttonStyle(SecondaryButtonStyle())
-                            }
-                            .glassCard(padding: 10, radius: Theme.radiusControl)
+                        Button(action: {
+                            viewModel.scanFiles()
+                        }) {
+                            Label(t("large.scanButton"), systemImage: "magnifyingglass")
                         }
-                        .frame(maxWidth: .infinity)
-                        
-                        // 크기 기준 선택
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(t("large.minSize"))
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(Theme.textSecondary)
-                            
-                            Picker("", selection: $viewModel.sizeThresholdMB) {
-                                Text("100 MB").tag(100.0)
-                                Text("500 MB").tag(500.0)
-                                Text("1 GB").tag(1024.0)
-                                Text("5 GB").tag(5120.0)
-                            }
-                            .pickerStyle(.segmented)
-                        }
-                        .frame(width: 250)
-                        
-                        // 기간 기준 선택
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(t("large.ageFilter"))
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(Theme.textSecondary)
-                            
-                            Picker("", selection: $viewModel.ageThresholdMonths) {
-                                Text(t("large.ageAny")).tag(0)
-                                Text(t("large.age3Months")).tag(3)
-                                Text(t("large.age6Months")).tag(6)
-                                Text(t("large.age1Year")).tag(12)
-                            }
-                            .pickerStyle(.segmented)
-                        }
-                        .frame(width: 250)
+                        .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isScanning))
+                        .disabled(viewModel.isScanning)
                     }
-                    
-                    Button(action: {
-                        viewModel.scanFiles()
-                    }) {
-                        Label(t("large.scanButton"), systemImage: "magnifyingglass")
-                    }
-                    .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isScanning))
-                    .disabled(viewModel.isScanning)
                 }
-                .glassCard()
+                .glassCard(padding: 14, radius: Theme.radiusControl)
                 .padding(.horizontal, Theme.pagePadding)
                 .padding(.bottom, 20)
+
                 
                 // 파일 리스트 테이블 영역 또는 스캔 준비 화면
                 if !viewModel.hasScanned && !viewModel.isScanning {
@@ -130,22 +81,23 @@ struct LargeFilesView: View {
                         HStack {
                             Text(t("large.colName"))
                                 .fontWeight(.bold)
-                                .frame(width: 220, alignment: .leading)
+                                .frame(minWidth: 120, alignment: .leading)
                             Text(t("large.colModified"))
                                 .fontWeight(.bold)
-                                .frame(width: 140, alignment: .leading)
+                                .frame(minWidth: 100, alignment: .leading)
                             Text(t("large.colPath"))
                                 .fontWeight(.bold)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             Text(t("large.colSize"))
                                 .fontWeight(.bold)
-                                .frame(width: 100, alignment: .trailing)
+                                .frame(minWidth: 80, alignment: .trailing)
                         }
                         .font(.system(size: 12))
                         .foregroundColor(Theme.textSecondary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .background(Theme.accent.opacity(0.06))
+                        .cornerRadius(Theme.radiusChip)
                         
                         // 리스트 본문
                         List {
@@ -211,7 +163,7 @@ struct LargeFilesView: View {
                             .disabled(selectedCount == 0)
                         }
                         .padding(16)
-                        .background(.ultraThinMaterial)
+                        .background(Theme.bgCardHover)
                     }
                     .glassCard(padding: 0, radius: Theme.radiusControl)
                     .padding(.horizontal, Theme.pagePadding)
@@ -250,4 +202,61 @@ struct LargeFilesView: View {
             // 자동 스캔 비활성화
         }
     }
+
+    @ViewBuilder private var targetFolderPicker: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(t("large.targetFolder"))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Theme.textSecondary)
+            HStack {
+                Text(viewModel.targetFolderPath)
+                    .font(.system(size: 12, design: .monospaced))
+                    .lineLimit(1)
+                    .foregroundColor(Theme.textPrimary)
+                Spacer()
+                Button(t("large.changeFolder")) {
+                    viewModel.selectFolder()
+                }
+                .buttonStyle(SecondaryButtonStyle())
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(RoundedRectangle(cornerRadius: Theme.radiusChip).fill(Theme.bgCardHover))
+            .overlay(RoundedRectangle(cornerRadius: Theme.radiusChip).stroke(Theme.hairline, lineWidth: 1))
+        }
+    }
+
+
+    @ViewBuilder private var sizePicker: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(t("large.minSize"))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Theme.textSecondary)
+            Picker("", selection: $viewModel.sizeThresholdMB) {
+                Text("100 MB").tag(100.0)
+                Text("500 MB").tag(500.0)
+                Text("1 GB").tag(1024.0)
+                Text("5 GB").tag(5120.0)
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    @ViewBuilder private var agePicker: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(t("large.ageFilter"))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Theme.textSecondary)
+            Picker("", selection: $viewModel.ageThresholdMonths) {
+                Text(t("large.ageAny")).tag(0)
+                Text(t("large.age3Months")).tag(3)
+                Text(t("large.age6Months")).tag(6)
+                Text(t("large.age1Year")).tag(12)
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: .infinity)
+        }
+    }
 }
+

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Mac Clean Optimizer Updates</title>
+    <link>https://lab98.studio/mac-clean-optimizer/appcast.xml</link>
+    <description>Most recent updates to Mac Clean Optimizer</description>
+    <language>ko</language>
+    <item>
+      <title>Mac Clean Optimizer v1.0.0</title>
+      <sparkle:releaseNotesLink>https://lab98.studio/mac-clean-optimizer/notes/v1.0.0.html</sparkle:releaseNotesLink>
+      <pubDate>Sat, 25 Jul 2026 15:41:00 +0900</pubDate>
+      <enclosure url="https://lab98.studio/mac-clean-optimizer/downloads/MacCleanOptimizer_Setup.dmg"
+                 sparkle:version="1.0.0"
+                 sparkle:shortVersionString="1.0.0"
+                 length="15423800"
+                 type="application/octet-stream" />
+    </item>
+  </channel>
+</rss>

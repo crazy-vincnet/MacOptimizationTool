@@ -59,6 +59,12 @@ class SettingsViewModel: ObservableObject {
     
     @Published var hasFullDiskAccess: Bool = false
     @Published var notificationPermissionGranted: Bool = false
+    @Published var appTheme: AppTheme {
+        didSet {
+            UserDefaults.standard.set(appTheme.rawValue, forKey: "appTheme")
+        }
+    }
+
     @Published var selectedLanguage: AppLanguage {
         didSet {
             LanguageManager.shared.currentLanguage = selectedLanguage
@@ -83,7 +89,10 @@ class SettingsViewModel: ObservableObject {
     }
     
     init() {
-        // 기본값 로드 및 UserDefaults 등록
+        // 기본값 로드 및 UserDefaults 등록 (라이트 모드를 기본값으로 지정)
+        let savedThemeRaw = UserDefaults.standard.string(forKey: "appTheme") ?? AppTheme.light.rawValue
+        self.appTheme = AppTheme(rawValue: savedThemeRaw) ?? .light
+
         self.autoPurgeMemory = UserDefaults.standard.bool(forKey: "autoPurgeMemory")
         
         let savedThreshold = UserDefaults.standard.double(forKey: "memoryThreshold")
@@ -105,6 +114,7 @@ class SettingsViewModel: ObservableObject {
         checkFullDiskAccess()
         checkNotificationPermission()
     }
+
     
     /// 저장된 보안 스코프 북마크를 기반으로 기본 스캔 경로 로드
     func loadDefaultScanFolder() {
@@ -196,34 +206,85 @@ class SettingsViewModel: ObservableObject {
         }
     }
     
-    /// 알림 권한 체크
+    /// 알림 권한 체크 (Async/Await)
     func checkNotificationPermission() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            Task { @MainActor in
-                self.notificationPermissionGranted = (settings.authorizationStatus == .authorized)
-            }
+        Task { @MainActor in
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            self.notificationPermissionGranted = (settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional)
         }
     }
     
-    /// 알림 권한 요청
+    /// 알림 권한 요청 및 시스템 설정 연결
     func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            Task { @MainActor in
+        Task { @MainActor in
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            if settings.authorizationStatus == .denied {
+                self.openSystemSettingsForNotifications()
+                return
+            }
+            
+            do {
+                let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
                 self.notificationPermissionGranted = granted
+                if !granted {
+                    self.openSystemSettingsForNotifications()
+                }
+            } catch {
+                print("알림 권한 요청 예외: \(error.localizedDescription)")
+                self.openSystemSettingsForNotifications()
             }
         }
     }
+
+
+    /// macOS 시스템 설정 (알림 설정) 열기
+    func openSystemSettingsForNotifications() {
+        let urlStrings = [
+            "x-apple.systempreferences:com.apple.preference.notifications",
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_Notifications",
+            "x-apple.systempreferences:com.apple.preference.security"
+        ]
+        for urlStr in urlStrings {
+            if let url = URL(string: urlStr), NSWorkspace.shared.open(url) {
+                break
+            }
+        }
+    }
+
+    /// 테스트 알림 직접 발송
+    func sendTestNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Lab98 Studio 알림 서비스"
+        content.body = "알림 권한 및 로컬 푸시 알림 서비스가 정상 작동 중입니다."
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: "com.cleanoptimizer.test_notification",
+            content: content,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("테스트 알림 발송 실패: \(error.localizedDescription)")
+            } else {
+                print("테스트 알림 발송 성공")
+            }
+        }
+    }
+
     
-    /// 업데이트 체크 시뮬레이션
+    /// Sparkle 2 기반 자동 업데이트 확인
     func checkForUpdates() {
         isCheckingUpdate = true
         
-        Task {
-            try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5초 연산 시뮬레이션
-            
-            self.updateAlertMessage = t("settings.updateAlert")
-            self.isCheckingUpdate = false
-            self.showUpdateAlert = true
+        SparkleUpdaterManager.shared.checkForUpdates { [weak self] message in
+            Task { @MainActor in
+                self?.updateAlertMessage = message
+                self?.isCheckingUpdate = false
+                self?.showUpdateAlert = true
+            }
         }
     }
+
 }

@@ -137,11 +137,11 @@ struct UninstallerView: View {
                         .frame(width: 28, height: 28)
                         .background(
                             RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
-                                .fill(.ultraThinMaterial)
+                                .fill(Theme.bgCardHover)
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
-                                .stroke(Theme.hairlineSoft, lineWidth: 1)
+                                .stroke(Theme.hairline, lineWidth: 1)
                         )
                 }
                 .buttonStyle(.plain)
@@ -166,11 +166,11 @@ struct UninstallerView: View {
                 .padding(.vertical, 4)
                 .background(
                     RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(Theme.bgCardHover)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
-                        .stroke(Theme.hairlineSoft, lineWidth: 1)
+                        .stroke(Theme.hairline, lineWidth: 1)
                 )
 
                 // 검색 텍스트 필드
@@ -179,6 +179,7 @@ struct UninstallerView: View {
                         .foregroundColor(Theme.textSecondary)
                     TextField(t("uninst.searchPlaceholder"), text: $searchText)
                         .textFieldStyle(.plain)
+                        .foregroundColor(Theme.textPrimary)
                         .frame(width: 180)
 
                     if !searchText.isEmpty {
@@ -193,12 +194,13 @@ struct UninstallerView: View {
                 .padding(.vertical, 5)
                 .background(
                     RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(Theme.bgCardHover)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
-                        .stroke(Theme.hairlineSoft, lineWidth: 1)
+                        .stroke(Theme.hairline, lineWidth: 1)
                 )
+
             }
             .padding(.top, 10)
             
@@ -274,11 +276,7 @@ struct UninstallerView: View {
         .padding(.vertical, 15)
         .background(
             RoundedRectangle(cornerRadius: Theme.radiusCard, style: .continuous)
-                .fill(isTargeted ? Theme.accent.opacity(0.06) : Color.clear)
-                .background(
-                    RoundedRectangle(cornerRadius: Theme.radiusCard, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                )
+                .fill(isTargeted ? Theme.accent.opacity(0.06) : Theme.bgCardHover)
         )
         .overlay(
             RoundedRectangle(cornerRadius: Theme.radiusCard, style: .continuous)
@@ -287,6 +285,7 @@ struct UninstallerView: View {
                     style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [6, 4])
                 )
         )
+
         .shadow(color: Color.black.opacity(0.06), radius: 14, x: 0, y: 6)
         .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
             guard let provider = providers.first else { return false }
@@ -381,12 +380,35 @@ struct UninstallerView: View {
     // 3. 스캔 완료 목록 뷰
     private var scanResultView: some View {
         VStack(spacing: 15) {
-            // 상단: 선택된 앱 요약 정보 바
+            // 상단: 선택된 앱 요약 정보 바 & 뒤로가기 버튼
             if let app = viewModel.selectedApp {
                 HStack(spacing: 15) {
+                    Button(action: {
+                        viewModel.reset()
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 12, weight: .bold))
+                            Text(t("uninst.backToMain"))
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(Theme.textSecondary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
+                                .fill(Theme.bgCardHover)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
+                                .stroke(Theme.hairline, lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
+
                     Image(nsImage: app.icon)
                         .resizable()
-                        .frame(width: 48, height: 48)
+                        .frame(width: 44, height: 44)
                         
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(alignment: .lastTextBaseline) {
@@ -418,6 +440,7 @@ struct UninstallerView: View {
                 }
                 .glassCard(padding: 15, radius: Theme.radiusControl)
             }
+
             
             // 중단: 찌꺼기 파일 목록 테이블
             VStack(alignment: .leading, spacing: 5) {
@@ -548,16 +571,13 @@ struct UninstallerView: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                .fill(item.wrappedValue.isSelected ? Theme.accent.opacity(0.10) : Color.clear)
-                .background(
-                    RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                )
+                .fill(item.wrappedValue.isSelected ? Theme.accent.opacity(0.10) : Theme.bgCardHover)
         )
         .overlay(
             RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                .stroke(item.wrappedValue.isSelected ? Theme.accent.opacity(0.4) : Theme.hairlineSoft, lineWidth: 1)
+                .stroke(item.wrappedValue.isSelected ? Theme.accent.opacity(0.4) : Theme.hairline, lineWidth: 1)
         )
+
     }
     
     // 4. 완료 화면 뷰

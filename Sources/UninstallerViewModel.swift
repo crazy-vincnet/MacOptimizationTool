@@ -390,5 +390,9 @@ class UninstallerViewModel: ObservableObject {
     func reset() {
         selectedApp = nil
         leftoverItems = []
+        showCleanSuccess = false
+        isScanning = false
+        isCleaning = false
     }
+
 }

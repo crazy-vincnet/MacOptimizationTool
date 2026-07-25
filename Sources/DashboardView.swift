@@ -85,12 +85,13 @@ struct DashboardView: View {
                             .frame(width: 34, height: 34)
                             .background(
                                 RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                                    .fill(.ultraThinMaterial)
+                                    .fill(Theme.bgCardHover)
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                                    .stroke(Theme.hairlineSoft, lineWidth: 1)
+                                    .stroke(Theme.hairline, lineWidth: 1)
                             )
+
                     }
                     .buttonStyle(.plain)
                 }
@@ -129,7 +130,7 @@ struct DashboardView: View {
                                                     .foregroundColor(Theme.textPrimary)
                                                 Text(t("dash.used"))
                                                     .font(.system(size: 8))
-                                                    .foregroundColor(.secondary)
+                                                    .foregroundColor(Theme.textSecondary)
                                             }
                                         }
                                         .padding(.vertical, 8)
@@ -143,11 +144,11 @@ struct DashboardView: View {
                                             HStack(spacing: 6) {
                                                 Text("\(t("dash.user")): \(Int(cpuUserPercent))%")
                                                 Text("•")
-                                                    .foregroundColor(.secondary.opacity(0.4))
+                                                    .foregroundColor(Theme.textSecondary.opacity(0.4))
                                                 Text("\(t("dash.sys")): \(Int(cpuSysPercent))%")
                                             }
                                             .font(.system(size: 9))
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(Theme.textSecondary)
                                             
                                             Text("\(t("dash.temp")): \(String(format: "%.1f", cpuTemperature))°C (\(cpuThermalStatus))")
                                                 .font(.system(size: 9, weight: .semibold))
@@ -181,7 +182,7 @@ struct DashboardView: View {
                                                     .foregroundColor(Theme.accent)
                                                 Text(t("dash.active"))
                                                     .font(.system(size: 8))
-                                                    .foregroundColor(.secondary)
+                                                    .foregroundColor(Theme.textSecondary)
                                             }
                                         }
                                         .padding(.vertical, 8)
@@ -194,7 +195,7 @@ struct DashboardView: View {
                                             
                                             Text(isUnifiedGPU ? t("dash.unifiedMemory") : t("dash.discreteGPU"))
                                                 .font(.system(size: 9))
-                                                .foregroundColor(.secondary)
+                                                .foregroundColor(Theme.textSecondary)
                                             
                                             Text("\(t("dash.temp")): \(String(format: "%.1f", gpuTemperature))°C")
                                                 .font(.system(size: 9, weight: .semibold))
@@ -231,7 +232,7 @@ struct DashboardView: View {
                                                     .foregroundColor(Theme.textPrimary)
                                                 Text(t("dash.used"))
                                                     .font(.system(size: 8))
-                                                    .foregroundColor(.secondary)
+                                                    .foregroundColor(Theme.textSecondary)
                                             }
                                         }
                                         .padding(.vertical, 8)
@@ -242,17 +243,17 @@ struct DashboardView: View {
                                                 .foregroundColor(Theme.textPrimary)
                                             
                                             HStack(spacing: 4) {
-                                                Text("App: \(formattedMemoryApp)")
+                                                Text("\(t("dash.appMem")): \(formattedMemoryApp)")
                                                 Text("|")
-                                                    .foregroundColor(.secondary.opacity(0.3))
-                                                Text("Wired: \(formattedMemoryWired)")
+                                                    .foregroundColor(Theme.textSecondary.opacity(0.3))
+                                                Text("\(t("dash.wiredMem")): \(formattedMemoryWired)")
                                             }
                                             .font(.system(size: 9))
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(Theme.textSecondary)
                                             
-                                            Text("Compressed: \(formattedMemoryCompressed)")
+                                            Text("\(t("dash.compressedMem")): \(formattedMemoryCompressed)")
                                                 .font(.system(size: 9))
-                                                .foregroundColor(.secondary)
+                                                .foregroundColor(Theme.textSecondary)
                                             
                                             // 메모리 즉시 최적화 버튼 (그린 강조)
                                             Button(action: {
@@ -300,7 +301,7 @@ struct DashboardView: View {
                                                     .foregroundColor(Theme.textPrimary)
                                                 Text(t("dash.used"))
                                                     .font(.system(size: 8))
-                                                    .foregroundColor(.secondary)
+                                                    .foregroundColor(Theme.textSecondary)
                                             }
                                         }
                                         .padding(.vertical, 8)
@@ -313,11 +314,11 @@ struct DashboardView: View {
                                             HStack(spacing: 6) {
                                                 Text("\(t("dash.usedDisk")): \(formattedDiskUsed)")
                                                 Text("•")
-                                                    .foregroundColor(.secondary.opacity(0.4))
+                                                    .foregroundColor(Theme.textSecondary.opacity(0.4))
                                                 Text("\(t("dash.total")): \(formattedDiskTotal)")
                                             }
                                             .font(.system(size: 9))
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(Theme.textSecondary)
                                             
                                             if let battTemp = batteryTemperature {
                                                 Text("\(t("dash.battery")) Temp: \(String(format: "%.1f", battTemp))°C")
@@ -327,13 +328,14 @@ struct DashboardView: View {
                                             } else {
                                                 Text(t("dash.batteryPowerAdapter"))
                                                     .font(.system(size: 9, weight: .medium))
-                                                    .foregroundColor(.secondary)
+                                                    .foregroundColor(Theme.textSecondary)
                                                     .padding(.top, 1)
                                             }
                                         }
                                     }
                                 }
                             }
+
                         }
                         
                         // 빠른 링크/팁 섹션

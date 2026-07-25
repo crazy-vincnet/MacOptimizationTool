@@ -1,5 +1,7 @@
 import Foundation
 import CryptoKit
+import AppKit
+
 
 /// 파일 삭제/해시 관련 보안 로직 단일 소스.
 /// 각 ViewModel 에 흩어져 있던 블랙리스트/삭제 코드를 통합하여 규칙 불일치를 제거한다.
@@ -50,8 +52,8 @@ enum FileSafety {
 
     // MARK: - Deletion
 
-    /// 안전 삭제: 영구 삭제 대신 휴지통 이동. 보호 경로면 차단하고 false 반환.
-    /// - Returns: 실제로 휴지통으로 이동했으면 true.
+    /// 안전 삭제: 영구 삭제 대신 휴지통 이동. 권한 부족 시 단계별 우회 및 시스템 관리자 권한(Sudo)으로 강제 삭제.
+    /// - Returns: 실제로 휴지통으로 이동했거나 삭제되었으면 true.
     @discardableResult
     static func moveToTrash(_ url: URL, treeProtection: Bool = false) -> Bool {
         let path = url.standardized.path
@@ -61,14 +63,54 @@ enum FileSafety {
             return false
         }
         guard FileManager.default.fileExists(atPath: url.path) else { return false }
+
+        // 1차 시도: 표준 FileManager 휴지통 이동
         do {
             try FileManager.default.trashItem(at: url, resultingItemURL: nil)
             return true
         } catch {
-            print("휴지통 이동 실패: \(url.path), 에러: \(error.localizedDescription)")
-            return false
+            print("1차 휴지통 이동 실패 (\(url.path)): \(error.localizedDescription)")
         }
+
+        // 2차 시도: NSWorkspace.shared.recycle (Finder 레벨 휴지통 이동)
+        var recycleSuccess = false
+        let semaphore = DispatchSemaphore(value: 0)
+        NSWorkspace.shared.recycle([url]) { _, error in
+            if error == nil {
+                recycleSuccess = true
+            } else if let error = error {
+                print("2차 NSWorkspace recycle 실패 (\(url.path)): \(error.localizedDescription)")
+            }
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: .now() + 2.0)
+        if recycleSuccess { return true }
+
+        // 3차 시도: FileManager.default.removeItem (직접 삭제)
+        do {
+            try FileManager.default.removeItem(at: url)
+            return true
+        } catch {
+            print("3차 direct removeItem 실패 (\(url.path)): \(error.localizedDescription)")
+        }
+
+        // 4차 시도: 권한 부족(Root/Admin 소유 앱) 시 AppleScript 관리자 권한으로 강제 삭제
+        let escapedPath = url.path.replacingOccurrences(of: "'", with: "'\\''")
+        let script = "do shell script \"rm -rf '\(escapedPath)'\" with administrator privileges"
+        var errorDict: NSDictionary?
+        if let scriptObject = NSAppleScript(source: script) {
+            scriptObject.executeAndReturnError(&errorDict)
+            if errorDict == nil && !FileManager.default.fileExists(atPath: url.path) {
+                print("4차 관리자 권한 강제 삭제 성공 (\(url.path))")
+                return true
+            } else {
+                print("4차 AppleScript 삭제 실패 (\(url.path)): \(String(describing: errorDict))")
+            }
+        }
+
+        return false
     }
+
 
     // MARK: - Hashing
 

@@ -1,18 +1,51 @@
 import SwiftUI
+import AppKit
 
-// MARK: - Design System
-// 미니멀 · 라이트 · 글래스모피즘 · 그린 액센트.
-// 모든 뷰는 하드코딩 색상/카드 대신 이 토큰과 모디파이어를 사용한다.
+
+// MARK: - Theme Mode Definition
+
+enum AppTheme: String, CaseIterable, Identifiable {
+    case light = "light"
+    case dark = "dark"
+    case system = "system"
+    
+    var id: String { rawValue }
+    
+    var displayName: String {
+        switch self {
+        case .light: return t("theme.light")
+        case .dark: return t("theme.dark")
+        case .system: return t("theme.system")
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .light: return .light
+        case .dark: return .dark
+        case .system: return nil
+        }
+    }
+}
+
+// MARK: - Design System (Lab98 Studio Dynamic Theme System)
 
 enum Theme {
 
-    // MARK: Accent (Emerald)
-    /// 주 액센트 그린 (#22C55E)
-    static let accent = Color(red: 0.13, green: 0.77, blue: 0.37)
-    /// 진한 그린 (그라디언트 끝, #16A34A)
-    static let accentDeep = Color(red: 0.09, green: 0.64, blue: 0.29)
-    /// 밝은 민트 (그라디언트 하이라이트, #6EE7B7)
-    static let accentSoft = Color(red: 0.43, green: 0.91, blue: 0.72)
+    private static func dynamicColor(lightHex: String, darkHex: String, alphaLight: CGFloat = 1.0, alphaDark: CGFloat = 1.0) -> Color {
+        let lightColor = NSColor(hex: lightHex).withAlphaComponent(alphaLight)
+        let darkColor = NSColor(hex: darkHex).withAlphaComponent(alphaDark)
+        return Color(NSColor(name: nil, dynamicProvider: { appearance in
+            let match = appearance.bestMatch(from: [.aqua, .darkAqua])
+            return match == .darkAqua ? darkColor : lightColor
+        }))
+    }
+
+    // MARK: Accent (Lab98 Emerald)
+    static let accent = dynamicColor(lightHex: "059669", darkHex: "3ECF8E")
+    static let accentDeep = dynamicColor(lightHex: "047857", darkHex: "00B96B")
+    static let accentSoft = dynamicColor(lightHex: "10B981", darkHex: "6EE7B7")
+    static let accentGlow = dynamicColor(lightHex: "059669", darkHex: "3ECF8E", alphaLight: 0.10, alphaDark: 0.14)
 
     static var accentGradient: LinearGradient {
         LinearGradient(colors: [accentSoft, accent, accentDeep],
@@ -23,41 +56,62 @@ enum Theme {
                        startPoint: .leading, endPoint: .trailing)
     }
 
-    // MARK: Surfaces (Light minimal)
-    /// 창 배경 상단 (거의 흰색, 미세한 그린 틴트)
-    static let bgTop = Color(red: 0.98, green: 0.99, blue: 0.98)
-    /// 창 배경 하단 (연한 그린-그레이)
-    static let bgBottom = Color(red: 0.93, green: 0.96, blue: 0.94)
+    // MARK: Surfaces (Lab98 Studio Canvas & Cards)
+    static let bgCanvas = dynamicColor(lightHex: "F8FAFC", darkHex: "121316")
+    static let bgCanvasBottom = dynamicColor(lightHex: "F1F5F9", darkHex: "0C0D0F")
+    static let bgSidebar = dynamicColor(lightHex: "F1F5F9", darkHex: "17181D")
+    static let bgCard = dynamicColor(lightHex: "FFFFFF", darkHex: "1D1F24")
+    static let bgCardHover = dynamicColor(lightHex: "F8FAFC", darkHex: "24262C")
 
     static var appBackground: LinearGradient {
-        LinearGradient(colors: [bgTop, bgBottom],
+        LinearGradient(colors: [bgCanvas, bgCanvasBottom],
                        startPoint: .top, endPoint: .bottom)
     }
 
-    /// 카드 유리면 위에 얹는 미세한 흰색 오버레이
-    static let glassTint = Color.white.opacity(0.55)
-    /// 카드 테두리 (얇은 밝은 라인)
-    static let hairline = Color.white.opacity(0.7)
-    static let hairlineSoft = Color.black.opacity(0.05)
+    static let glassTint = Color.primary.opacity(0.02)
+    static let hairline = dynamicColor(lightHex: "E2E8F0", darkHex: "2E3038")
+    static let hairlineSoft = dynamicColor(lightHex: "CBD5E1", darkHex: "3A3D47")
 
-    // MARK: Text
-    static let textPrimary = Color.primary
-    static let textSecondary = Color.secondary
-    static let textOnAccent = Color.white
+    // MARK: Text & Contrast (Solid, Razor-Sharp Typography - No Haze/Blur)
+    static let textPrimary = dynamicColor(lightHex: "020617", darkHex: "EDEDED")
+    static let textSecondary = dynamicColor(lightHex: "475569", darkHex: "A1A1AA")
+    static let textOnAccent = dynamicColor(lightHex: "FFFFFF", darkHex: "0E0F12")
+
+    // MARK: Card Shadow (Light: Soft 4% shadow for crisp edges / Dark: 35% shadow)
+    static let cardShadow = dynamicColor(lightHex: "000000", darkHex: "000000", alphaLight: 0.04, alphaDark: 0.35)
 
     // MARK: Semantic
-    static let danger = Color(red: 0.94, green: 0.33, blue: 0.31)
-    static let warning = Color(red: 0.98, green: 0.71, blue: 0.19)
+    static let danger = dynamicColor(lightHex: "EF4444", darkHex: "F87171")
+    static let dangerBg = dynamicColor(lightHex: "FEE2E2", darkHex: "471C1C", alphaLight: 0.5, alphaDark: 0.3)
+    static let warning = dynamicColor(lightHex: "F59E0B", darkHex: "FBBF24")
 
     // MARK: Metrics
-    static let radiusCard: CGFloat = 18
-    static let radiusControl: CGFloat = 12
-    static let radiusChip: CGFloat = 8
-    static let cardPadding: CGFloat = 20
-    static let pagePadding: CGFloat = 30
+    static let radiusCard: CGFloat = 12
+    static let radiusControl: CGFloat = 8
+    static let radiusChip: CGFloat = 6
+    static let cardPadding: CGFloat = 18
+    static let pagePadding: CGFloat = 28
 }
 
-// MARK: - Glass Card
+// MARK: - NSColor Hex Extension
+extension NSColor {
+    convenience init(hex: String) {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+        let r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+        let g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+        let b = CGFloat(rgb & 0x0000FF) / 255.0
+
+        self.init(red: r, green: g, blue: b, alpha: 1.0)
+    }
+}
+
+
+// MARK: - Studio Card Modifier (Sharp Edges, No Text Blur)
 
 private struct GlassCardModifier: ViewModifier {
     var padding: CGFloat
@@ -69,92 +123,93 @@ private struct GlassCardModifier: ViewModifier {
             .padding(padding)
             .background(
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .fill(.ultraThinMaterial)
-            )
-            .background(
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .fill(Theme.glassTint)
+                    .fill(highlighted ? Theme.bgCardHover : Theme.bgCard)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .stroke(highlighted ? Theme.accent.opacity(0.5) : Theme.hairline, lineWidth: 1)
+                    .stroke(highlighted ? Theme.accent.opacity(0.45) : Theme.hairline, lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.06), radius: 14, x: 0, y: 6)
+            .shadow(color: Theme.cardShadow, radius: 6, x: 0, y: 2)
     }
 }
 
+
 extension View {
-    /// 표준 글래스 카드. 배경·테두리·그림자·패딩을 일관되게 적용.
+    /// Supabase Dark Studio Card.
     func glassCard(padding: CGFloat = Theme.cardPadding,
                    radius: CGFloat = Theme.radiusCard,
                    highlighted: Bool = false) -> some View {
         modifier(GlassCardModifier(padding: padding, radius: radius, highlighted: highlighted))
     }
 
-    /// 페이지 전체 라이트 그라디언트 배경.
+    /// Dark Studio Page Background.
     func appBackground() -> some View {
         background(Theme.appBackground.ignoresSafeArea())
     }
 }
 
-// MARK: - Button Styles
+// MARK: - Supabase Button Styles
 
-/// 그린 그라디언트 주 액션 버튼.
+/// Supabase Emerald Primary Action Button (Bright Emerald with Crisp Dark Bold Text).
 struct PrimaryActionButtonStyle: ButtonStyle {
     var enabled: Bool = true
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .fontWeight(.semibold)
-            .foregroundColor(Theme.textOnAccent)
-            .padding(.horizontal, 22)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                    .fill(enabled ? AnyShapeStyle(Theme.accentGradientFlat)
-                                  : AnyShapeStyle(Color.gray.opacity(0.3)))
-            )
-            .shadow(color: enabled ? Theme.accent.opacity(0.28) : .clear, radius: 10, y: 4)
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
-    }
-}
-
-/// 파괴적(삭제) 액션 버튼.
-struct DangerActionButtonStyle: ButtonStyle {
-    var enabled: Bool = true
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .fontWeight(.semibold)
-            .foregroundColor(Theme.textOnAccent)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundColor(enabled ? Theme.textOnAccent : Theme.textSecondary)
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                    .fill(enabled ? AnyShapeStyle(Theme.danger) : AnyShapeStyle(Color.gray.opacity(0.3)))
+                    .fill(enabled ? AnyShapeStyle(Theme.accent)
+                                  : AnyShapeStyle(Theme.bgCardHover))
             )
-            .shadow(color: enabled ? Theme.danger.opacity(0.25) : .clear, radius: 8, y: 3)
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
+                    .stroke(enabled ? Theme.accentSoft.opacity(0.3) : Theme.hairline, lineWidth: 1)
+            )
+            .shadow(color: enabled ? Theme.accent.opacity(0.3) : .clear, radius: 10, y: 3)
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
-/// 보조(투명/외곽선) 버튼.
+/// Danger Action Button.
+struct DangerActionButtonStyle: ButtonStyle {
+    var enabled: Bool = true
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundColor(enabled ? Color.white : Theme.textSecondary)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 9)
+            .background(
+                RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
+                    .fill(enabled ? AnyShapeStyle(Theme.danger) : AnyShapeStyle(Theme.bgCardHover))
+            )
+            .shadow(color: enabled ? Theme.danger.opacity(0.3) : .clear, radius: 8, y: 3)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+/// Supabase Secondary (Translucent Dark Slate) Button.
 struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .fontWeight(.medium)
+            .font(.system(size: 12, weight: .medium))
             .foregroundColor(Theme.textPrimary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
             .background(
                 RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(Theme.bgCardHover)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
-                    .stroke(Theme.hairlineSoft, lineWidth: 1)
+                    .stroke(Theme.hairline, lineWidth: 1)
             )
-            .opacity(configuration.isPressed ? 0.7 : 1.0)
+            .opacity(configuration.isPressed ? 0.75 : 1.0)
     }
 }
 
@@ -169,23 +224,28 @@ struct PageHeader: View {
         HStack(alignment: .center, spacing: 14) {
             if let icon {
                 Image(systemName: icon)
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundStyle(Theme.accentGradient)
-                    .frame(width: 44, height: 44)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(Theme.accent)
+                    .frame(width: 42, height: 42)
                     .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Theme.accent.opacity(0.12))
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Theme.accentGlow)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Theme.accent.opacity(0.3), lineWidth: 1)
                     )
             }
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .font(.system(size: 24, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
                 Text(subtitle)
-                    .font(.system(size: 13))
+                    .font(.system(size: 12))
                     .foregroundColor(Theme.textSecondary)
             }
             Spacer()
         }
     }
 }
+

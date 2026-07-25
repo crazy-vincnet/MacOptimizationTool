@@ -1,5 +1,28 @@
 import SwiftUI
 
+/// 사이드바 카테고리 그룹
+enum MenuCategory: String, CaseIterable, Identifiable {
+    case overview = "OVERVIEW"
+    case storage = "STORAGE & CLEANUP"
+    case tools = "SYSTEM TOOLS"
+    case preferences = "PREFERENCES"
+
+    var id: String { self.rawValue }
+
+    var tabs: [MenuTab] {
+        switch self {
+        case .overview:
+            return [.dashboard]
+        case .storage:
+            return [.diskCleaner, .largeFiles, .duplicateFinder, .uninstaller]
+        case .tools:
+            return [.startupManager, .winCompat, .maintenance]
+        case .preferences:
+            return [.settings]
+        }
+    }
+}
+
 /// 사이드바 메뉴 정의
 enum MenuTab: String, CaseIterable, Identifiable {
     case dashboard
@@ -51,148 +74,230 @@ struct MainView: View {
     @State private var selectedTab: MenuTab = .dashboard
     @State private var hoveredTab: MenuTab? = nil
     @ObservedObject private var langManager = LanguageManager.shared
+    @AppStorage("appTheme") private var appThemeRaw: String = AppTheme.light.rawValue
     
+    private var currentColorScheme: ColorScheme? {
+        (AppTheme(rawValue: appThemeRaw) ?? .light).colorScheme
+    }
+
     var body: some View {
         HStack(spacing: 0) {
-            // 사이드바 영역 (글래스)
+            // 사이드바 영역 (Supabase Studio)
             sidebarView
-                .frame(width: 236)
-                .background(.regularMaterial)
+                .frame(width: 240)
+                .background(Theme.bgSidebar)
                 .overlay(alignment: .trailing) {
-                    Rectangle().fill(Theme.hairlineSoft).frame(width: 1)
+                    Rectangle().fill(Theme.hairline).frame(width: 1)
                 }
 
-            // 메인 콘텐츠 영역
-            ZStack {
-                Theme.appBackground.ignoresSafeArea()
-
-                Group {
-                    switch selectedTab {
-                    case .dashboard:
-                        DashboardView()
-                    case .uninstaller:
-                        UninstallerView()
-                    case .diskCleaner:
-                        DiskCleanerView()
-                    case .largeFiles:
-                        LargeFilesView()
-                    case .duplicateFinder:
-                        DuplicateView()
-                    case .startupManager:
-                        StartupView()
-                    case .winCompat:
-                        WinCompatView()
-                    case .maintenance:
-                        MaintenanceView()
-                    case .settings:
-                        SettingsView()
+            // 메인 콘텐츠 영역 (상단 헤더 바 + 탭 영역)
+            VStack(spacing: 0) {
+                // Top Global Bar
+                topGlobalBar
+                    .frame(height: 48)
+                    .background(Theme.bgSidebar)
+                    .overlay(alignment: .bottom) {
+                        Rectangle().fill(Theme.hairline).frame(height: 1)
                     }
+
+                ZStack {
+                    Theme.appBackground.ignoresSafeArea()
+
+                    Group {
+                        switch selectedTab {
+                        case .dashboard:
+                            DashboardView()
+                        case .uninstaller:
+                            UninstallerView()
+                        case .diskCleaner:
+                            DiskCleanerView()
+                        case .largeFiles:
+                            LargeFilesView()
+                        case .duplicateFinder:
+                            DuplicateView()
+                        case .startupManager:
+                            StartupView()
+                        case .winCompat:
+                            WinCompatView()
+                        case .maintenance:
+                            MaintenanceView()
+                        case .settings:
+                            SettingsView()
+                        }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .trailing)))
+                    .id(selectedTab)
                 }
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
-                .id(selectedTab)
+                .animation(.easeInOut(duration: 0.18), value: selectedTab)
             }
-            .animation(.easeInOut(duration: 0.2), value: selectedTab)
         }
-        .frame(minWidth: 900, minHeight: 600)
-        .preferredColorScheme(.light)
+        .frame(minWidth: 960, minHeight: 640)
+        .preferredColorScheme(currentColorScheme)
+    }
+
+
+    // Top Global Header Bar
+    private var topGlobalBar: some View {
+        HStack(spacing: 12) {
+            // Breadcrumb navigation
+            HStack(spacing: 6) {
+                Text("Lab98 Studio")
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                    .foregroundColor(Theme.textSecondary)
+
+                Text("/")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Theme.hairline)
+                Text(selectedTab.displayName)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Theme.textPrimary)
+            }
+
+            Spacer()
+
+            // System Status Pill Badge
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(Theme.accent)
+                    .frame(width: 7, height: 7)
+                Text(t("menu.operational"))
+
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundColor(Theme.accent)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(Theme.accentGlow)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Theme.accent.opacity(0.3), lineWidth: 1)
+            )
+            .cornerRadius(12)
+
+            // Environment badge
+            Text("macOS Studio")
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .foregroundColor(Theme.textSecondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Theme.bgCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .stroke(Theme.hairline, lineWidth: 1)
+                )
+                .cornerRadius(4)
+        }
+        .padding(.horizontal, 24)
     }
     
     private var sidebarView: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // 앱 타이틀
+        VStack(alignment: .leading, spacing: 0) {
+            // 앱 타이틀 & 뱃지
             HStack(spacing: 12) {
                 Image(systemName: "bolt.shield.fill")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(Theme.textOnAccent)
-                    .frame(width: 40, height: 40)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(Theme.textOnAccent)
+                    .frame(width: 34, height: 34)
                     .background(
-                        RoundedRectangle(cornerRadius: 11, style: .continuous)
-                            .fill(Theme.accentGradient)
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Theme.accent)
                     )
-                    .shadow(color: Theme.accent.opacity(0.3), radius: 6, y: 3)
+                    .shadow(color: Theme.accent.opacity(0.35), radius: 8, y: 2)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Mac Clean Optimizer")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                    Text("v1.0.0")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Mac Clean")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(Theme.textPrimary)
+                    Text("Lab98 Studio")
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .foregroundColor(Theme.accent)
                 }
+
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 30)
-            .padding(.bottom, 10)
-            
-            // 사이드바 항목 목록
-            VStack(spacing: 6) {
-                ForEach(MenuTab.allCases) { tab in
-                    if tab.isEnabled {
-                        Button(action: {
-                            selectedTab = tab
-                        }) {
-                            sidebarItem(for: tab, isSelected: selectedTab == tab)
+            .padding(.horizontal, 16)
+            .padding(.top, 18)
+            .padding(.bottom, 16)
+
+            Divider()
+                .background(Theme.hairline)
+
+            // 카테고리별 사이드바 목록
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    ForEach(MenuCategory.allCases) { category in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(category.rawValue)
+                                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                .foregroundColor(Theme.textSecondary.opacity(0.7))
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 2)
+
+                            ForEach(category.tabs) { tab in
+                                Button(action: {
+                                    selectedTab = tab
+                                }) {
+                                    sidebarItem(for: tab, isSelected: selectedTab == tab)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
-                        .buttonStyle(.plain)
-                    } else {
-                        // 비활성화된 탭 (추후 확장용)
-                        sidebarItem(for: tab, isSelected: false)
-                            .opacity(0.4)
-                            .help("준비 중인 기능입니다 (다음 업데이트 예정)")
                     }
                 }
+                .padding(.vertical, 14)
+                .padding(.horizontal, 8)
             }
-            .padding(.horizontal, 10)
+
+            Spacer(minLength: 0)
+
+            Divider()
+                .background(Theme.hairline)
             
-            Spacer()
-            
-            // 하단 상태 표시 또는 회사정보
-            VStack(alignment: .leading, spacing: 5) {
-                Text(t("main.footer.title"))
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(Theme.accent)
-                Text(t("main.footer.sub"))
-                    .font(.system(size: 9))
-                    .foregroundColor(.secondary)
+            // 하단 상태 표시
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Theme.accent)
+                    .frame(width: 8, height: 8)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Mac Clean Optimizer")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(Theme.textPrimary)
+                    Text("© 2026 Lab98 Studio. All rights reserved.")
+                        .font(.system(size: 9, design: .monospaced))
+                        .foregroundColor(Theme.textSecondary)
+                }
+
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 25)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
         }
     }
     
-    // 사이드바 개별 로우 뷰 디자인
+    // 사이드바 개별 로우 뷰 디자인 (Supabase active item indicator)
     private func sidebarItem(for tab: MenuTab, isSelected: Bool) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             Image(systemName: tab.iconName)
-                .font(.system(size: 16))
-                .foregroundColor(isSelected ? .white : .secondary)
-                .frame(width: 20)
+                .font(.system(size: 14))
+                .foregroundColor(isSelected ? Theme.accent : Theme.textSecondary)
+                .frame(width: 18)
             
             Text(tab.displayName)
-                .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(isSelected ? .white : .primary)
+                .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
+                .foregroundColor(isSelected ? Theme.textPrimary : Theme.textSecondary)
             
             Spacer()
-            
-            if !tab.isEnabled {
-                Text("곧 추가됨")
-                    .font(.system(size: 9, weight: .semibold))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(5)
-                    .foregroundColor(.secondary)
-            }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
                 .fill(
-                    isSelected ?
-                    AnyShapeStyle(Theme.accentGradient) :
-                    AnyShapeStyle(hoveredTab == tab ? Color.primary.opacity(0.06) : Color.clear)
+                    isSelected ? Theme.accentGlow :
+                    (hoveredTab == tab ? Theme.bgCardHover : Color.clear)
                 )
-                .shadow(color: isSelected ? Theme.accent.opacity(0.28) : .clear, radius: 8, y: 3)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
+                .stroke(isSelected ? Theme.accent.opacity(0.4) : Color.clear, lineWidth: 1)
         )
         .contentShape(Rectangle())
         .onHover { isHovered in

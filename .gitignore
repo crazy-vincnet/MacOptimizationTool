@@ -1,5 +1,17 @@
+# macOS System Files
 .DS_Store
-MacCleanOptimizer.app/
-MacCleanOptimizer
+.AppleDouble
+.LSOverride
+
+# Build Artifacts & Large Binary Releases
+*.app
+*.dmg
+*.pkg
+*.iconset
 *.o
-build/
+*.dSYM/
+*.tmp
+MacCleanOptimizer*.app
+MacCleanOptimizer 2.app/
+MacCleanOptimizer 3.app/
+MacCleanOptimizer 4.app/

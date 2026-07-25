@@ -13,22 +13,22 @@ struct DuplicateView: View {
                     subtitle: t("dup.subtitle"),
                     icon: "doc.on.doc.fill"
                 )
-                .padding(.horizontal, 30)
-                .padding(.top, 30)
+                .padding(.horizontal, Theme.pagePadding)
+                .padding(.top, Theme.pagePadding)
                 .padding(.bottom, 20)
                 
                 // 검색 조건 카드
-                HStack(spacing: 20) {
+                HStack(alignment: .bottom, spacing: 20) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(t("dup.target_folder"))
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Theme.textSecondary)
                         
                         HStack {
                             Text(viewModel.targetFolderPath)
                                 .font(.system(size: 12, design: .monospaced))
                                 .lineLimit(1)
-                                .foregroundColor(.primary)
+                                .foregroundColor(Theme.textPrimary)
                             
                             Spacer()
                             
@@ -39,7 +39,14 @@ struct DuplicateView: View {
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(RoundedRectangle(cornerRadius: Theme.radiusChip).fill(.ultraThinMaterial))
+                        .background(
+                            RoundedRectangle(cornerRadius: Theme.radiusChip)
+                                .fill(Theme.bgCardHover)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Theme.radiusChip)
+                                .stroke(Theme.hairline, lineWidth: 1)
+                        )
                     }
 
                     Button(action: {
@@ -50,9 +57,10 @@ struct DuplicateView: View {
                     .buttonStyle(PrimaryActionButtonStyle())
                     .disabled(viewModel.isScanning)
                 }
-                .glassCard()
-                .padding(.horizontal, 30)
+                .glassCard(padding: 14, radius: Theme.radiusControl)
+                .padding(.horizontal, Theme.pagePadding)
                 .padding(.bottom, 20)
+
                 
                 // 중복 그룹 목록 영역 또는 스캔 준비 화면
                 if !viewModel.hasScanned && !viewModel.isScanning {
@@ -202,8 +210,9 @@ struct DuplicateView: View {
                         .padding(16)
                     }
                     .glassCard(padding: 0, radius: Theme.radiusControl)
-                    .padding(.horizontal, 30)
-                    .padding(.bottom, 30)
+                    .padding(.horizontal, Theme.pagePadding)
+                    .padding(.bottom, Theme.pagePadding)
+
                 }
             }
             
