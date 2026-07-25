@@ -80,9 +80,9 @@ struct SettingsView: View {
             .padding(.bottom, Theme.pagePadding)
         }
         .alert(isPresented: $viewModel.showUpdateAlert) {
-            if viewModel.updateURL != nil && viewModel.hasNewVersion {
+            if viewModel.hasNewVersion {
                 Alert(
-                    title: Text(t("settings.checkUpdate")),
+                    title: Text("🎉 새로운 버전 출시"),
                     message: Text(viewModel.updateAlertMessage),
                     primaryButton: .default(Text("지금 자동 다운로드 & 설치"), action: {
                         viewModel.startInAppUpdate()
@@ -92,11 +92,15 @@ struct SettingsView: View {
             } else {
                 Alert(
                     title: Text(t("settings.checkUpdate")),
-                    message: Text(viewModel.updateAlertMessage),
-                    dismissButton: .default(Text(t("common.ok")))
+                    message: Text("\(viewModel.updateAlertMessage)\n\n최신 설치 파일(.dmg)을 인앱 재다운로드하시겠습니까?"),
+                    primaryButton: .default(Text("최신 .dmg 인앱 다운로드 및 마운트"), action: {
+                        viewModel.startInAppUpdate()
+                    }),
+                    secondaryButton: .cancel(Text(t("common.ok")))
                 )
             }
         }
+
         .overlay {
             if SparkleUpdaterManager.shared.isDownloading {
                 ZStack {

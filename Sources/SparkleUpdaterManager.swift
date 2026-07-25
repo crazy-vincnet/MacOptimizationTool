@@ -64,20 +64,28 @@ final class SparkleUpdaterManager: NSObject, ObservableObject, URLSessionDownloa
                         return
                     }
 
+                    let displayTag = "v\(cleanTag)"
+                    let finalDownloadURL = dmgDownloadURL ?? URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/\(displayTag)/MacOptimizationTool_Setup.dmg")!
+                    let formattedMsg = String(format: t("settings.updateAlert"), cleanCurrent)
+                    completion(UpdateCheckResult(hasNewVersion: false, latestVersion: displayTag, message: formattedMsg, downloadURL: finalDownloadURL))
+                    return
                 }
                 
-                let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.4.0"
+                let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5.0"
                 let currentVerString = "v\(appVer)"
                 let formattedMsg = String(format: t("settings.updateAlert"), appVer)
-                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: formattedMsg, downloadURL: nil))
+                let fallbackURL = URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest")!
+                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: formattedMsg, downloadURL: fallbackURL))
             } catch {
-                let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.4.0"
+                let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5.0"
                 let currentVerString = "v\(appVer)"
                 let formattedMsg = String(format: t("settings.updateAlert"), appVer)
-                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: formattedMsg, downloadURL: nil))
+                let fallbackURL = URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest")!
+                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: formattedMsg, downloadURL: fallbackURL))
             }
         }
     }
+
 
     /// 초고속 병렬 스트리밍 인앱 다운로드 및 .dmg 자동 마운트/실행
     func startDirectDownloadAndInstall(from downloadURL: URL) {
