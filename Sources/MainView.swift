@@ -93,6 +93,7 @@ struct MainView: View {
     @ObservedObject private var privacyVM = PrivacyCleanerViewModel.shared
     @ObservedObject private var oldDownloadsVM = OldDownloadsViewModel.shared
     @ObservedObject private var diskHealthVM = DiskHealthViewModel.shared
+    @ObservedObject private var permissionManager = PermissionManager.shared
     @AppStorage("appTheme") private var appThemeRaw: String = AppTheme.light.rawValue
 
     private var currentColorScheme: ColorScheme? {
@@ -100,61 +101,73 @@ struct MainView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            // 사이드바 영역 (Supabase Studio)
-            sidebarView
-                .frame(width: 240)
-                .background(Theme.bgSidebar)
-                .overlay(alignment: .trailing) {
-                    Rectangle().fill(Theme.hairline).frame(width: 1)
-                }
-
-            // 메인 콘텐츠 영역 (상단 헤더 바 + 탭 영역)
-            VStack(spacing: 0) {
-                // Top Global Bar
-                topGlobalBar
-                    .frame(height: 48)
+        ZStack {
+            HStack(spacing: 0) {
+                // 사이드바 영역 (Supabase Studio)
+                sidebarView
+                    .frame(width: 240)
                     .background(Theme.bgSidebar)
-                    .overlay(alignment: .bottom) {
-                        Rectangle().fill(Theme.hairline).frame(height: 1)
+                    .overlay(alignment: .trailing) {
+                        Rectangle().fill(Theme.hairline).frame(width: 1)
                     }
 
-                ZStack {
-                    Theme.appBackground.ignoresSafeArea()
-
-                    Group {
-                        switch selectedTab {
-                        case .dashboard:
-                            DashboardView()
-                        case .uninstaller:
-                            UninstallerView()
-                        case .diskCleaner:
-                            DiskCleanerView()
-                        case .largeFiles:
-                            LargeFilesView()
-                        case .duplicateFinder:
-                            DuplicateView()
-                        case .privacyCleaner:
-                            PrivacyCleanerView()
-                        case .oldDownloads:
-                            OldDownloadsView()
-                        case .diskHealth:
-                            DiskHealthView()
-                        case .startupManager:
-                            StartupManagerView()
-                        case .winCompat:
-                            WinCompatView()
-                        case .maintenance:
-                            DiskSunburstView()
-                        case .settings:
-                            SettingsView()
+                // 메인 콘텐츠 영역 (상단 헤더 바 + 탭 영역)
+                VStack(spacing: 0) {
+                    // Top Global Bar
+                    topGlobalBar
+                        .frame(height: 48)
+                        .background(Theme.bgSidebar)
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(Theme.hairline).frame(height: 1)
                         }
+
+                    ZStack {
+                        Theme.appBackground.ignoresSafeArea()
+
+                        Group {
+                            switch selectedTab {
+                            case .dashboard:
+                                DashboardView()
+                            case .uninstaller:
+                                UninstallerView()
+                            case .diskCleaner:
+                                DiskCleanerView()
+                            case .largeFiles:
+                                LargeFilesView()
+                            case .duplicateFinder:
+                                DuplicateView()
+                            case .privacyCleaner:
+                                PrivacyCleanerView()
+                            case .oldDownloads:
+                                OldDownloadsView()
+                            case .diskHealth:
+                                DiskHealthView()
+                            case .startupManager:
+                                StartupManagerView()
+                            case .winCompat:
+                                WinCompatView()
+                            case .maintenance:
+                                DiskSunburstView()
+                            case .settings:
+                                SettingsView()
+                            }
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .trailing)))
+                        .id(selectedTab)
                     }
-                    .transition(.opacity.combined(with: .move(edge: .trailing)))
-                    .id(selectedTab)
+                    .animation(.easeInOut(duration: 0.18), value: selectedTab)
                 }
-                .animation(.easeInOut(duration: 0.18), value: selectedTab)
             }
+
+            // 필수 시스템 전체 디스크 접근 권한 미승인 시 앱 접근 차단 모달 노출
+            if !permissionManager.hasFullDiskAccess {
+                PermissionModalView()
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: permissionManager.hasFullDiskAccess)
+        .onAppear {
+            permissionManager.checkPermissions()
         }
         .frame(minWidth: 960, minHeight: 640)
         .preferredColorScheme(currentColorScheme)
