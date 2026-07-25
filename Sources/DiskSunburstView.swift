@@ -15,7 +15,7 @@ final class DiskSunburstViewModel: ObservableObject {
     @Published var currentPath: String = NSString(string: "~").expandingTildeInPath
 
     private let fileManager = FileManager.default
-    private let colors: [Color] = [.blue, .purple, .cyan, .green, .orange, .pink, .indigo]
+    private let colors: [Color] = [.blue, .purple, .cyan, .green, .orange, .pink, .indigo, .mint, .teal]
 
     @MainActor
     func scanPath(targetPath: String) {
@@ -31,25 +31,50 @@ final class DiskSunburstViewModel: ObservableObject {
         }
     }
 
+    /// 재귀적으로 폴더 내부의 모든 파일 용량을 100% 합산
+    nonisolated private func directorySize(at url: URL) -> Int64 {
+        guard let enumerator = fileManager.enumerator(
+            at: url,
+            includingPropertiesForKeys: [.fileSizeKey, .isDirectoryKey],
+            options: [.skipsHiddenFiles, .skipsPackageDescendants]
+        ) else { return 0 }
+
+        var total: Int64 = 0
+        for case let fileURL as URL in enumerator {
+            if let resourceValues = try? fileURL.resourceValues(forKeys: [.fileSizeKey, .isDirectoryKey]),
+               let isDir = resourceValues.isDirectory, !isDir,
+               let size = resourceValues.fileSize {
+                total += Int64(size)
+            }
+        }
+        return total
+    }
+
     nonisolated private func calculateNode(path: String, depth: Int) -> SunburstNode {
         let name = (path as NSString).lastPathComponent
         var totalSize: Int64 = 0
         var childNodes: [SunburstNode] = []
 
         if let contents = try? fileManager.contentsOfDirectory(atPath: path) {
-            for item in contents.prefix(15) {
+            for item in contents {
                 guard !item.hasPrefix(".") else { continue }
                 let fullPath = (path as NSString).appendingPathComponent(item)
+                let itemURL = URL(fileURLWithPath: fullPath)
                 
                 var isDir: ObjCBool = false
                 if fileManager.fileExists(atPath: fullPath, isDirectory: &isDir) {
-                    if isDir.boolValue && depth < 2 {
-                        let child = calculateNode(path: fullPath, depth: depth + 1)
-                        totalSize += child.size
-                        childNodes.append(child)
+                    if isDir.boolValue {
+                        let dirSize = directorySize(at: itemURL)
+                        totalSize += dirSize
+                        if dirSize > 0 {
+                            let color = colors[abs(item.hashValue) % colors.count]
+                            childNodes.append(SunburstNode(name: item, path: fullPath, size: dirSize, color: color, children: []))
+                        }
                     } else if let attrs = try? fileManager.attributesOfItem(atPath: fullPath),
-                              let size = attrs[.size] as? Int64 {
+                              let size = attrs[.size] as? Int64, size > 0 {
                         totalSize += size
+                        let color = colors[abs(item.hashValue) % colors.count]
+                        childNodes.append(SunburstNode(name: item, path: fullPath, size: size, color: color, children: []))
                     }
                 }
             }
@@ -57,7 +82,7 @@ final class DiskSunburstViewModel: ObservableObject {
 
         let color = colors[abs(name.hashValue) % colors.count]
         childNodes.sort(by: { $0.size > $1.size })
-        return SunburstNode(name: name, path: path, size: totalSize, color: color, children: childNodes)
+        return SunburstNode(name: name, path: path, size: totalSize, color: color, children: Array(childNodes.prefix(35)))
     }
 
     func formatBytes(_ bytes: Int64) -> String {
@@ -83,7 +108,7 @@ struct DiskSunburstView: View {
                 VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.2)
-                    Text("시각적 디스크 용량 맵 계산 중...")
+                    Text("전체 폴더 및 하위 파일 용량 100% 전수 계산 중...")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(Theme.textSecondary)
                 }
@@ -106,7 +131,7 @@ struct DiskSunburstView: View {
                 Text("시각적 디스크 용량 맵")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
-                Text("폴더별 용량 점유 비율을 아름다운 시각 차트로 한눈에 파악하세요.")
+                Text("폴더 내부의 모든 하위 파일 및 디렉토리 용량을 100% 전수 측정합니다.")
                     .font(.system(size: 13))
                     .foregroundColor(Theme.textSecondary)
             }
@@ -159,7 +184,7 @@ struct DiskSunburstView: View {
 
                 // Sunburst Visual Bar Breakdown
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("하위 폴더 점유 비율")
+                    Text("하위 폴더/파일 용량 점유 비율 (상위 35개)")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(Theme.textPrimary)
 
@@ -167,10 +192,10 @@ struct DiskSunburstView: View {
                     GeometryReader { geo in
                         HStack(spacing: 2) {
                             ForEach(root.children) { child in
-                                let fraction = root.size > 0 ? CGFloat(child.size) / CGFloat(root.size) : 0
+                                let fraction = (root.size > 0 && child.size > 0) ? CGFloat(child.size) / CGFloat(root.size) : 0
                                 Rectangle()
                                     .fill(child.color)
-                                    .frame(width: max(geo.size.width * fraction, 4))
+                                    .frame(width: max(geo.size.width * fraction, 3))
                             }
                         }
                     }
@@ -196,7 +221,10 @@ struct DiskSunburstView: View {
                                     .foregroundColor(Theme.textSecondary)
 
                                 Button(action: {
-                                    viewModel.scanPath(targetPath: child.path)
+                                    var isDir: ObjCBool = false
+                                    if FileManager.default.fileExists(atPath: child.path, isDirectory: &isDir), isDir.boolValue {
+                                        viewModel.scanPath(targetPath: child.path)
+                                    }
                                 }) {
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 12))
