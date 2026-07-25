@@ -75,7 +75,9 @@ struct MainView: View {
     @State private var hoveredTab: MenuTab? = nil
     @ObservedObject private var langManager = LanguageManager.shared
     @ObservedObject private var processGuard = ProcessGuardManager.shared
+    @ObservedObject private var duplicateVM = DuplicateViewModel.shared
     @AppStorage("appTheme") private var appThemeRaw: String = AppTheme.light.rawValue
+
 
     
     private var currentColorScheme: ColorScheme? {
@@ -303,6 +305,13 @@ struct MainView: View {
                 .foregroundColor(isSelected ? Theme.textPrimary : Theme.textSecondary)
             
             Spacer()
+
+            if tab == .duplicateFinder && duplicateVM.isScanning {
+                ProgressView()
+                    .scaleEffect(0.55)
+                    .frame(width: 14, height: 14)
+            }
+
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

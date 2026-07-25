@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct DuplicateView: View {
-    @StateObject private var viewModel = DuplicateViewModel()
+    @ObservedObject private var viewModel = DuplicateViewModel.shared
     @State private var showDeleteConfirm = false
+
 
     var body: some View {
         ZStack {

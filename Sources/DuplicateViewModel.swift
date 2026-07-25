@@ -18,7 +18,10 @@ struct DuplicateGroup: Identifiable, Hashable {
 
 @MainActor
 class DuplicateViewModel: ObservableObject {
+    static let shared = DuplicateViewModel()
+
     @Published var groups: [DuplicateGroup] = []
+
     @Published var isScanning = false
     @Published var isDeleting = false
     @Published var targetFolderPath: String = "선택된 폴더 없음"
