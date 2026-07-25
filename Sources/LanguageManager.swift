@@ -90,9 +90,13 @@ class LanguageManager: ObservableObject {
             "menu.diskCleaner": "디스크 정리",
             "menu.largeFiles": "대용량 파일 정리",
             "menu.duplicateFinder": "중복 파일 정리",
+            "menu.privacyCleaner": "브라우저 & 개인정보",
+            "menu.oldDownloads": "방치된 다운로드 분류기",
+            "menu.diskHealth": "디스크 헬스 & S.M.A.R.T",
             "menu.startupManager": "시작 프로그램",
             "menu.winCompat": "윈도우 이름 호환",
             "menu.maintenance": "시각적 디스크 맵",
+
 
             "menu.settings": "설정",
             "menu.operational": "정상 가동 중",

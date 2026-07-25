@@ -1,4 +1,6 @@
 import SwiftUI
+import UserNotifications
+
 
 /// 사이드바 카테고리 그룹
 enum MenuCategory: String, CaseIterable, Identifiable {
@@ -14,9 +16,9 @@ enum MenuCategory: String, CaseIterable, Identifiable {
         case .overview:
             return [.dashboard]
         case .storage:
-            return [.diskCleaner, .largeFiles, .duplicateFinder, .uninstaller]
+            return [.diskCleaner, .largeFiles, .duplicateFinder, .privacyCleaner, .oldDownloads, .uninstaller]
         case .tools:
-            return [.startupManager, .winCompat, .maintenance]
+            return [.diskHealth, .startupManager, .winCompat, .maintenance]
         case .preferences:
             return [.settings]
         }
@@ -30,6 +32,9 @@ enum MenuTab: String, CaseIterable, Identifiable {
     case diskCleaner
     case largeFiles
     case duplicateFinder
+    case privacyCleaner
+    case oldDownloads
+    case diskHealth
     case startupManager
     case winCompat
     case maintenance
@@ -44,6 +49,9 @@ enum MenuTab: String, CaseIterable, Identifiable {
         case .diskCleaner: return t("menu.diskCleaner")
         case .largeFiles: return t("menu.largeFiles")
         case .duplicateFinder: return t("menu.duplicateFinder")
+        case .privacyCleaner: return t("menu.privacyCleaner")
+        case .oldDownloads: return t("menu.oldDownloads")
+        case .diskHealth: return t("menu.diskHealth")
         case .startupManager: return t("menu.startupManager")
         case .winCompat: return t("menu.winCompat")
         case .maintenance: return t("menu.maintenance")
@@ -58,6 +66,9 @@ enum MenuTab: String, CaseIterable, Identifiable {
         case .diskCleaner: return "leaf.fill"
         case .largeFiles: return "doc.text.magnifyingglass"
         case .duplicateFinder: return "doc.on.doc.fill"
+        case .privacyCleaner: return "lock.shield.fill"
+        case .oldDownloads: return "archivebox.circle.fill"
+        case .diskHealth: return "waveform.path.ecg"
         case .startupManager: return "cpu.fill"
         case .winCompat: return "arrow.triangle.2.circlepath"
         case .maintenance: return "wrench.and.screwdriver.fill"
@@ -79,12 +90,11 @@ struct MainView: View {
     @ObservedObject private var largeVM = LargeFilesViewModel.shared
     @ObservedObject private var diskCleanVM = DiskCleanViewModel.shared
     @ObservedObject private var uninstallerVM = UninstallerViewModel.shared
+    @ObservedObject private var privacyVM = PrivacyCleanerViewModel.shared
+    @ObservedObject private var oldDownloadsVM = OldDownloadsViewModel.shared
+    @ObservedObject private var diskHealthVM = DiskHealthViewModel.shared
     @AppStorage("appTheme") private var appThemeRaw: String = AppTheme.light.rawValue
 
-
-
-
-    
     private var currentColorScheme: ColorScheme? {
         (AppTheme(rawValue: appThemeRaw) ?? .light).colorScheme
     }
@@ -124,6 +134,12 @@ struct MainView: View {
                             LargeFilesView()
                         case .duplicateFinder:
                             DuplicateView()
+                        case .privacyCleaner:
+                            PrivacyCleanerView()
+                        case .oldDownloads:
+                            OldDownloadsView()
+                        case .diskHealth:
+                            DiskHealthView()
                         case .startupManager:
                             StartupManagerView()
                         case .winCompat:
@@ -132,7 +148,6 @@ struct MainView: View {
                             DiskSunburstView()
                         case .settings:
                             SettingsView()
-
                         }
                     }
                     .transition(.opacity.combined(with: .move(edge: .trailing)))
@@ -154,90 +169,126 @@ struct MainView: View {
                     secondaryButton: .cancel(Text("무시하기"))
                 )
             } else {
-                return Alert(title: Text("알림"), message: Text(""), dismissButton: .default(Text("확인")))
+                return Alert(title: Text("알림"))
             }
         }
     }
 
-
-
-    // Top Global Header Bar
+    // Top Global Bar Component
     private var topGlobalBar: some View {
         HStack(spacing: 12) {
-            // Breadcrumb navigation
             HStack(spacing: 6) {
-                Text("Lab98 Studio")
-                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                    .foregroundColor(Theme.textSecondary)
-
-                Text("/")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(Theme.hairline)
+                Image(systemName: selectedTab.iconName)
+                    .foregroundColor(Theme.accent)
+                    .font(.system(size: 13, weight: .bold))
                 Text(selectedTab.displayName)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
             }
+            .padding(.leading, 18)
 
             Spacer()
 
-            // System Status Pill Badge
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(Theme.accent)
-                    .frame(width: 7, height: 7)
-                Text(t("menu.operational"))
-
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundColor(Theme.accent)
+            // 언어 선택 드롭다운 피커
+            Picker("", selection: $langManager.currentLanguage) {
+                ForEach(AppLanguage.allCases) { lang in
+                    Text(lang.displayName).tag(lang)
+                }
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(Theme.accentGlow)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Theme.accent.opacity(0.3), lineWidth: 1)
-            )
-            .cornerRadius(12)
+            .pickerStyle(.menu)
+            .frame(width: 140)
+            .tint(Theme.accent)
 
-            // Environment badge
-            Text("macOS Studio")
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
-                .foregroundColor(Theme.textSecondary)
-                .padding(.horizontal, 8)
+            // 글로벌 테마 토글 (Dark / Light)
+            Button(action: {
+                let current = AppTheme(rawValue: appThemeRaw) ?? .light
+                let next: AppTheme = (current == .dark) ? .light : .dark
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    appThemeRaw = next.rawValue
+                }
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: (AppTheme(rawValue: appThemeRaw) ?? .light) == .dark ? "sun.max.fill" : "moon.fill")
+                        .foregroundColor((AppTheme(rawValue: appThemeRaw) ?? .light) == .dark ? .orange : Theme.accent)
+                    Text((AppTheme(rawValue: appThemeRaw) ?? .light) == .dark ? "Light" : "Dark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Theme.textPrimary)
+                }
+                .padding(.horizontal, 10)
                 .padding(.vertical, 4)
-                .background(Theme.bgCard)
+                .background(
+                    RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
+                        .fill(Theme.bgCardHover)
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
                         .stroke(Theme.hairline, lineWidth: 1)
                 )
-                .cornerRadius(4)
+            }
+            .buttonStyle(.plain)
+            .help("라이트/다크 테마 전환")
+
+            // 글로벌 메모리 퍼지 버튼
+            Button(action: {
+                Task {
+                    let before = HardwareStatsHelper.getRAMStats().free
+                    let p = Process()
+                    p.launchPath = "/usr/sbin/purge"
+                    try? p.run()
+                    p.waitUntilExit()
+                    let after = HardwareStatsHelper.getRAMStats().free
+                    let reclaimed = max(0, after - before)
+
+                    let content = UNMutableNotificationContent()
+                    content.title = t("menu.notif.title")
+                    content.body = "\(t("menu.notif.bodyPrefix"))\(ByteCountFormatter.string(fromByteCount: reclaimed, countStyle: .file))\(t("menu.notif.bodySuffix"))"
+                    content.sound = .default
+                    let req = UNNotificationRequest(identifier: "quick_purge_\(Date().timeIntervalSince1970)", content: content, trigger: nil)
+                    try? await UNUserNotificationCenter.current().add(req)
+                }
+            }) {
+                HStack(spacing: 5) {
+                    Image(systemName: "bolt.fill")
+                        .foregroundColor(Theme.accent)
+                        .font(.system(size: 11))
+                    Text(t("dash.optimize"))
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Theme.textPrimary)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
+                        .fill(Theme.accent.opacity(0.12))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: Theme.radiusChip, style: .continuous)
+                        .stroke(Theme.accent.opacity(0.3), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 18)
         }
-        .padding(.horizontal, 24)
     }
-    
+
+    // Sidebar Component
     private var sidebarView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 앱 타이틀 & 뱃지
-            HStack(spacing: 12) {
+            // Header / App Title
+            HStack(spacing: 10) {
                 Image(systemName: "bolt.shield.fill")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(Theme.textOnAccent)
-                    .frame(width: 34, height: 34)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Theme.accent)
-                    )
-                    .shadow(color: Theme.accent.opacity(0.35), radius: 8, y: 2)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(Theme.accentGradient)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("Mac Clean")
-                        .font(.system(size: 13, weight: .bold))
+                    Text("MacOptimizationTool")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(Theme.textPrimary)
-                    Text("Lab98 Studio")
-                        .font(.system(size: 10, weight: .medium, design: .monospaced))
-                        .foregroundColor(Theme.accent)
+                    Text("v1.4.0 • Studio Edition")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(Theme.textSecondary)
                 }
-
+                Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.top, 18)
@@ -246,104 +297,100 @@ struct MainView: View {
             Divider()
                 .background(Theme.hairline)
 
-            // 카테고리별 사이드바 목록
+            // Navigation Item Groups
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
                     ForEach(MenuCategory.allCases) { category in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(category.rawValue)
-                                .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                .foregroundColor(Theme.textSecondary.opacity(0.7))
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(Theme.textSecondary.opacity(0.6))
                                 .padding(.horizontal, 16)
-                                .padding(.bottom, 2)
+                                .padding(.top, 4)
 
                             ForEach(category.tabs) { tab in
-                                Button(action: {
-                                    selectedTab = tab
-                                }) {
-                                    sidebarItem(for: tab, isSelected: selectedTab == tab)
-                                }
-                                .buttonStyle(.plain)
+                                sidebarItem(for: tab)
                             }
                         }
                     }
                 }
-                .padding(.vertical, 14)
-                .padding(.horizontal, 8)
+                .padding(.vertical, 12)
             }
 
-            Spacer(minLength: 0)
+            Spacer(minLength: 10)
 
             Divider()
                 .background(Theme.hairline)
-            
-            // 하단 상태 표시
+
+            // Footer Status Indicator
             HStack(spacing: 8) {
                 Circle()
                     .fill(Theme.accent)
                     .frame(width: 8, height: 8)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("MacOptimizationTool")
-
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(Theme.textPrimary)
                     Text("© 2026 Lab98 Studio. All rights reserved.")
-                        .font(.system(size: 9, design: .monospaced))
+                        .font(.system(size: 8))
                         .foregroundColor(Theme.textSecondary)
                 }
-
+                Spacer()
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, 12)
         }
     }
-    
-    // 사이드바 개별 로우 뷰 디자인 (Supabase active item indicator)
-    private func sidebarItem(for tab: MenuTab, isSelected: Bool) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: tab.iconName)
-                .font(.system(size: 14))
-                .foregroundColor(isSelected ? Theme.accent : Theme.textSecondary)
-                .frame(width: 18)
-            
-            Text(tab.displayName)
-                .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(isSelected ? Theme.textPrimary : Theme.textSecondary)
-            
-            Spacer()
 
-            let isScanningTab = (tab == .duplicateFinder && duplicateVM.isScanning) ||
-                                (tab == .largeFiles && largeVM.isScanning) ||
-                                (tab == .diskCleaner && diskCleanVM.isScanning) ||
-                                (tab == .uninstaller && (uninstallerVM.isScanning || uninstallerVM.isSearchingApps))
+    private func sidebarItem(for tab: MenuTab) -> some View {
+        let isSelected = (selectedTab == tab)
+        let isHovered = (hoveredTab == tab)
 
-            if isScanningTab {
-                ProgressView()
-                    .scaleEffect(0.55)
-                    .frame(width: 14, height: 14)
+        return Button(action: {
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                selectedTab = tab
             }
+        }) {
+            HStack(spacing: 10) {
+                Image(systemName: tab.iconName)
+                    .font(.system(size: 13, weight: isSelected ? .bold : .regular))
+                    .foregroundColor(isSelected ? Theme.accent : (isHovered ? Theme.textPrimary : Theme.textSecondary))
+                    .frame(width: 18)
 
+                Text(tab.displayName)
+                    .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
+                    .foregroundColor(isSelected ? Theme.textPrimary : Theme.textSecondary)
+                
+                Spacer()
 
+                let isScanningTab = (tab == .duplicateFinder && duplicateVM.isScanning) ||
+                                    (tab == .largeFiles && largeVM.isScanning) ||
+                                    (tab == .diskCleaner && diskCleanVM.isScanning) ||
+                                    (tab == .uninstaller && (uninstallerVM.isScanning || uninstallerVM.isSearchingApps)) ||
+                                    (tab == .privacyCleaner && privacyVM.isScanning) ||
+                                    (tab == .oldDownloads && oldDownloadsVM.isScanning)
 
+                if isScanningTab {
+                    ProgressView()
+                        .scaleEffect(0.55)
+                        .frame(width: 14, height: 14)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
+                    .fill(isSelected ? Theme.bgCardHover : (isHovered ? Theme.bgCardHover.opacity(0.5) : Color.clear))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
+                    .stroke(isSelected ? Theme.accent.opacity(0.3) : Color.clear, lineWidth: 1)
+            )
+            .padding(.horizontal, 10)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                .fill(
-                    isSelected ? Theme.accentGlow :
-                    (hoveredTab == tab ? Theme.bgCardHover : Color.clear)
-                )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.radiusControl, style: .continuous)
-                .stroke(isSelected ? Theme.accent.opacity(0.4) : Color.clear, lineWidth: 1)
-        )
-        .contentShape(Rectangle())
-        .onHover { isHovered in
-            if tab.isEnabled {
-                hoveredTab = isHovered ? tab : nil
-            }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            hoveredTab = hovering ? tab : nil
         }
     }
 }
