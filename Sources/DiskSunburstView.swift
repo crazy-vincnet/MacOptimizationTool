@@ -95,6 +95,7 @@ final class DiskSunburstViewModel: ObservableObject {
 
 struct DiskSunburstView: View {
     @StateObject private var viewModel = DiskSunburstViewModel()
+    @State private var hoveredChild: SunburstNode? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -122,7 +123,7 @@ struct DiskSunburstView: View {
         }
         .background(Theme.appBackground)
         .onAppear {
-            // 사용자가 [시작] 또는 [폴더 선택] 버튼을 누를 때만 스캔이 실행되도록 자동 스캔 비활성화
+            // 수동 스캔 모드
         }
     }
 
@@ -199,35 +200,98 @@ struct DiskSunburstView: View {
 
                 // Sunburst Visual Bar Breakdown
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("하위 폴더/파일 용량 점유 비율 (상위 35개)")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Theme.textPrimary)
+                    HStack {
+                        Text("하위 폴더/파일 용량 점유 비율 (상위 35개)")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(Theme.textPrimary)
 
-                    // Stacked Ring Bar
+                        Spacer()
+
+                        // 툴팁 및 실시간 호버 칩 정보
+                        if let hovered = hoveredChild {
+                            let pct = root.size > 0 ? (Double(hovered.size) / Double(root.size) * 100.0) : 0.0
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(hovered.color)
+                                    .frame(width: 8, height: 8)
+                                Text(hovered.name)
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(Theme.textPrimary)
+                                Text("•")
+                                    .foregroundColor(Theme.textSecondary)
+                                Text(viewModel.formatBytes(hovered.size))
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    .foregroundColor(Theme.accentDeep)
+                                Text("(\(String(format: "%.1f", pct))%)")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .foregroundColor(Theme.accent)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: Theme.radiusChip)
+                                    .fill(Theme.bgCardHover)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Theme.radiusChip)
+                                    .stroke(hovered.color, lineWidth: 1)
+                            )
+                        } else {
+                            Text("💡 마우스를 바의 각 색상 블록 위에 올리면 항목 이름과 점유율을 확인하실 수 있습니다.")
+                                .font(.system(size: 11))
+                                .foregroundColor(Theme.textSecondary)
+                        }
+                    }
+
+                    // Interactive Stacked Ring Bar with Hover & Tooltips
                     GeometryReader { geo in
                         HStack(spacing: 2) {
                             ForEach(root.children) { child in
                                 let fraction = (root.size > 0 && child.size > 0) ? CGFloat(child.size) / CGFloat(root.size) : 0
+                                let pct = (root.size > 0 && child.size > 0) ? (Double(child.size) / Double(root.size) * 100.0) : 0.0
+                                let isHovered = (hoveredChild?.id == child.id)
+
                                 Rectangle()
                                     .fill(child.color)
                                     .frame(width: max(geo.size.width * fraction, 3))
+                                    .opacity(hoveredChild == nil || isHovered ? 1.0 : 0.45)
+                                    .scaleEffect(y: isHovered ? 1.4 : 1.0)
+                                    .animation(.easeOut(duration: 0.15), value: isHovered)
+                                    .help("\(child.name) • \(viewModel.formatBytes(child.size)) (\(String(format: "%.1f", pct))%)")
+                                    .onHover { hovering in
+                                        withAnimation(.easeInOut(duration: 0.12)) {
+                                            if hovering {
+                                                hoveredChild = child
+                                            } else if hoveredChild?.id == child.id {
+                                                hoveredChild = nil
+                                            }
+                                        }
+                                    }
                             }
                         }
                     }
-                    .frame(height: 14)
-                    .cornerRadius(7)
+                    .frame(height: 16)
+                    .cornerRadius(8)
+                    .padding(.vertical, 4)
 
                     // Children Breakdown List
                     VStack(spacing: 10) {
                         ForEach(root.children) { child in
+                            let isHovered = (hoveredChild?.id == child.id)
+                            let pct = root.size > 0 ? (Double(child.size) / Double(root.size) * 100.0) : 0.0
+
                             HStack {
                                 Circle()
                                     .fill(child.color)
                                     .frame(width: 10, height: 10)
 
                                 Text(child.name)
-                                    .font(.system(size: 13, weight: .semibold))
+                                    .font(.system(size: 13, weight: isHovered ? .bold : .semibold))
                                     .foregroundColor(Theme.textPrimary)
+
+                                Text("(\(String(format: "%.1f", pct))%)")
+                                    .font(.system(size: 11, design: .rounded))
+                                    .foregroundColor(Theme.textSecondary)
 
                                 Spacer()
 
@@ -248,7 +312,18 @@ struct DiskSunburstView: View {
                                 .buttonStyle(.plain)
                             }
                             .padding(12)
-                            .glassCard()
+                            .glassCard(highlighted: isHovered)
+                            .scaleEffect(isHovered ? 1.01 : 1.0)
+                            .animation(.easeInOut(duration: 0.12), value: isHovered)
+                            .onHover { hovering in
+                                withAnimation(.easeInOut(duration: 0.12)) {
+                                    if hovering {
+                                        hoveredChild = child
+                                    } else if hoveredChild?.id == child.id {
+                                        hoveredChild = nil
+                                    }
+                                }
+                            }
                         }
                     }
                 }
