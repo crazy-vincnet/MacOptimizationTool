@@ -146,8 +146,11 @@ struct SettingsView: View {
         // 다운로드가 끝난 뒤에도 결과 문구를 남긴다. 마운트 실패·검증 실패는
         // 오버레이가 사라진 뒤에 확인할 방법이 없으면 "아무 일도 안 일어난" 것으로 보인다.
         .onChange(of: updater.statusMessage) { _ in
-            if !updater.isDownloading, !updater.statusMessage.isEmpty {
-                viewModel.updateResultMessage = updater.statusMessage
+            guard !updater.statusMessage.isEmpty else { return }
+            viewModel.updateResultMessage = updater.statusMessage
+            if !updater.isDownloading {
+                // 다운로드가 끝난 뒤 진행률이 0 이면 검증·마운트 실패다.
+                viewModel.updateStatus = updater.downloadProgress >= 1.0 ? .installFinished : .failed
             }
         }
 
@@ -399,6 +402,63 @@ struct SettingsView: View {
             }
         }
         .glassCard()
+    }
+
+    // MARK: - Update status row
+    /// 업데이트 확인·설치 결과를 화면에 계속 표시한다.
+    /// 알림 시트는 놓칠 수 있고, 놓치면 버튼이 반응하지 않은 것처럼 보인다.
+    private var updateStatusRow: some View {
+        let (icon, tint): (String, Color) = {
+            switch viewModel.updateStatus {
+            case .failed: return ("exclamationmark.triangle.fill", Theme.danger)
+            case .newVersion: return ("arrow.down.circle.fill", Theme.accent)
+            case .upToDate: return ("checkmark.circle.fill", Theme.accent)
+            case .installFinished: return ("shippingbox.fill", Theme.accent)
+            case .idle: return ("info.circle.fill", Theme.textSecondary)
+            }
+        }()
+
+        return HStack(alignment: .top, spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(tint)
+
+            Text(viewModel.updateResultMessage)
+                .font(.system(size: 11))
+                .foregroundColor(Theme.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+                .textSelection(.enabled)
+
+            Spacer(minLength: 8)
+
+            switch viewModel.updateStatus {
+            case .newVersion:
+                Button(t("update.alert.installNow")) {
+                    viewModel.startInAppUpdate()
+                }
+                .buttonStyle(PrimaryActionButtonStyle())
+            case .failed:
+                Button(t("update.alert.openReleasePage")) {
+                    if let url = viewModel.updateURL {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+                .buttonStyle(SecondaryButtonStyle())
+            case .idle, .upToDate, .installFinished:
+                EmptyView()
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: Theme.radiusControl)
+                .fill(viewModel.updateStatus == .failed ? Theme.dangerBg : Theme.accentGlow)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radiusControl)
+                .stroke((viewModel.updateStatus == .failed ? Theme.danger : Theme.accent).opacity(0.35), lineWidth: 1)
+        )
+        .padding(.leading, 38)
     }
 
     // MARK: - 3. Process Guard Card
@@ -670,11 +730,7 @@ struct SettingsView: View {
             }
 
             if !viewModel.updateResultMessage.isEmpty {
-                Text(viewModel.updateResultMessage)
-                    .font(.system(size: 11))
-                    .foregroundColor(Theme.textSecondary)
-                    .padding(.leading, 38)
-                    .textSelection(.enabled)
+                updateStatusRow
             }
 
             Divider().background(Theme.hairline)

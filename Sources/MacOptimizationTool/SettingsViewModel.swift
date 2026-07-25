@@ -83,6 +83,17 @@ class SettingsViewModel: ObservableObject {
     @Published var updateCheckFailed: Bool = false
     /// 다운로드·검증·마운트의 최종 결과. 오버레이가 사라진 뒤에도 남는다.
     @Published var updateResultMessage: String = ""
+    /// 버튼을 누른 결과를 화면에 계속 표시하기 위한 상태.
+    @Published var updateStatus: UpdateStatus = .idle
+
+    enum UpdateStatus: Equatable {
+        case idle
+        case upToDate
+        case newVersion
+        case failed
+        /// 다운로드·검증·마운트 결과 (성공/실패 문구는 updateResultMessage 에 담긴다).
+        case installFinished
+    }
 
     
     private let fileManager = FileManager.default
@@ -297,16 +308,34 @@ class SettingsViewModel: ObservableObject {
     /// Sparkle 2 / GitHub Release 기반 자동 업데이트 확인
     func checkForUpdates() {
         isCheckingUpdate = true
-        
+        // 누른 즉시 이전 결과를 지우고 진행 중임을 표시한다.
+        updateStatus = .idle
+        updateResultMessage = t("update.inline.checking")
+
         SparkleUpdaterManager.shared.checkForUpdates { [weak self] result in
             Task { @MainActor in
-                self?.updateAlertMessage = result.message
-                self?.updateURL = result.downloadURL
-                self?.updateExpectedSHA256 = result.expectedSHA256
-                self?.hasNewVersion = result.hasNewVersion
-                self?.updateCheckFailed = result.checkFailed
-                self?.isCheckingUpdate = false
-                self?.showUpdateAlert = true
+                guard let self else { return }
+                self.updateAlertMessage = result.message
+                self.updateURL = result.downloadURL
+                self.updateExpectedSHA256 = result.expectedSHA256
+                self.hasNewVersion = result.hasNewVersion
+                self.updateCheckFailed = result.checkFailed
+                self.isCheckingUpdate = false
+
+                // 결과는 화면에 항상 남긴다. 알림 시트만으로는 사용자가 놓칠 수 있고,
+                // 놓치면 "버튼이 아무 반응도 없다" 로 보인다.
+                if result.checkFailed {
+                    self.updateStatus = .failed
+                    self.updateResultMessage = result.message
+                } else if result.hasNewVersion {
+                    self.updateStatus = .newVersion
+                    self.updateResultMessage = String(format: t("update.inline.newVersion"), result.latestVersion)
+                } else {
+                    self.updateStatus = .upToDate
+                    self.updateResultMessage = result.message
+                }
+
+                self.showUpdateAlert = true
             }
         }
     }
