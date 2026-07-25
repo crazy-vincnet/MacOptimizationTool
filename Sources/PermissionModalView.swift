@@ -20,7 +20,7 @@ struct PermissionModalView: View {
                 }
             }
             .padding(32)
-            .frame(width: 540)
+            .frame(width: 560)
             .glassCard(padding: 0, radius: 24, highlighted: true)
             .shadow(color: Color.black.opacity(0.5), radius: 30, x: 0, y: 15)
         }
@@ -95,21 +95,45 @@ struct PermissionModalView: View {
                         .foregroundColor(Theme.textSecondary)
                 }
 
-                Button(action: {
-                    permissionManager.checkPermissions()
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.clockwise.circle.fill")
-                        Text(permissionManager.isChecking ? "권한 확인 중..." : "2. 권한 승인 완료 및 시작하기")
+                Text("💡 macOS 보안 정책상 권한을 켠 후 앱을 껐다 켜야 권한이 완벽히 반영됩니다.")
+                    .font(.system(size: 11))
+                    .foregroundColor(Theme.accent)
+                    .padding(.vertical, 2)
+
+                HStack(spacing: 10) {
+                    Button(action: {
+                        permissionManager.relaunchApp()
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.clockwise.circle.fill")
+                            Text("앱 자동 재시작 (권한 즉시 적용)")
+                        }
+                        .font(.system(size: 12, weight: .bold))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .background(Theme.bgCardHover)
+                        .foregroundColor(Theme.textPrimary)
+                        .cornerRadius(Theme.radiusControl)
                     }
-                    .font(.system(size: 13, weight: .bold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Theme.accent)
-                    .foregroundColor(.white)
-                    .cornerRadius(Theme.radiusControl)
+                    .buttonStyle(.plain)
+
+                    Button(action: {
+                        permissionManager.bypassPermissionCheck()
+                    }) {
+                        HStack {
+                            Image(systemName: "checkmark.seal.fill")
+                            Text("권한 부여 완료 • 바로 시작하기")
+                        }
+                        .font(.system(size: 12, weight: .bold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(LinearGradient(colors: [Theme.accent, Theme.accentDeep], startPoint: .leading, endPoint: .trailing))
+                        .foregroundColor(.white)
+                        .cornerRadius(Theme.radiusControl)
+                        .shadow(color: Theme.accent.opacity(0.3), radius: 6, x: 0, y: 3)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .padding(18)
@@ -148,7 +172,6 @@ struct PermissionModalView: View {
                     Label("알림 권한 승인됨", systemImage: "checkmark.circle.fill")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(Theme.accent)
-
                 } else {
                     Button(action: {
                         permissionManager.requestNotificationPermission()
