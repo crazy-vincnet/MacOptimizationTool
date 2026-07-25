@@ -2,14 +2,14 @@
 
 ![App Icon](AppIcon.png)
 
-# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.6.0
+# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.6.1
 
 **macOS 전용 프리미엄 고성능 시스템 최적화, 디스크 정리, 자원 가드 및 개인정보 보호 종합 툴키트**
 
 [![macOS](https://img.shields.io/badge/macOS-13.0%2B-000000?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos)
 [![Swift](https://img.shields.io/badge/Swift-6.0-F05138?style=for-the-badge&logo=swift&logoColor=white)](https://swift.org)
 [![Tests](https://img.shields.io/badge/Tests-56%20passing-3ECF8E?style=for-the-badge)](Tests)
-[![Version](https://img.shields.io/badge/Version-v1.6.0-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
+[![Version](https://img.shields.io/badge/Version-v1.6.1-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
 [![License](https://img.shields.io/badge/License-MIT-059669?style=for-the-badge)](LICENSE)
 
 ---
@@ -24,7 +24,7 @@
 5. [변경 이력 (Changelog)](#-변경-이력-changelog)
 6. [라이선스 및 저작권 (License & Copyright)](#-라이선스-및-저작권-license--copyright)
 
-> **v1.6.0 릴리스 안내** — 보안 결함 3건과 버그 8건을 수정하고, SwiftPM 전환·단위 테스트 56개·CI를 도입했습니다.
+> **v1.6.1 릴리스 안내** — v1.6.0 의 보안 감사 결과(보안 3건·버그 8건 수정, SwiftPM 전환, 테스트 56개, CI)에 더해, CI 가 잡아낸 동시성 안전성 결함 3건을 수정했습니다.
 > 전체 감사 내역은 [`CODE_REVIEW.md`](CODE_REVIEW.md), 변경 요약은 [`CHANGELOG.md`](CHANGELOG.md) 를 참고하세요.
 
 ---
@@ -161,7 +161,7 @@ SwiftPM 릴리스 빌드(`swift build -c release`), `xattr` 정리, ad-hoc 코�
 
 ### 3. GitHub Release 자동 게시
 ```bash
-./release.sh v1.6.0 "릴리즈 노트 내용"
+./release.sh v1.6.1 "릴리즈 노트 내용"
 ```
 버전 커밋, Git 태그 생성, DMG 패키징, `gh release create`를 통해 GitHub Release 게시 및 DMG 첨부를 자동 진행합니다.
 릴리스 노트에는 DMG 의 SHA-256 체크섬이 함께 게시되며, 인앱 업데이터는 이 값으로 무결성을 검증합니다.
@@ -228,7 +228,17 @@ MacOptimizationTool/
 
 버전별 상세 변경 사항은 [`CHANGELOG.md`](CHANGELOG.md) 에 정리되어 있습니다.
 
-### v1.6.0 (최신)
+### v1.6.1 (최신)
+
+CI 가 잡아낸 Swift 동시성 안전성 결함 3건을 수정한 패치 릴리스입니다. 동작 변경은 없습니다.
+
+| 분류 | 내용 |
+|---|---|
+| 🐛 수정 | `NSImage` 를 담은 앱 정보 구조체를 백그라운드에서 메인 액터로 전달하던 문제 |
+| 🐛 수정 | 비Sendable `UNNotificationSettings` 를 액터 경계 너머로 전달하던 문제 |
+| 🐛 수정 | 언인스톨러 백그라운드 클로저가 비Sendable 값을 통째로 캡처하던 문제 |
+
+### v1.6.0
 
 보안 결함 3건과 버그 8건을 수정하고, SwiftPM 전환·회귀 테스트·CI를 도입한 품질 릴리스입니다.
 
