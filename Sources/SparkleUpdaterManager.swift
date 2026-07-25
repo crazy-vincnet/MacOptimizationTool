@@ -47,22 +47,23 @@ final class SparkleUpdaterManager: NSObject, ObservableObject, URLSessionDownloa
                         }
                     }
                     
-                    let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5.0"
+                    let rawAppVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.4.0"
+                    let cleanCurrent = rawAppVer.replacingOccurrences(of: "v", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    let cleanTag = latestTag.replacingOccurrences(of: "v", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
 
-                    let currentVersion = appVer.starts(with: "v") ? appVer : "v\(appVer)"
-                    let cleanTag = latestTag.starts(with: "v") ? latestTag : "v\(latestTag)"
-
-                    if cleanTag.compare(currentVersion, options: .numeric) == .orderedDescending {
-                        let finalDownloadURL = dmgDownloadURL ?? URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/\(cleanTag)/MacOptimizationTool_Setup.dmg")!
+                    if (cleanTag as NSString).compare(cleanCurrent, options: .numeric) == .orderedDescending {
+                        let displayTag = "v\(cleanTag)"
+                        let finalDownloadURL = dmgDownloadURL ?? URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/\(displayTag)/MacOptimizationTool_Setup.dmg")!
                         let result = UpdateCheckResult(
                             hasNewVersion: true,
-                            latestVersion: cleanTag,
-                            message: "🎉 새로운 버전(\(cleanTag))이 출시되었습니다!\n\n[지금 자동 다운로드 & 설치] 버튼을 누르시면 최신 설치 파일(.dmg)을 초고속 인앱 다운로드받아 즉시 마운트해 드립니다.",
+                            latestVersion: displayTag,
+                            message: "🎉 새로운 버전(\(displayTag))이 출시되었습니다!\n\n[지금 자동 다운로드 & 설치] 버튼을 누르시면 최신 설치 파일(.dmg)을 초고속 인앱 다운로드받아 즉시 마운트해 드립니다.",
                             downloadURL: finalDownloadURL
                         )
                         completion(result)
                         return
                     }
+
                 }
                 
                 let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.4.0"
