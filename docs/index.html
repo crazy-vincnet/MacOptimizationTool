@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MacOptimizationTool - Apple Silicon & Intel 전용 고성능 macOS 최적화 | Lab98 Studio</title>
-    <meta name="description" content="MacOptimizationTool v1.4.0 - 실시간 자원 대시보드, 4단계 스마트 앱 완전 삭제기, TCC 전체 디스크 권한 온보딩, 전 메뉴 스캔 취소, 초고속 중복 및 정크 탐색을 지원하는 macOS 전용 최적화 앱입니다.">
-    <meta property="og:title" content="MacOptimizationTool v1.4.0 - macOS 전용 프리미엄 최적화 툴키트">
-    <meta property="og:description" content="빠르고 스마트한 Mac 최적화. 원클릭 메모리 최적화, FDA 권한 온보딩, 전 기능 스캔 취소, 4개 국어 및 라이트/다크 테마 지원.">
+    <meta name="description" content="MacOptimizationTool v1.6.0 - 실시간 자원 대시보드, 4단계 스마트 앱 완전 삭제기, TCC 전체 디스크 권한 온보딩, SHA-256 검증 자동 업데이트, 4개 국어를 지원하는 macOS 전용 최적화 앱입니다. 보안 감사와 56개 단위 테스트를 거쳤습니다.">
+    <meta property="og:title" content="MacOptimizationTool v1.6.0 - macOS 전용 프리미엄 최적화 툴키트">
+    <meta property="og:description" content="빠르고 스마트한 Mac 최적화. 원클릭 메모리 최적화, FDA 권한 온보딩, 전 기능 스캔 취소, SHA-256 검증 자동 업데이트, 4개 국어 및 라이트/다크 테마 지원.">
     <meta property="og:image" content="screenshot_dashboard.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -322,6 +322,29 @@
             transition: all 0.3s ease;
         }
 
+        .feature-desc code {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.85em;
+            color: var(--accent-cyan);
+            word-break: break-all;
+        }
+
+        .feature-desc a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(6, 182, 212, 0.4);
+        }
+
+        .feature-desc a:hover {
+            border-bottom-color: var(--accent-cyan);
+        }
+
         .feature-card:hover {
             background: rgba(255, 255, 255, 0.05);
             transform: translateY(-4px);
@@ -482,8 +505,9 @@
                 </a>
                 <div class="nav-actions">
                     <a href="#showcase" class="nav-link hide-mobile">기능 소개</a>
+                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool/blob/main/CHANGELOG.md" target="_blank" class="nav-link hide-mobile">변경 이력</a>
                     <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="nav-link hide-mobile">GitHub</a>
-                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" target="_blank" class="btn-header-cta">v1.5.0 최신버전 다운로드</a>
+                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" target="_blank" class="btn-header-cta">v1.6.0 최신버전 다운로드</a>
                 </div>
             </nav>
         </header>
@@ -492,7 +516,7 @@
         <section class="hero">
             <div class="version-pill">
                 <div class="pulse-dot"></div>
-                <span>Lab98 Studio 공식 v1.5.0 메이저 릴리즈</span>
+                <span>Lab98 Studio 공식 v1.6.0 보안 강화 릴리즈</span>
             </div>
 
             <h1 class="hero-title">
@@ -501,11 +525,11 @@
             </h1>
 
             <p class="hero-desc">
-                실시간 자원 대시보드, FDA 전체 디스크 권한 온보딩, 전 메뉴 비동기 스캔 취소, 4단계 앱 완전 삭제기부터 브라우저 개인정보 수거까지 단 하나로 해결하세요.
+                실시간 자원 대시보드, FDA 전체 디스크 권한 온보딩, 4단계 앱 완전 삭제기부터 브라우저 개인정보 수거까지 단 하나로 해결하세요.<br>v1.6.0 은 전체 코드 보안 감사를 거쳐 삭제 안전 규칙과 업데이트 무결성 검증을 강화했습니다.
             </p>
 
             <div class="cta-group">
-                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.5.0/MacOptimizationTool_Setup.dmg" class="btn-download">
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.6.0/MacOptimizationTool_Setup.dmg" class="btn-download">
 
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -532,34 +556,46 @@
         <!-- New Key Features Grid -->
         <section class="showcase-section">
             <div class="section-header">
-                <h2 class="section-title">v1.5.0 메이저 코어 시스템 릴리즈</h2>
+                <h2 class="section-title">v1.6.0 보안 강화 및 품질 릴리즈</h2>
 
-                <p class="section-subtitle">macOS 최신 시스템 보안 가이드 및 병렬 처리 엔진으로 더 강력해졌습니다.</p>
+                <p class="section-subtitle">전체 코드 감사로 보안 결함 3건과 버그 8건을 수정하고, 56개 단위 테스트와 CI로 회귀를 막습니다.</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon-box">🛡️</div>
-                    <h3 class="feature-title">FDA 전체 디스크 권한 온보딩</h3>
-                    <p class="feature-desc">TCC FileHandle 정밀 샌드박스 검사기 및 직관적인 시스템 설정 가이드 모달 제공으로 필수 디스크 접근 권한을 안전하게 안내합니다.</p>
+                    <div class="feature-icon-box">🔐</div>
+                    <h3 class="feature-title">삭제 안전 규칙 강화</h3>
+                    <p class="feature-desc">시스템 경로 정확 일치·트리 보호에 더해, 관리자 권한 삭제는 앱 잔여물이 실제로 존재하는 <code>/Library</code> 하위 트리의 하위 항목으로만 제한됩니다. 각 트리의 루트 자체는 어떤 경우에도 삭제되지 않습니다.</p>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon-box">🛑</div>
-                    <h3 class="feature-title">전 메뉴 비동기 스캔 취소</h3>
-                    <p class="feature-desc">중복 파일, 대용량 파일, 정크 디스크 청소, 방치 다운로드 등 모든 탐색 오버레이에 [스캔 취소] 버튼을 연동하여 즉시 중단 가능합니다.</p>
+                    <div class="feature-icon-box">🧾</div>
+                    <h3 class="feature-title">SHA-256 검증 자동 업데이트</h3>
+                    <p class="feature-desc">HTTPS 와 GitHub 배포 호스트 허용목록을 강제하고, 내려받은 설치 이미지의 해시가 릴리스 다이제스트와 일치할 때만 마운트합니다. 검증할 수 없으면 자동 설치를 중단합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">🧪</div>
+                    <h3 class="feature-title">56개 회귀 테스트 & CI</h3>
+                    <p class="feature-desc">삭제 안전 규칙, 잔여물 매칭 오탐, 업데이트 검증, 번역 정합성을 단위 테스트로 고정했습니다. 모든 변경마다 빌드·테스트·서명 검증이 자동 실행됩니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">🌐</div>
+                    <h3 class="feature-title">4개 국어 완전 지원</h3>
+                    <p class="feature-desc">한국어 · English · 简体中文 · 日本語. 진행 상태 문구와 알림까지 전부 번역되며, 언어별 번역 누락은 테스트가 상시 검사합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">📊</div>
+                    <h3 class="feature-title">정직한 시스템 수치</h3>
+                    <p class="feature-desc">커널 통계 조회에 실패하면 추정값을 만들어내지 않고 측정 불가로 표시합니다. 모니터링 도구가 조용히 거짓 수치를 보여주지 않도록 했습니다.</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon-box">⚡</div>
                     <h3 class="feature-title">16-Worker 초고속 해시 엔진</h3>
                     <p class="feature-desc">16개 전용 워커 바운디드 병렬 슬라이딩 윈도우로 파일 시스템 교착상태 없이 대용량 파일 해시를 초고속 비교합니다.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon-box">🚀</div>
-                    <h3 class="feature-title">100Mbps+ CDN 초고속 자동 업데이트</h3>
-                    <p class="feature-desc">Sparkle 2 기반 CDN 전용 스트리밍 다운로더와 실시간 MB / 퍼센트 전송률을 지원하여 손쉽게 최신 버전을 다운로드합니다.</p>
                 </div>
             </div>
 
@@ -577,7 +613,7 @@
                     <ul class="feature-bullets">
                         <li><span class="bullet-icon">✓</span> <strong>원클릭 메모리 최적화</strong>: 비활성 메모리 및 가상 수거 영역 즉시 환수</li>
                         <li><span class="bullet-icon">✓</span> <strong>메뉴바 미니 컨트롤러</strong>: 상태바에서 실시간 RAM% 및 네트워크 업/다운로드 속도 조망</li>
-                        <li><span class="bullet-icon">✓</span> <strong>프로세스 폭주 가드</strong>: CPU 85% 이상 독점 앱 실시간 감지 및 강제 종료 지원</li>
+                        <li><span class="bullet-icon">✓</span> <strong>프로세스 폭주 가드</strong>: CPU 85% 이상 독점 앱 실시간 감지 및 강제 종료 지원 (v1.6.0에서 재활성화)</li>
                     </ul>
                 </div>
             </div>
@@ -594,10 +630,50 @@
                         앱 파일 본체만 삭제해서는 지워지지 않는 Application Support, Caches, Preferences 등의 숨은 찌꺼기 파일까지 완벽하게 추적합니다.
                     </p>
                     <ul class="feature-bullets">
-                        <li><span class="bullet-icon">✓</span> <strong>사전 권한 검증 (Pre-Auth)</strong>: 비밀번호 오류 시 오삭제 없는 안전 찌꺼기 수거</li>
+                        <li><span class="bullet-icon">✓</span> <strong>사전 권한 검증 (Pre-Auth)</strong>: 비밀번호 오류나 취소 시 앱 본체를 포함해 어떤 파일도 삭제하지 않고 전체 중단</li>
                         <li><span class="bullet-icon">✓</span> <strong>4단계 폴백 엔진</strong>: Trash ➔ NSWorkspace ➔ Direct Delete ➔ Admin Privilege Escalation</li>
+                        <li><span class="bullet-icon">✓</span> <strong>이중 이스케이프 방어</strong>: 셸과 AppleScript 두 레이어를 모두 이스케이프해 파일명을 통한 명령 주입을 차단</li>
                         <li><span class="bullet-icon">✓</span> <strong>시동 프로그램 관리자</strong>: 부팅 시 실행되는 백그라운드 에이전트 선택적 비활성화</li>
                     </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust & Verification -->
+        <section class="showcase-section">
+            <div class="section-header">
+                <h2 class="section-title">🔐 안심하고 쓸 수 있는 이유</h2>
+                <p class="section-subtitle">파일을 지우고 관리자 권한을 쓰는 앱인 만큼, "지우면 안 되는 것을 지우지 않는" 규칙을 코드로 고정했습니다.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-box">🚫</div>
+                    <h3 class="feature-title">4중 삭제 보호 계층</h3>
+                    <p class="feature-desc">
+                        ① 시스템 루트·홈 최상위 폴더 정확 일치 차단<br>
+                        ② 시스템 트리 하위까지 경계 단위 차단<br>
+                        ③ 심볼릭 링크 해석 후 판정<br>
+                        ④ 관리자 권한 삭제는 화이트리스트 트리의 하위 항목만 허용
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">🛑</div>
+                    <h3 class="feature-title">전부 아니면 전무 (All-or-Nothing)</h3>
+                    <p class="feature-desc">앱 완전 삭제 시 관리자 권한이 필요한 항목이 있으면 삭제를 시작하기 전에 인증을 요청합니다. 인증에 실패하거나 취소하면 앱 본체를 포함해 어떤 파일도 삭제되지 않습니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">✅</div>
+                    <h3 class="feature-title">다운로드 무결성 직접 확인</h3>
+                    <p class="feature-desc">모든 릴리스에 설치 파일의 SHA-256 체크섬을 함께 게시합니다. 아래 명령으로 직접 대조하실 수 있습니다.<br><br><code>shasum -a 256 MacOptimizationTool_Setup.dmg</code></p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">📖</div>
+                    <h3 class="feature-title">감사 결과 전문 공개</h3>
+                    <p class="feature-desc">발견된 결함과 조치 내역을 저장소에 그대로 공개합니다. <a href="https://github.com/crazy-vincnet/MacOptimizationTool/blob/main/CODE_REVIEW.md" target="_blank">CODE_REVIEW.md</a> · <a href="https://github.com/crazy-vincnet/MacOptimizationTool/blob/main/CHANGELOG.md" target="_blank">CHANGELOG.md</a></p>
                 </div>
             </div>
         </section>
@@ -608,6 +684,7 @@
         <div class="container">
             <p>Copyright © 2026 Lab98 Studio. All rights reserved.</p>
             <p style="margin-top: 8px;">Designed & Engineered for macOS by Vincent Jeon @ Lab98 Studio</p>
+            <p style="margin-top: 8px; opacity: 0.7;">v1.6.0 · MIT License · macOS 13.0 이상</p>
         </div>
     </footer>
 </body>

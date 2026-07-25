@@ -22,5 +22,5 @@ for l in langs:
     out.append("        ],")
 out.append("    ]")
 out.append("}")
-open(base+"/Sources/GeneratedTranslations.swift","w",encoding="utf-8").write("\n".join(out)+"\n")
+open(base+"/Sources/MacOptimizationCore/GeneratedTranslations.swift","w",encoding="utf-8").write("\n".join(out)+"\n")
 print("files:",len(files),"keys:",len(merged["ko"]),"dupes:",sorted(set(dupes)))

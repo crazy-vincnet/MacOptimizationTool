@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Build & Test (macOS)
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swift 버전 확인
+        run: swift --version
+
+      - name: 디버그 빌드
+        run: swift build
+
+      - name: 단위 테스트
+        run: ./test.sh
+
+      - name: 릴리스 빌드 및 .app 패키징
+        run: ./build.sh --no-run
+
+      - name: 코드 서명 검증
+        run: codesign -v MacOptimizationTool.app

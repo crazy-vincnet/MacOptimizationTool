@@ -3,16 +3,31 @@
 # 에러 발생 시 즉시 중단
 set -e
 
+# iCloud 동기화 폴더에서는 fileprovider 데몬이 com.apple.FinderInfo 를 비동기로 다시 붙이기 때문에
+# 한 번 지우고 바로 서명하면 실패할 수 있다. 지우고 서명하는 과정을 몇 번 재시도한다.
+sign_with_retry() {
+    local target="$1"
+    shift
+    local attempt
+    for attempt in 1 2 3 4 5; do
+        xattr -d com.apple.FinderInfo "$target" 2>/dev/null || true
+        xattr -cr "$target"
+        if codesign "$@" "$target" 2>/dev/null; then
+            return 0
+        fi
+        sleep 0.5
+    done
+    echo "오류: 코드 서명에 실패했습니다 ($target)"
+    return 1
+}
+
+
 echo "=== 웹사이트 직접 배포용 .dmg 설치 파일 빌드 ==="
 
-# 1. Swift 앱 컴파일
-SWIFT_FILES=$(find Sources -name "*.swift")
-
-echo "-> Sources 디렉토리 컴파일 중..."
-swiftc -O \
-       -parse-as-library \
-       $SWIFT_FILES \
-       -o MacOptimizationTool
+# 1. SwiftPM 릴리스 빌드
+echo "-> SwiftPM 릴리스 빌드 중..."
+swift build -c release --product MacOptimizationTool
+BUILT_BINARY=$(swift build -c release --product MacOptimizationTool --show-bin-path)/MacOptimizationTool
 
 APP_DIR="MacOptimizationTool.app"
 CONTENTS_DIR="$APP_DIR/Contents"
@@ -23,7 +38,7 @@ rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR"
 mkdir -p "$RESOURCES_DIR"
 
-mv MacOptimizationTool "$MACOS_DIR/MacOptimizationTool"
+cp "$BUILT_BINARY" "$MACOS_DIR/MacOptimizationTool"
 chmod +x "$MACOS_DIR/MacOptimizationTool"
 
 if [ -f "AppIcon.icns" ]; then
@@ -46,9 +61,9 @@ cat <<EOF > "$CONTENTS_DIR/Info.plist"
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.5.0</string>
+    <string>1.6.0</string>
     <key>CFBundleVersion</key>
-    <string>1.5.0</string>
+    <string>1.6.0</string>
 
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
@@ -67,8 +82,7 @@ cat <<EOF > "$CONTENTS_DIR/Info.plist"
 EOF
 
 echo "-> Finder 확장 속성 제거 및 ad-hoc 코드 서명 적용..."
-xattr -cr "$APP_DIR"
-codesign --force --deep --sign - "$APP_DIR"
+sign_with_retry "$APP_DIR" --force --deep --sign -
 
 # 2. DMG 패키징 스테이징 폴더 생성
 STAGING_DIR="dmg_staging"

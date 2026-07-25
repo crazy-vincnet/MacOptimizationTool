@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    직접 배포(.dmg)용 entitlements.
+
+    이 앱은 전체 디스크 접근 권한으로 /Library 와 ~/Library 를 스캔하고,
+    /usr/sbin/purge · /bin/ps · hdiutil 등 외부 프로세스를 실행하며,
+    관리자 권한 삭제를 위해 AppleScript 를 사용한다. 이 동작들은 App Sandbox 와
+    원천적으로 호환되지 않으므로 직접 배포 빌드에서는 샌드박스를 사용하지 않는다.
+
+    Mac App Store 제출용 샌드박스 entitlements 는 MacCleanOptimizer.entitlements 를 사용한다.
+    (해당 구성에서는 /Library 스캔·관리자 삭제·프로세스 감시 기능이 동작하지 않는다.)
+-->
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    <key>com.apple.security.network.client</key>
+    <true/>
+</dict>
+</plist>

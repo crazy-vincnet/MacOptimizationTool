@@ -57,3 +57,9 @@ xcuserdata/
 .vscode/
 .idea/
 *.log
+
+# ==========================================
+# SwiftPM
+# ==========================================
+.swiftpm/
+Package.resolved
