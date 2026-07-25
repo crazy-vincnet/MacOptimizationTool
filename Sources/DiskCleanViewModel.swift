@@ -127,7 +127,7 @@ class DiskCleanViewModel: ObservableObject {
                     if Task.isCancelled { break }
 
                     let catName = cat.name
-                    await MainActor.run {
+                    await MainActor.run { [weak self] in
                         self?.currentScanCategory = catName
                         self?.scanStatusText = "[\(catName)] 정크 항목 탐색 중..."
                         self?.scanProgress = 0.05 + (Double(index) / Double(totalCategoriesCount) * 0.90)
@@ -166,10 +166,11 @@ class DiskCleanViewModel: ObservableObject {
                     results[index].size = totalSize
 
                     let count = totalFoundCount
-                    await MainActor.run {
+                    await MainActor.run { [weak self] in
                         self?.scannedItemCount = count
                     }
                 }
+
 
                 return results
             }.value

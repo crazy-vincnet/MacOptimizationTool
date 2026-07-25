@@ -130,11 +130,12 @@ final class PrivacyCleanerViewModel: ObservableObject {
                 
                 for (bIdx, (bName, icon, targets)) in browserTargets.enumerated() {
                     let progress = 0.05 + (Double(bIdx) / Double(totalBrowsers) * 0.90)
-                    await MainActor.run {
+                    await MainActor.run { [weak self] in
                         self?.currentScanBrowser = bName
                         self?.scanStatusText = "\(bName) 데이터 검사 중..."
                         self?.scanProgress = progress
                     }
+
                     
                     var subItems: [PrivacySubItem] = []
                     
@@ -170,9 +171,12 @@ final class PrivacyCleanerViewModel: ObservableObject {
                     }
                 }
                 
-                await MainActor.run {
-                    self?.scannedItemCount = foundCount
+                let count = foundCount
+                await MainActor.run { [weak self] in
+                    self?.scannedItemCount = count
                 }
+
+
                 
                 return list
             }.value

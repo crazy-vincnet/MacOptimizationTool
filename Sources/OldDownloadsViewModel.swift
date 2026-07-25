@@ -176,13 +176,14 @@ final class OldDownloadsViewModel: ObservableObject {
                         let filename = fileURL.lastPathComponent
                         let countScanned = localScanned
                         let countMatched = localMatched
-                        await MainActor.run {
+                        await MainActor.run { [weak self] in
                             self?.scannedCount = countScanned
                             self?.matchedCount = countMatched
                             self?.currentScanPath = filename
                             self?.scanStatusText = "다운로드 스캔 중... (\(countScanned)개 검사, \(countMatched)개 방치 파일 발견)"
                             self?.scanProgress = min(0.95, Double(countScanned) / 1000.0 * 0.95)
                         }
+
                     }
                 }
 

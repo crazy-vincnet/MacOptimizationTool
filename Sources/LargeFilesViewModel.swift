@@ -217,13 +217,14 @@ class LargeFilesViewModel: ObservableObject {
                     let scanned = totalScanned
                     let matched = results.count
                     let currentPath = url.lastPathComponent
-                    await MainActor.run {
+                    await MainActor.run { [weak self] in
                         self?.scannedCount = scanned
                         self?.matchedCount = matched
                         self?.currentScanPath = currentPath
                         self?.scanStatusText = "대용량 파일 스캔 중... (\(scanned)개 탐색, \(matched)개 발견)"
                         self?.scanProgress = min(0.95, Double(scanned) / 10000.0 * 0.95)
                     }
+
                 }
             }
 

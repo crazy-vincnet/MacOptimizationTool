@@ -152,7 +152,7 @@ class DuplicateViewModel: ObservableObject {
                     lastUIUpdate = Date()
                     let count = totalFiles
                     let currentPath = url.lastPathComponent
-                    await MainActor.run {
+                    await MainActor.run { [weak self] in
                         self?.scannedCount = count
                         self?.currentScanPath = currentPath
                         self?.scanStatusText = "파일 탐색 중... (\(count)개 수집 완료)"
@@ -175,11 +175,13 @@ class DuplicateViewModel: ObservableObject {
                 }
             }
             
-            await MainActor.run {
-                self?.candidateCount = totalCandidatesCount
+            let candCount = totalCandidatesCount
+            await MainActor.run { [weak self] in
+                self?.candidateCount = candCount
                 self?.scanProgress = 0.40
-                self?.scanStatusText = "병렬 고속 해시 1차 검증 중... (대상: \(totalCandidatesCount)개 파일)"
+                self?.scanStatusText = "병렬 고속 해시 1차 검증 중... (대상: \(candCount)개 파일)"
             }
+
             
             var partialHashGroups: [String: [URL]] = [:]
             var processedCandidateCount = 0
@@ -221,11 +223,12 @@ class DuplicateViewModel: ObservableObject {
                         let processed = processedCandidateCount
                         let total = max(1, totalCandidatesCount)
                         let currentPath = url.lastPathComponent
-                        await MainActor.run {
+                        await MainActor.run { [weak self] in
                             self?.currentScanPath = currentPath
                             self?.scanProgress = 0.40 + (Double(processed) / Double(total) * 0.35)
                             self?.scanStatusText = "1차 병렬 고속 해시 비교 중... (\(processed)/\(total))"
                         }
+
                     }
                 }
             }
@@ -247,10 +250,12 @@ class DuplicateViewModel: ObservableObject {
                 }
             }
             
-            await MainActor.run {
+            let fullCount = totalFullHashCount
+            await MainActor.run { [weak self] in
                 self?.scanProgress = 0.75
-                self?.scanStatusText = "정밀 2차 SHA-256 병렬 검증 중... (대상: \(totalFullHashCount)개 파일)"
+                self?.scanStatusText = "정밀 2차 SHA-256 병렬 검증 중... (대상: \(fullCount)개 파일)"
             }
+
             
             var processedFullCount = 0
             await withTaskGroup(of: (URL, Int64, String?).self) { group in
@@ -290,11 +295,12 @@ class DuplicateViewModel: ObservableObject {
                         let processed = processedFullCount
                         let total = max(1, totalFullHashCount)
                         let currentPath = url.lastPathComponent
-                        await MainActor.run {
+                        await MainActor.run { [weak self] in
                             self?.currentScanPath = currentPath
                             self?.scanProgress = 0.75 + (Double(processed) / Double(total) * 0.23)
                             self?.scanStatusText = "정밀 해시 최종 검증 중... (\(processed)/\(total))"
                         }
+
                     }
                 }
             }

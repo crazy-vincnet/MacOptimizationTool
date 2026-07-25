@@ -165,9 +165,10 @@ struct OldDownloadsView: View {
                 }
                 .pickerStyle(.segmented)
                 .frame(width: 240)
-                .onChange(of: viewModel.selectedAgeThreshold) { _ in
+                .onChange(of: viewModel.selectedAgeThreshold) { _, _ in
                     viewModel.scanOldDownloads()
                 }
+
 
                 Button(action: {
                     viewModel.scanOldDownloads()

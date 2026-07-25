@@ -86,12 +86,13 @@ class UninstallerViewModel: ObservableObject {
                         let count = results.count
                         let appName = name
                         let progress = 0.05 + (Double(index) / Double(totalContents) * 0.90)
-                        await MainActor.run {
+                        await MainActor.run { [weak self] in
                             self?.scannedAppCount = count
                             self?.currentScanPath = appName
                             self?.scanStatusText = "앱 목록 탐색 중... (\(count)개 앱 발견)"
                             self?.scanProgress = progress
                         }
+
                     }
                 }
                 
@@ -253,11 +254,12 @@ class UninstallerViewModel: ObservableObject {
                 
                 let dirName = dirURL.lastPathComponent
                 let progress = 0.10 + (Double(idx) / Double(totalDirs) * 0.85)
-                await MainActor.run {
+                await MainActor.run { [weak self] in
                     self?.currentScanPath = dirName
                     self?.scanStatusText = "보조 라이브러리 스캔 중... (\(dirName))"
                     self?.scanProgress = progress
                 }
+
 
                 let isAccessed = dirURL.startAccessingSecurityScopedResource()
                 defer {
