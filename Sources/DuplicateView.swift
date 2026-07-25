@@ -216,10 +216,56 @@ struct DuplicateView: View {
                 }
             }
             
-            // 로딩 오버레이
+            // 실시간 스캔 프로그레스 오버레이
             if viewModel.isScanning {
-                ProgressOverlay(message: t("dup.scanning_overlay"))
+                ZStack {
+                    Theme.bgCardHover.opacity(0.88)
+                        .edgesIgnoringSafeArea(.all)
+
+                    VStack(spacing: 18) {
+                        Image(systemName: "doc.on.doc.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(Theme.accent)
+
+                        Text(viewModel.scanStatusText)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(Theme.textPrimary)
+
+                        ProgressView(value: viewModel.scanProgress)
+                            .progressViewStyle(.linear)
+                            .tint(Theme.accent)
+                            .frame(width: 320)
+
+                        VStack(spacing: 4) {
+                            Text("현재 경로: \(viewModel.currentScanPath)")
+                                .font(.system(size: 11, design: .monospaced))
+                                .foregroundColor(Theme.textSecondary)
+                                .lineLimit(1)
+                                .frame(maxWidth: 380)
+
+                            Text("수집 완료: \(viewModel.scannedCount)개 파일 탐색 완료")
+                                .font(.system(size: 11))
+                                .foregroundColor(Theme.textSecondary)
+                        }
+
+                        Button(action: {
+                            viewModel.isCancelled = true
+                        }) {
+                            Text("스캔 취소")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Theme.textSecondary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(Theme.bgCardHover)
+                                .cornerRadius(Theme.radiusControl)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(28)
+                    .glassCard(padding: 28, radius: Theme.radiusCard)
+                }
             }
+
             if viewModel.isDeleting {
                 ProgressOverlay(message: t("dup.deleting_overlay"))
             }

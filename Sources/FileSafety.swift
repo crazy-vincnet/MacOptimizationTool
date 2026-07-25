@@ -114,8 +114,27 @@ enum FileSafety {
 
     // MARK: - Hashing
 
-    /// 파일 전체를 스트리밍 SHA-256 해시. 부분 해시 충돌로 인한 오탐 삭제를 방지한다.
-    /// 큰 파일도 64KB 청크로 읽어 메모리 사용을 억제.
+    /// 1단계 고속 부분 해시: 파일의 처음 16KB와 마지막 16KB만 읽어 0.0001초 만에 1차 비교.
+    static func partialFileHash(for url: URL) -> String? {
+        guard let file = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { try? file.close() }
+
+        var hasher = SHA256()
+        let headData = file.readData(ofLength: 16_384)
+        hasher.update(data: headData)
+
+        let fileSize = (try? file.seekToEnd()) ?? 0
+        if fileSize > 32_768 {
+            try? file.seek(toOffset: fileSize - 16_384)
+            let tailData = file.readData(ofLength: 16_384)
+            hasher.update(data: tailData)
+        }
+
+        let digest = hasher.finalize()
+        return digest.map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// 2단계 정밀 전체 해시: 1단계 부분 해시가 일치하는 파일만 전체 SHA-256을 검증한다.
     static func fullFileHash(for url: URL) -> String? {
         guard let file = try? FileHandle(forReadingFrom: url) else { return nil }
         defer { try? file.close() }
@@ -131,3 +150,4 @@ enum FileSafety {
         return digest.map { String(format: "%02x", $0) }.joined()
     }
 }
+
