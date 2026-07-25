@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac Clean Optimizer - macOS 전용 프리미엄 최적화 툴키트 | Lab98 Studio</title>
+    <meta name="description" content="Mac Clean Optimizer - 실시간 자원 대시보드, 4단계 스마트 앱 완전 삭제기, 캐시 정리기, 대용량 및 중복 파일 탐색기를 포함한 macOS 전용 고성능 무료 최적화 앱입니다.">
+    <meta property="og:title" content="Mac Clean Optimizer - macOS 전용 프리미엄 최적화 툴키트">
+    <meta property="og:description" content="빠르고 스마트한 Mac 최적화. 원클릭 메모리 최적화, 잔여 파일 완전 삭제, 4개 국어 및 라이트/다크 테마 지원.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.35);
+            --accent-hover: #2563eb;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Glow Effect */
+        .ambient-glow {
+            position: fixed;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 80%);
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(60px);
+        }
+
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navbar */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 32px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
+
+        .brand img {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 70px 0 90px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            color: #60a5fa;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 28px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-icon {
+            width: 128px;
+            height: 128px;
+            margin: 0 auto 32px;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 30px rgba(59, 130, 246, 0.3));
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hero-icon:hover {
+            transform: scale(1.06) rotate(-2deg);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin: 0 auto 40px;
+            font-weight: 400;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #ffffff;
+            padding: 16px 36px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            box-shadow: 0 10px 30px var(--accent-glow), 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.25s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, #60a5fa 0%, #1d4ed8 100%);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.25s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .meta-info {
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 60px 0 100px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 50px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 32px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--card-border);
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <nav>
+            <a href="#" class="brand">
+                <img src="AppIcon.png" alt="Mac Clean Optimizer Icon">
+                <span>Mac Clean Optimizer</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">주요 기능</a>
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool" class="nav-link" target="_blank">GitHub</a>
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" class="nav-link" target="_blank">릴리즈 노트</a>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-badge">
+                <span>✨ 최신 v1.1.0 정식 배포</span>
+            </div>
+            
+            <img src="AppIcon.png" alt="Mac Clean Optimizer Large Icon" class="hero-icon">
+            
+            <h1 class="hero-title">더 빠르고 깨끗한 macOS를 위한<br>프리미엄 최적화 툴키트</h1>
+            
+            <p class="hero-subtitle">
+                실시간 자원 모니터링, 4단계 스마트 앱 완전 삭제, 시스템 디스크 정리 및 인앱 자동 업데이트까지 하나로 완벽하게 관리하세요.
+            </p>
+
+            <div class="cta-buttons">
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.1.0/MacCleanOptimizer_Setup.dmg" class="btn-primary">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>macOS 전용 설치 파일 다운로드 (.dmg)</span>
+                </a>
+                
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="btn-secondary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span>GitHub 저장소 방문</span>
+                </a>
+            </div>
+
+            <div class="meta-info">
+                <span>버전 1.1.0 • macOS 14.0 (Sonoma) 이상 권장 • Apple Silicon & Intel Universal</span>
+            </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section id="features" class="features-section">
+            <h2 class="section-title">왜 Mac Clean Optimizer 인가요?</h2>
+            <p class="section-subtitle">복잡한 설정 없이 직관적이고 강력한 6가지 핵심 기능을 제공합니다.</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">실시간 자원 대시보드</h3>
+                    <p class="feature-desc">CPU, GPU, 메모리, 디스크, 시스템 온도 및 배터리 전원 상태를 실시간 모니터링하고 원클릭 메모리 가상 공간 수거를 수행합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🗑️</div>
+                    <h3 class="feature-title">4단계 앱 완전 삭제기</h3>
+                    <p class="feature-desc">일반 파일 이동부터 루트 관리자 권한 승격 삭제까지 지원하여 라이브러리 및 캐시에 남은 앱 찌꺼기를 완벽하게 지워냅니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🧹</div>
+                    <h3 class="feature-title">스마트 디스크 정리</h3>
+                    <p class="feature-desc">시스템 Caches, Logs, Xcode DerivedData 및 휴지통에 방치된 수 십 GB 용량의 낭비 공간을 손쉽게 정리합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3 class="feature-title">중복 및 대용량 파일 탐색기</h3>
+                    <p class="feature-desc">이진 해시 비교 검사를 통해 원본 1개를 안전하게 보존하면서 중복 파일과 방치된 대용량 파일을 고속 분류합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">☀️</div>
+                    <h3 class="feature-title">라이트 / 다크 테마 엔진</h3>
+                    <p class="feature-desc">서체 앤티앨리어싱을 고려한 0% 텍스트 블러와 고대비 obsidian black 문자로 구성되어 눈이 편안한 디자인 시스템을 경험하세요.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">인앱 원클릭 자동 업데이트</h3>
+                    <p class="feature-desc">Sparkle 2 및 GitHub Release API 연동으로 웹 브라우저를 열 필요 없이 앱 내에서 새 버전을 자동으로 다운로드하고 설치합니다.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>Copyright © 2026 Lab98 Studio. All rights reserved.</p>
+            <p style="margin-top: 6px;">Designed & Engineered for macOS by Vincent Jeon @ Lab98 Studio</p>
+        </div>
+    </footer>
+</body>
+</html>
