@@ -47,7 +47,8 @@ final class SparkleUpdaterManager: NSObject, ObservableObject, URLSessionDownloa
                         }
                     }
                     
-                    let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.4.0"
+                    let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5.0"
+
                     let currentVersion = appVer.starts(with: "v") ? appVer : "v\(appVer)"
                     let cleanTag = latestTag.starts(with: "v") ? latestTag : "v\(latestTag)"
 
