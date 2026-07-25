@@ -41,7 +41,7 @@ git push origin "$VERSION"
 echo "-> gh CLI를 통해 GitHub Release 자동 게시 중..."
 gh release create "$VERSION" MacOptimizationTool_Setup.dmg \
     --title "MacOptimizationTool $VERSION" \
-    --notes "$NOTES" \
-    --clobber
+    --notes "$NOTES"
+
 
 echo "=== 🎉 성공! GitHub Release $VERSION 및 DMG 첨부가 자동 완료되었습니다 ==="
