@@ -23,6 +23,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         }
         
         setupMenuBar()
+        Task { @MainActor in
+            ProcessGuardManager.shared.startGuard()
+        }
+
     }
 
     // 포그라운드(앱이 화면에 켜져있을 때) 알림도 배너, 리스트, 소리로 즉시 노출

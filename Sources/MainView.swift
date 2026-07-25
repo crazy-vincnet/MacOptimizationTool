@@ -116,13 +116,14 @@ struct MainView: View {
                         case .duplicateFinder:
                             DuplicateView()
                         case .startupManager:
-                            StartupView()
+                            StartupManagerView()
                         case .winCompat:
                             WinCompatView()
                         case .maintenance:
-                            MaintenanceView()
+                            DiskSunburstView()
                         case .settings:
                             SettingsView()
+
                         }
                     }
                     .transition(.opacity.combined(with: .move(edge: .trailing)))

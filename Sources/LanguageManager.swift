@@ -92,7 +92,8 @@ class LanguageManager: ObservableObject {
             "menu.duplicateFinder": "중복 파일 정리",
             "menu.startupManager": "시작 프로그램",
             "menu.winCompat": "윈도우 이름 호환",
-            "menu.maintenance": "시스템 유지보수",
+            "menu.maintenance": "시각적 디스크 맵",
+
             "menu.settings": "설정",
             "menu.operational": "정상 가동 중",
             
