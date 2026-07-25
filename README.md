@@ -2,14 +2,14 @@
 
 ![App Icon](AppIcon.png)
 
-# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.7.1
+# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.7.2
 
 **macOS 전용 프리미엄 고성능 시스템 최적화, 디스크 정리, 자원 가드 및 개인정보 보호 종합 툴키트**
 
 [![macOS](https://img.shields.io/badge/macOS-13.0%2B-000000?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos)
 [![Swift](https://img.shields.io/badge/Swift-6.0-F05138?style=for-the-badge&logo=swift&logoColor=white)](https://swift.org)
 [![Tests](https://img.shields.io/badge/Tests-56%20passing-3ECF8E?style=for-the-badge)](Tests)
-[![Version](https://img.shields.io/badge/Version-v1.7.1-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
+[![Version](https://img.shields.io/badge/Version-v1.7.2-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
 [![License](https://img.shields.io/badge/License-MIT-059669?style=for-the-badge)](LICENSE)
 
 ---
@@ -24,7 +24,8 @@
 5. [변경 이력 (Changelog)](#-변경-이력-changelog)
 6. [라이선스 및 저작권 (License & Copyright)](#-라이선스-및-저작권-license--copyright)
 
-> **v1.7.1 릴리스 안내** — v1.7.0 의 프로세스 자원 폭주 경고가 너무 자주 뜨던 문제를 해결했습니다. 감지 기능은 **기본 꺼짐**이 되었고, 임계값·지속 시간 조건을 설정에서 직접 조절할 수 있습니다.
+> **v1.7.2 릴리스 안내** — 업데이트 확인이 실패했는데 "최신 버전입니다" 로 표시되던 문제를 수정했습니다.
+> v1.7.0 에서는 프로세스 자원 폭주 경고가 너무 자주 뜨던 문제를 해결했습니다. 감지 기능은 **기본 꺼짐**이 되었고, 임계값·지속 시간 조건을 설정에서 직접 조절할 수 있습니다.
 > 전체 감사 내역은 [`CODE_REVIEW.md`](CODE_REVIEW.md), 변경 요약은 [`CHANGELOG.md`](CHANGELOG.md) 를 참고하세요.
 
 ---
@@ -163,7 +164,7 @@ SwiftPM 릴리스 빌드(`swift build -c release`), `xattr` 정리, ad-hoc 코�
 
 ### 3. GitHub Release 자동 게시
 ```bash
-./release.sh v1.7.1 "릴리즈 노트 내용"
+./release.sh v1.7.2 "릴리즈 노트 내용"
 ```
 버전 커밋, Git 태그 생성, DMG 패키징, `gh release create`를 통해 GitHub Release 게시 및 DMG 첨부를 자동 진행합니다.
 릴리스 노트에는 DMG 의 SHA-256 체크섬이 함께 게시되며, 인앱 업데이터는 이 값으로 무결성을 검증합니다.
@@ -230,7 +231,16 @@ MacOptimizationTool/
 
 버전별 상세 변경 사항은 [`CHANGELOG.md`](CHANGELOG.md) 에 정리되어 있습니다.
 
-### v1.7.1 (최신)
+### v1.7.2 (최신)
+
+업데이트 확인 실패를 "최신 버전" 으로 위장하던 문제를 수정한 패치 릴리스입니다.
+
+| 분류 | 내용 |
+|---|---|
+| 🐛 수정 | 네트워크 오류·타임아웃·GitHub API 요청 한도 초과·응답 파싱 실패가 모두 "최신 버전입니다" 로 표시되던 문제 |
+| ✨ 추가 | 별도의 "⚠️ 업데이트 확인 실패" 알림 — 구체적 사유 표시 + 릴리스 페이지 열기 (4개 국어) |
+
+### v1.7.1
 
 CI 가 잡아낸 번역 사전 결함 1건을 수정한 패치 릴리스입니다. 기능 변경은 없습니다.
 
