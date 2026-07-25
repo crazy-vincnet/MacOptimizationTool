@@ -33,15 +33,17 @@ final class DiskSunburstViewModel: ObservableObject {
 
     /// 재귀적으로 폴더 내부의 모든 파일 용량을 100% 합산
     nonisolated private func directorySize(at url: URL) -> Int64 {
+        let keys: [URLResourceKey] = [.fileSizeKey, .isDirectoryKey]
         guard let enumerator = fileManager.enumerator(
             at: url,
-            includingPropertiesForKeys: [.fileSizeKey, .isDirectoryKey],
-            options: [.skipsHiddenFiles, .skipsPackageDescendants]
+            includingPropertiesForKeys: keys,
+            options: [.skipsHiddenFiles, .skipsPackageDescendants],
+            errorHandler: { _, _ in return true }
         ) else { return 0 }
 
         var total: Int64 = 0
-        for case let fileURL as URL in enumerator {
-            if let resourceValues = try? fileURL.resourceValues(forKeys: [.fileSizeKey, .isDirectoryKey]),
+        while let fileURL = enumerator.nextObject() as? URL {
+            if let resourceValues = try? fileURL.resourceValues(forKeys: Set(keys)),
                let isDir = resourceValues.isDirectory, !isDir,
                let size = resourceValues.fileSize {
                 total += Int64(size)
@@ -49,6 +51,7 @@ final class DiskSunburstViewModel: ObservableObject {
         }
         return total
     }
+
 
     nonisolated private func calculateNode(path: String, depth: Int) -> SunburstNode {
         let name = (path as NSString).lastPathComponent

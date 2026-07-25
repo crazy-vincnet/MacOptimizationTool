@@ -115,10 +115,12 @@ class DuplicateViewModel: ObservableObject {
             guard let enumerator = fm.enumerator(
                 at: rootURL,
                 includingPropertiesForKeys: resourceKeys,
-                options: [.skipsHiddenFiles, .skipsPackageDescendants]
+                options: [.skipsHiddenFiles, .skipsPackageDescendants],
+                errorHandler: { _, _ in return true }
             ) else {
                 return []
             }
+
             
             var totalFiles = 0
             var lastUIUpdate = Date()

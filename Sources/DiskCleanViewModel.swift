@@ -345,8 +345,9 @@ class DiskCleanViewModel: ObservableObject {
                 at: url,
                 includingPropertiesForKeys: keys,
                 options: [.skipsHiddenFiles, .skipsPackageDescendants],
-                errorHandler: nil
+                errorHandler: { _, _ in return true }
             ) else {
+
                 return 0
             }
             while let fileURL = enumerator.nextObject() as? URL {
