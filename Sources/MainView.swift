@@ -76,7 +76,9 @@ struct MainView: View {
     @ObservedObject private var langManager = LanguageManager.shared
     @ObservedObject private var processGuard = ProcessGuardManager.shared
     @ObservedObject private var duplicateVM = DuplicateViewModel.shared
+    @ObservedObject private var largeVM = LargeFilesViewModel.shared
     @AppStorage("appTheme") private var appThemeRaw: String = AppTheme.light.rawValue
+
 
 
     
@@ -306,11 +308,12 @@ struct MainView: View {
             
             Spacer()
 
-            if tab == .duplicateFinder && duplicateVM.isScanning {
+            if (tab == .duplicateFinder && duplicateVM.isScanning) || (tab == .largeFiles && largeVM.isScanning) {
                 ProgressView()
                     .scaleEffect(0.55)
                     .frame(width: 14, height: 14)
             }
+
 
         }
         .padding(.horizontal, 12)

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LargeFilesView: View {
-    @StateObject private var viewModel = LargeFilesViewModel()
+    @ObservedObject private var viewModel = LargeFilesViewModel.shared
     @State private var showDeleteConfirm = false
 
     var body: some View {
@@ -171,10 +171,56 @@ struct LargeFilesView: View {
                 }
             }
             
-            // 로딩 오버레이
+            // 실시간 대용량 스캔 프로그레스 오버레이
             if viewModel.isScanning {
-                ProgressOverlay(message: t("large.scanningOverlay"))
+                ZStack {
+                    Theme.bgCardHover.opacity(0.88)
+                        .edgesIgnoringSafeArea(.all)
+
+                    VStack(spacing: 18) {
+                        Image(systemName: "doc.text.magnifyingglass")
+                            .font(.system(size: 36))
+                            .foregroundColor(Theme.accent)
+
+                        Text(viewModel.scanStatusText)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(Theme.textPrimary)
+
+                        ProgressView(value: viewModel.scanProgress)
+                            .progressViewStyle(.linear)
+                            .tint(Theme.accent)
+                            .frame(width: 320)
+
+                        VStack(spacing: 4) {
+                            Text("현재 경로: \(viewModel.currentScanPath)")
+                                .font(.system(size: 11, design: .monospaced))
+                                .foregroundColor(Theme.textSecondary)
+                                .lineLimit(1)
+                                .frame(maxWidth: 380)
+
+                            Text("탐색 진행: \(viewModel.scannedCount)개 파일 스캔 완료 (\(viewModel.matchedCount)개 조건 부합)")
+                                .font(.system(size: 11))
+                                .foregroundColor(Theme.textSecondary)
+                        }
+
+                        Button(action: {
+                            viewModel.isCancelled = true
+                        }) {
+                            Text("스캔 취소")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Theme.textSecondary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(Theme.bgCardHover)
+                                .cornerRadius(Theme.radiusControl)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(28)
+                    .glassCard(padding: 28, radius: Theme.radiusCard)
+                }
             }
+
             if viewModel.isDeleting {
                 ProgressOverlay(message: t("large.deletingOverlay"))
             }
@@ -259,4 +305,3 @@ struct LargeFilesView: View {
         }
     }
 }
-

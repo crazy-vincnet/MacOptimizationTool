@@ -13,6 +13,8 @@ struct LargeFileItem: Identifiable, Hashable {
 
 @MainActor
 class LargeFilesViewModel: ObservableObject {
+    static let shared = LargeFilesViewModel()
+
     @Published var files: [LargeFileItem] = []
     @Published var isScanning = false
     @Published var isDeleting = false
@@ -22,24 +24,31 @@ class LargeFilesViewModel: ObservableObject {
     @Published var selectedFolderURL: URL? = nil
     @Published var hasScanned = false
     @Published var isCancelled = false
-    
+
+    // Real-Time Progress Tracking Properties
+    @Published var scanProgress: Double = 0.0
+    @Published var scannedCount: Int = 0
+    @Published var matchedCount: Int = 0
+    @Published var currentScanPath: String = ""
+    @Published var scanStatusText: String = ""
+
     @Published var showDeleteSuccess = false
     @Published var deletedSize: Int64 = 0
     @Published var deletedCount = 0
-    
+
     init() {
         let defaultURL = SettingsViewModel.getSavedDefaultScanURL()
         selectedFolderURL = defaultURL
         targetFolderPath = defaultURL.path
     }
-    
+
     func selectFolder() {
         let openPanel = NSOpenPanel()
         openPanel.canChooseDirectories = true
         openPanel.canChooseFiles = false
         openPanel.allowsMultipleSelection = false
         openPanel.title = t("large.panelTitle")
-        
+
         openPanel.begin { [weak self] response in
             guard let self = self else { return }
             if response == .OK, let url = openPanel.url {
@@ -49,19 +58,19 @@ class LargeFilesViewModel: ObservableObject {
             }
         }
     }
-    
+
     private func updateSelectedFolder(_ url: URL) async {
         self.isCancelled = true
         self.selectedFolderURL = url
         self.targetFolderPath = url.path
-        
+
         try? await Task.sleep(nanoseconds: 100_000_000)
         self.scanFiles()
     }
-    
+
     func scanFiles() {
         guard let rootURL = selectedFolderURL else { return }
-        
+
         if isScanning {
             isCancelled = true
             Task {
@@ -76,17 +85,22 @@ class LargeFilesViewModel: ObservableObject {
             }
         }
     }
-    
+
     private func startScanExecution(rootURL: URL) async {
         isScanning = true
+        hasScanned = false
         showDeleteSuccess = false
-        
+        scanProgress = 0.05
+        scannedCount = 0
+        matchedCount = 0
+        scanStatusText = "대용량 파일 검색 시작..."
+
         let sizeLimit = Int64(sizeThresholdMB * 1024 * 1024)
         let calendar = Calendar.current
         let now = Date()
         let ageMonths = ageThresholdMonths
-        
-        let foundFiles = await Task.detached(priority: .userInitiated) { () -> [LargeFileItem] in
+
+        let foundFiles = await Task.detached(priority: .userInitiated) { [weak self] () -> [LargeFileItem] in
             let fm = FileManager.default
             let isAccessed = rootURL.startAccessingSecurityScopedResource()
             defer {
@@ -94,7 +108,7 @@ class LargeFilesViewModel: ObservableObject {
                     rootURL.stopAccessingSecurityScopedResource()
                 }
             }
-            
+
             var results: [LargeFileItem] = []
             let resourceKeys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey, .isDirectoryKey]
             guard let enumerator = fm.enumerator(
@@ -104,24 +118,29 @@ class LargeFilesViewModel: ObservableObject {
             ) else {
                 return []
             }
-            
+
+            var totalScanned = 0
+            var lastUIUpdate = Date()
+
             while let url = enumerator.nextObject() as? URL {
                 if Task.isCancelled {
                     break
                 }
-                
+
                 let path = url.path
                 if path.contains("/Library") || path.contains("/.gemini") || path.contains("/System") {
                     continue
                 }
-                
+
                 guard let resourceValues = try? url.resourceValues(forKeys: Set(resourceKeys)),
                       let isDir = resourceValues.isDirectory, !isDir,
                       let fileSize = resourceValues.fileSize,
                       let modDate = resourceValues.contentModificationDate else {
                     continue
                 }
-                
+
+                totalScanned += 1
+
                 if fileSize >= sizeLimit {
                     var matchesAge = true
                     if ageMonths > 0 {
@@ -129,7 +148,7 @@ class LargeFilesViewModel: ObservableObject {
                             matchesAge = modDate < limitDate
                         }
                     }
-                    
+
                     if matchesAge {
                         let item = LargeFileItem(
                             id: url.path,
@@ -141,29 +160,44 @@ class LargeFilesViewModel: ObservableObject {
                         results.append(item)
                     }
                 }
+
+                if Date().timeIntervalSince(lastUIUpdate) > 0.08 {
+                    lastUIUpdate = Date()
+                    let scanned = totalScanned
+                    let matched = results.count
+                    let currentPath = url.lastPathComponent
+                    await MainActor.run {
+                        self?.scannedCount = scanned
+                        self?.matchedCount = matched
+                        self?.currentScanPath = currentPath
+                        self?.scanStatusText = "대용량 파일 스캔 중... (\(scanned)개 탐색, \(matched)개 발견)"
+                        self?.scanProgress = min(0.95, Double(scanned) / 10000.0 * 0.95)
+                    }
+                }
             }
-            
+
             results.sort { $0.size > $1.size }
             return results
         }.value
-        
+
         if !isCancelled {
             self.files = foundFiles
+            self.scanProgress = 1.0
             self.isScanning = false
             self.hasScanned = true
         }
     }
-    
+
     func deleteSelectedFiles() {
         let itemsToDelete = files.filter { $0.isSelected }
         guard !itemsToDelete.isEmpty else { return }
-        
+
         isDeleting = true
-        
+
         Task {
             var count = 0
             var totalSize: Int64 = 0
-            
+
             let result = await Task.detached(priority: .userInitiated) { () -> (Int, Int64) in
                 var localCount = 0
                 var localSize: Int64 = 0
@@ -183,7 +217,7 @@ class LargeFilesViewModel: ObservableObject {
             }.value
             count = result.0
             totalSize = result.1
-            
+
             self.deletedCount = count
             self.deletedSize = totalSize
             self.isDeleting = false
