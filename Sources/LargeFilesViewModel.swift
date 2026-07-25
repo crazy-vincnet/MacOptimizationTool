@@ -2,6 +2,22 @@ import Foundation
 import SwiftUI
 import AppKit
 
+enum LargeFileSortColumn {
+    case name
+    case modifiedDate
+    case path
+    case size
+}
+
+enum SortDirection {
+    case ascending
+    case descending
+
+    var arrow: String {
+        self == .ascending ? " ▲" : " ▼"
+    }
+}
+
 struct LargeFileItem: Identifiable, Hashable {
     let id: String // 파일 전체 경로
     let url: URL
@@ -25,6 +41,10 @@ class LargeFilesViewModel: ObservableObject {
     @Published var hasScanned = false
     @Published var isCancelled = false
 
+    // Table Sorting State
+    @Published var currentSortColumn: LargeFileSortColumn = .size
+    @Published var currentSortDirection: SortDirection = .descending
+
     // Real-Time Progress Tracking Properties
     @Published var scanProgress: Double = 0.0
     @Published var scannedCount: Int = 0
@@ -40,6 +60,30 @@ class LargeFilesViewModel: ObservableObject {
         let defaultURL = SettingsViewModel.getSavedDefaultScanURL()
         selectedFolderURL = defaultURL
         targetFolderPath = defaultURL.path
+    }
+
+    var sortedFiles: [LargeFileItem] {
+        files.sorted { a, b in
+            switch currentSortColumn {
+            case .name:
+                return currentSortDirection == .ascending ? a.name.localizedStandardCompare(b.name) == .orderedAscending : a.name.localizedStandardCompare(b.name) == .orderedDescending
+            case .modifiedDate:
+                return currentSortDirection == .ascending ? a.lastModified < b.lastModified : a.lastModified > b.lastModified
+            case .path:
+                return currentSortDirection == .ascending ? a.url.path.localizedStandardCompare(b.url.path) == .orderedAscending : a.url.path.localizedStandardCompare(b.url.path) == .orderedDescending
+            case .size:
+                return currentSortDirection == .ascending ? a.size < b.size : a.size > b.size
+            }
+        }
+    }
+
+    func toggleSort(column: LargeFileSortColumn) {
+        if currentSortColumn == column {
+            currentSortDirection = (currentSortDirection == .ascending) ? .descending : .ascending
+        } else {
+            currentSortColumn = column
+            currentSortDirection = (column == .size || column == .modifiedDate) ? .descending : .ascending
+        }
     }
 
     func selectFolder() {

@@ -77,35 +77,66 @@ struct LargeFilesView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     VStack(alignment: .leading, spacing: 0) {
-                        // 헤더
+                        // 클릭 가능한 정렬 테이블 헤더 셀
                         HStack {
-                            Text(t("large.colName"))
-                                .fontWeight(.bold)
-                                .frame(minWidth: 120, alignment: .leading)
-                            Text(t("large.colModified"))
-                                .fontWeight(.bold)
-                                .frame(minWidth: 100, alignment: .leading)
-                            Text(t("large.colPath"))
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Text(t("large.colSize"))
-                                .fontWeight(.bold)
-                                .frame(minWidth: 80, alignment: .trailing)
+                            Text("")
+                                .frame(width: 24)
+
+                            Button(action: { viewModel.toggleSort(column: .name) }) {
+                                HStack(spacing: 4) {
+                                    Text(t("large.colName") + (viewModel.currentSortColumn == .name ? viewModel.currentSortDirection.arrow : ""))
+                                        .fontWeight(viewModel.currentSortColumn == .name ? .bold : .semibold)
+                                        .foregroundColor(viewModel.currentSortColumn == .name ? Theme.accent : Theme.textSecondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .frame(width: 200, alignment: .leading)
+
+                            Button(action: { viewModel.toggleSort(column: .modifiedDate) }) {
+                                HStack(spacing: 4) {
+                                    Text(t("large.colModified") + (viewModel.currentSortColumn == .modifiedDate ? viewModel.currentSortDirection.arrow : ""))
+                                        .fontWeight(viewModel.currentSortColumn == .modifiedDate ? .bold : .semibold)
+                                        .foregroundColor(viewModel.currentSortColumn == .modifiedDate ? Theme.accent : Theme.textSecondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .frame(width: 140, alignment: .leading)
+
+                            Button(action: { viewModel.toggleSort(column: .path) }) {
+                                HStack(spacing: 4) {
+                                    Text(t("large.colPath") + (viewModel.currentSortColumn == .path ? viewModel.currentSortDirection.arrow : ""))
+                                        .fontWeight(viewModel.currentSortColumn == .path ? .bold : .semibold)
+                                        .foregroundColor(viewModel.currentSortColumn == .path ? Theme.accent : Theme.textSecondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                            Button(action: { viewModel.toggleSort(column: .size) }) {
+                                HStack(spacing: 4) {
+                                    Spacer()
+                                    Text(t("large.colSize") + (viewModel.currentSortColumn == .size ? viewModel.currentSortDirection.arrow : ""))
+                                        .fontWeight(viewModel.currentSortColumn == .size ? .bold : .semibold)
+                                        .foregroundColor(viewModel.currentSortColumn == .size ? Theme.accent : Theme.textSecondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .frame(width: 100, alignment: .trailing)
                         }
                         .font(.system(size: 12))
-                        .foregroundColor(Theme.textSecondary)
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Theme.accent.opacity(0.06))
+                        .padding(.vertical, 10)
+                        .background(Theme.accent.opacity(0.08))
                         .cornerRadius(Theme.radiusChip)
                         
-                        // 리스트 본문
+                        // 리스트 본문 (정렬된 결과)
                         List {
-                            ForEach(viewModel.files.indices, id: \.self) { index in
-                                let file = viewModel.files[index]
+                            ForEach(viewModel.sortedFiles) { file in
                                 HStack {
                                     Button(action: {
-                                        viewModel.files[index].isSelected.toggle()
+                                        if let idx = viewModel.files.firstIndex(where: { $0.id == file.id }) {
+                                            viewModel.files[idx].isSelected.toggle()
+                                        }
                                     }) {
                                         Image(systemName: file.isSelected ? "checkmark.square.fill" : "square")
                                             .foregroundColor(file.isSelected ? Theme.accent : Theme.textSecondary)
@@ -142,6 +173,7 @@ struct LargeFilesView: View {
                             }
                         }
                         .listStyle(.plain)
+
                         
                         // 삭제 실행 하단 바
                         let selectedCount = viewModel.files.filter { $0.isSelected }.count
