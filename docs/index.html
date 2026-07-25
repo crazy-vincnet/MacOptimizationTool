@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MacOptimizationTool - Apple Silicon & Intel 전용 고성능 macOS 최적화 | Lab98 Studio</title>
-    <meta name="description" content="MacOptimizationTool - 실시간 자원 대시보드, 4단계 스마트 앱 완전 삭제기, 캐시 정리기, 대용량 및 중복 파일 탐색기를 포함한 macOS 전용 고성능 무료 최적화 앱입니다.">
-    <meta property="og:title" content="MacOptimizationTool - macOS 전용 프리미엄 최적화 툴키트">
-    <meta property="og:description" content="빠르고 스마트한 Mac 최적화. 원클릭 메모리 최적화, 잔여 파일 완전 삭제, 4개 국어 및 라이트/다크 테마 지원.">
+    <meta name="description" content="MacOptimizationTool v1.4.0 - 실시간 자원 대시보드, 4단계 스마트 앱 완전 삭제기, TCC 전체 디스크 권한 온보딩, 전 메뉴 스캔 취소, 초고속 중복 및 정크 탐색을 지원하는 macOS 전용 최적화 앱입니다.">
+    <meta property="og:title" content="MacOptimizationTool v1.4.0 - macOS 전용 프리미엄 최적화 툴키트">
+    <meta property="og:description" content="빠르고 스마트한 Mac 최적화. 원클릭 메모리 최적화, FDA 권한 온보딩, 전 기능 스캔 취소, 4개 국어 및 라이트/다크 테마 지원.">
     <meta property="og:image" content="screenshot_dashboard.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +16,7 @@
             --bg-dark: #07090e;
             --accent-blue: #3b82f6;
             --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
             --accent-purple: #8b5cf6;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
@@ -62,8 +63,8 @@
             animation: float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .blob-1 { top: -10%; left: 20%; width: 600px; height: 600px; background: radial-gradient(circle, #3b82f6 0%, #1d4ed8 100%); }
-        .blob-2 { top: 30%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, #8b5cf6 0%, #4c1d95 100%); animation-delay: -7s; }
+        .blob-1 { top: -10%; left: 20%; width: 600px; height: 600px; background: radial-gradient(circle, #10b981 0%, #059669 100%); }
+        .blob-2 { top: 30%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, #3b82f6 0%, #1d4ed8 100%); animation-delay: -7s; }
         .blob-3 { bottom: -10%; left: 10%; width: 550px; height: 550px; background: radial-gradient(circle, #06b6d4 0%, #0e7490 100%); animation-delay: -14s; }
 
         @keyframes float {
@@ -140,9 +141,9 @@
         .nav-link:hover { color: var(--text-primary); }
 
         .btn-header-cta {
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #60a5fa;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
             padding: 8px 16px;
             border-radius: 12px;
             font-size: 0.85rem;
@@ -151,7 +152,7 @@
             transition: all 0.2s ease;
         }
 
-        .btn-header-cta:hover { background: rgba(59, 130, 246, 0.3); }
+        .btn-header-cta:hover { background: rgba(16, 185, 129, 0.3); }
 
         /* Hero Section */
         .hero {
@@ -163,9 +164,9 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(59, 130, 246, 0.12);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #60a5fa;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
             padding: 6px 16px;
             border-radius: 30px;
             font-size: 0.85rem;
@@ -176,16 +177,16 @@
         .pulse-dot {
             width: 8px;
             height: 8px;
-            background-color: #3b82f6;
+            background-color: #10b981;
             border-radius: 50%;
-            box-shadow: 0 0 10px #3b82f6;
+            box-shadow: 0 0 10px #10b981;
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
         .hero-title {
@@ -200,7 +201,7 @@
         }
 
         .hero-title span {
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, #34d399 0%, #60a5fa 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -227,20 +228,20 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
             color: #ffffff;
             padding: 16px 36px;
             border-radius: 16px;
             font-size: 1.08rem;
             font-weight: 700;
             text-decoration: none;
-            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 20px 40px rgba(5, 150, 105, 0.4);
             transition: all 0.3s ease;
         }
 
         .btn-download:hover {
             transform: translateY(-3px);
-            box-shadow: 0 25px 50px rgba(59, 130, 246, 0.6);
+            box-shadow: 0 25px 50px rgba(5, 150, 105, 0.6);
         }
 
         .btn-github {
@@ -271,7 +272,7 @@
             margin: 0 auto;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(16, 185, 129, 0.2);
             border: 1px solid var(--glass-border);
         }
 
@@ -305,6 +306,54 @@
             margin: 0 auto;
         }
 
+        /* Feature Cards Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 80px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-4px);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .feature-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
         .showcase-item {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -336,7 +385,7 @@
 
         .showcase-tag {
             display: inline-block;
-            color: #60a5fa;
+            color: #34d399;
             font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -375,7 +424,7 @@
         }
 
         .bullet-icon {
-            color: #3b82f6;
+            color: #10b981;
             font-weight: 700;
         }
 
@@ -388,81 +437,31 @@
             font-size: 0.9rem;
         }
 
-        /* ==========================================
-           RESPONSIVE MOBILE BREAKPOINTS (Mobile & Tablet)
-           ========================================== */
+        /* Responsive Mobile Breakpoints */
         @media (max-width: 900px) {
-            .hero-title {
-                font-size: 3rem;
-            }
-
+            .hero-title { font-size: 3rem; }
             .showcase-item, .showcase-item.reverse {
                 grid-template-columns: 1fr;
                 direction: ltr;
                 gap: 24px;
                 margin-bottom: 60px;
             }
-
-            .showcase-h3 {
-                font-size: 1.6rem;
-            }
+            .showcase-h3 { font-size: 1.6rem; }
         }
 
         @media (max-width: 600px) {
-            .container {
-                padding: 0 16px;
-            }
-
-            header {
-                top: 10px;
-                margin-bottom: 20px;
-            }
-
-            .navbar {
-                padding: 10px 16px;
-            }
-
-            .brand-name {
-                font-size: 1rem;
-            }
-
-            .nav-link.hide-mobile {
-                display: none;
-            }
-
-            .hero {
-                padding: 20px 0 40px;
-            }
-
-            .hero-title {
-                font-size: 2.2rem;
-                letter-spacing: -0.02em;
-            }
-
-            .hero-desc {
-                font-size: 1rem;
-                margin-bottom: 28px;
-            }
-
-            .cta-group {
-                flex-direction: column;
-                width: 100%;
-                gap: 12px;
-            }
-
-            .btn-download, .btn-github {
-                width: 100%;
-                padding: 14px 20px;
-                font-size: 0.98rem;
-            }
-
-            .section-title {
-                font-size: 1.8rem;
-            }
-
-            .section-subtitle {
-                font-size: 0.95rem;
-            }
+            .container { padding: 0 16px; }
+            header { top: 10px; margin-bottom: 20px; }
+            .navbar { padding: 10px 16px; }
+            .brand-name { font-size: 1rem; }
+            .nav-link.hide-mobile { display: none; }
+            .hero { padding: 20px 0 40px; }
+            .hero-title { font-size: 2.2rem; letter-spacing: -0.02em; }
+            .hero-desc { font-size: 1rem; margin-bottom: 28px; }
+            .cta-group { flex-direction: column; width: 100%; gap: 12px; }
+            .btn-download, .btn-github { width: 100%; padding: 14px 20px; font-size: 0.98rem; }
+            .section-title { font-size: 1.8rem; }
+            .section-subtitle { font-size: 0.95rem; }
         }
     </style>
 </head>
@@ -482,9 +481,9 @@
                     <span class="brand-name">MacOptimizationTool</span>
                 </a>
                 <div class="nav-actions">
-                    <a href="#showcase" class="nav-link hide-mobile">기능 스크린샷</a>
+                    <a href="#showcase" class="nav-link hide-mobile">기능 소개</a>
                     <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="nav-link hide-mobile">GitHub</a>
-                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" target="_blank" class="btn-header-cta">v1.2.0 다운로드</a>
+                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" target="_blank" class="btn-header-cta">v1.4.0 최신버전 다운로드</a>
                 </div>
             </nav>
         </header>
@@ -493,7 +492,7 @@
         <section class="hero">
             <div class="version-pill">
                 <div class="pulse-dot"></div>
-                <span>Lab98 Studio 공식 v1.2.0 메이저 릴리즈</span>
+                <span>Lab98 Studio 공식 v1.4.0 메이저 릴리즈</span>
             </div>
 
             <h1 class="hero-title">
@@ -502,12 +501,11 @@
             </h1>
 
             <p class="hero-desc">
-                실시간 자원 대시보드, 메뉴바 미니 컨트롤러, 4단계 앱 완전 삭제기, 프로세스 폭주 가드부터 시각적 디스크 맵까지 단 하나로 해결하세요.
+                실시간 자원 대시보드, FDA 전체 디스크 권한 온보딩, 전 메뉴 비동기 스캔 취소, 4단계 앱 완전 삭제기부터 브라우저 개인정보 수거까지 단 하나로 해결하세요.
             </p>
 
             <div class="cta-group">
-                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.3.0/MacOptimizationTool_Setup.dmg" class="btn-download">
-
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.4.0/MacOptimizationTool_Setup.dmg" class="btn-download">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
@@ -530,15 +528,41 @@
             </div>
         </section>
 
-        <!-- Detailed Feature Showcases -->
-        <section id="showcase" class="showcase-section">
+        <!-- New Key Features Grid -->
+        <section class="showcase-section">
             <div class="section-header">
-                <h2 class="section-title">실제 앱 구동 화면 및 스크린샷</h2>
-                <p class="section-subtitle">Mac Clean Optimizer의 주요 모듈 화면과 세부 기능을 소개합니다.</p>
+                <h2 class="section-title">v1.4.0 메이저 코어 시스템 릴리즈</h2>
+                <p class="section-subtitle">macOS 최신 시스템 보안 가이드 및 병렬 처리 엔진으로 더 강력해졌습니다.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-box">🛡️</div>
+                    <h3 class="feature-title">FDA 전체 디스크 권한 온보딩</h3>
+                    <p class="feature-desc">TCC FileHandle 정밀 샌드박스 검사기 및 직관적인 시스템 설정 가이드 모달 제공으로 필수 디스크 접근 권한을 안전하게 안내합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">🛑</div>
+                    <h3 class="feature-title">전 메뉴 비동기 스캔 취소</h3>
+                    <p class="feature-desc">중복 파일, 대용량 파일, 정크 디스크 청소, 방치 다운로드 등 모든 탐색 오버레이에 [스캔 취소] 버튼을 연동하여 즉시 중단 가능합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">⚡</div>
+                    <h3 class="feature-title">16-Worker 초고속 해시 엔진</h3>
+                    <p class="feature-desc">16개 전용 워커 바운디드 병렬 슬라이딩 윈도우로 파일 시스템 교착상태 없이 대용량 파일 해시를 초고속 비교합니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-box">🚀</div>
+                    <h3 class="feature-title">100Mbps+ CDN 초고속 자동 업데이트</h3>
+                    <p class="feature-desc">Sparkle 2 기반 CDN 전용 스트리밍 다운로더와 실시간 MB / 퍼센트 전송률을 지원하여 손쉽게 최신 버전을 다운로드합니다.</p>
+                </div>
             </div>
 
             <!-- Showcase Item 1: Dashboard -->
-            <div class="showcase-item">
+            <div id="showcase" class="showcase-item">
                 <div class="showcase-image-box">
                     <img src="screenshot_dashboard.jpg" alt="System Dashboard Screenshot">
                 </div>
@@ -568,7 +592,7 @@
                         앱 파일 본체만 삭제해서는 지워지지 않는 Application Support, Caches, Preferences 등의 숨은 찌꺼기 파일까지 완벽하게 추적합니다.
                     </p>
                     <ul class="feature-bullets">
-                        <li><span class="bullet-icon">✓</span> <strong>드롭존 지원</strong>: 앱 아이콘을 드래그 앤 드롭하여 1초 만에 잔여 파일 탐색</li>
+                        <li><span class="bullet-icon">✓</span> <strong>사전 권한 검증 (Pre-Auth)</strong>: 비밀번호 오류 시 오삭제 없는 안전 찌꺼기 수거</li>
                         <li><span class="bullet-icon">✓</span> <strong>4단계 폴백 엔진</strong>: Trash ➔ NSWorkspace ➔ Direct Delete ➔ Admin Privilege Escalation</li>
                         <li><span class="bullet-icon">✓</span> <strong>시동 프로그램 관리자</strong>: 부팅 시 실행되는 백그라운드 에이전트 선택적 비활성화</li>
                     </ul>
