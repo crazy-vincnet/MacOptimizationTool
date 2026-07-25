@@ -65,12 +65,15 @@ final class SparkleUpdaterManager: NSObject, ObservableObject {
                 
                 let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
                 let currentVerString = "v\(appVer)"
-                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: t("settings.updateAlert"), downloadURL: nil))
+                let formattedMsg = String(format: t("settings.updateAlert"), appVer)
+                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: formattedMsg, downloadURL: nil))
             } catch {
                 let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
                 let currentVerString = "v\(appVer)"
-                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: t("settings.updateAlert"), downloadURL: nil))
+                let formattedMsg = String(format: t("settings.updateAlert"), appVer)
+                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: formattedMsg, downloadURL: nil))
             }
+
 
         }
     }

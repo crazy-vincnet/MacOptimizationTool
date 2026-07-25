@@ -151,7 +151,8 @@ class LanguageManager: ObservableObject {
             "settings.version": "현재 버전",
             "settings.buildDate": "빌드 일자",
             "settings.checkUpdate": "업데이트 확인",
-            "settings.updateAlert": "현재 최신 버전(v1.0.0)을 사용하고 있습니다.",
+            "settings.updateAlert": "현재 최신 버전(v%@)을 사용하고 있습니다.",
+
             "settings.testNotif": "테스트 알림"
         ],
 
@@ -222,7 +223,8 @@ class LanguageManager: ObservableObject {
             "settings.version": "Current Version",
             "settings.buildDate": "Build Date",
             "settings.checkUpdate": "Check for Updates",
-            "settings.updateAlert": "You are currently running the latest version (v1.0.0).",
+            "settings.updateAlert": "You are currently running the latest version (v%@).",
+
             "settings.testNotif": "Test Notification"
         ],
 
@@ -293,7 +295,8 @@ class LanguageManager: ObservableObject {
             "settings.version": "当前版本",
             "settings.buildDate": "构建日期",
             "settings.checkUpdate": "检查更新",
-            "settings.updateAlert": "您当前使用的是最新版本 (v1.0.0)。",
+            "settings.updateAlert": "您当前使用的是最新版本 (v%@)。",
+
             "settings.testNotif": "测试通知"
         ],
 
@@ -358,7 +361,8 @@ class LanguageManager: ObservableObject {
             "settings.version": "現在のバージョン",
             "settings.buildDate": "ビルド日付",
             "settings.checkUpdate": "アップデートを確認",
-            "settings.updateAlert": "現在、最新バージョン (v1.0.0) を使用しています。",
+            "settings.updateAlert": "現在、最新バージョン (v%@) を使用しています。",
+
             "settings.testNotif": "テスト通知"
         ]
     ]
