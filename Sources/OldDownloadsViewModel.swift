@@ -92,9 +92,10 @@ final class OldDownloadsViewModel: ObservableObject {
                 let now = Date()
                 var list: [OldDownloadItem] = []
 
-                // 패키지 내부 파일(.app, .framework 내부 무한 탐색)을 건너뛰고 권한 에러 시 멈추지 않는 에러 핸들러 지정
-                let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants]
+                // Downloads 폴더 직속(최상위 1단계) 방치 파일만 초고속 스캔하도록 하위 디렉토리 탐색 생략 옵션 추가
+                let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants]
                 let keys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey, .isDirectoryKey, .isPackageKey]
+
 
                 guard let enumerator = fm.enumerator(
                     at: downloadsURL,
