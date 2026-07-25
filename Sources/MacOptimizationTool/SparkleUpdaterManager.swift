@@ -49,11 +49,26 @@ final class SparkleUpdaterManager: NSObject, ObservableObject, URLSessionDownloa
 
     // MARK: - Update check
 
+    /// 업데이트 확인 전용 세션. 캐시를 쓰지도, 남기지도 않는다.
+    /// `URLSession.shared` 는 이전 응답을 디스크 캐시에 남기고, 오프라인에서 그 응답을 그대로
+    /// 돌려줄 수 있다. 그러면 네트워크가 끊긴 상태에서도 "최신 버전" 으로 잘못 보고된다.
+    nonisolated private static let checkSession: URLSession = {
+        let config = URLSessionConfiguration.ephemeral
+        config.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        config.urlCache = nil
+        config.timeoutIntervalForRequest = 10
+        config.timeoutIntervalForResource = 15
+        return URLSession(configuration: config)
+    }()
+
     func checkForUpdates(completion: @escaping (UpdateCheckResult) -> Void) {
         var request = URLRequest(url: Self.releaseAPIURL)
         request.timeoutInterval = 10
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.setValue("MacOptimizationTool/\(Self.currentVersion)", forHTTPHeaderField: "User-Agent")
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+        request.setValue("no-cache", forHTTPHeaderField: "Pragma")
 
         Task {
             let current = UpdateVerification.normalizedVersion(Self.currentVersion)
@@ -70,7 +85,18 @@ final class SparkleUpdaterManager: NSObject, ObservableObject, URLSessionDownloa
 
             let payload: (Data, URLResponse)
             do {
-                payload = try await URLSession.shared.data(for: request)
+                payload = try await Self.checkSession.data(for: request)
+            } catch let error as URLError {
+                // 연결 자체가 없는 경우는 사유를 분명히 알려준다.
+                switch error.code {
+                case .notConnectedToInternet, .networkConnectionLost, .cannotFindHost, .dnsLookupFailed:
+                    reportFailure(t("update.checkFailed.offline"))
+                case .timedOut:
+                    reportFailure(t("update.checkFailed.timedOut"))
+                default:
+                    reportFailure(error.localizedDescription)
+                }
+                return
             } catch {
                 reportFailure(error.localizedDescription)
                 return
