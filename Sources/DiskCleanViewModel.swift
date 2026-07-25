@@ -23,6 +23,8 @@ struct JunkCategory: Identifiable {
 
 @MainActor
 class DiskCleanViewModel: ObservableObject {
+    static let shared = DiskCleanViewModel()
+
     @Published var categories: [JunkCategory] = []
     @Published var isScanning = false
     @Published var isCleaning = false
@@ -30,23 +32,29 @@ class DiskCleanViewModel: ObservableObject {
     @Published var totalJunkSize: Int64 = 0
     @Published var cleanedSize: Int64 = 0
     @Published var hasScanned = false
-    
+
+    // Real-Time Progress Tracking Properties
+    @Published var scanProgress: Double = 0.0
+    @Published var currentScanCategory: String = ""
+    @Published var scanStatusText: String = ""
+    @Published var scannedItemCount: Int = 0
+
     // 파일명 호환성 고도화 상태 변수들
     @Published var isFixingFilenames = false
     @Published var fixProgress: Double = 0.0
     @Published var showFixSuccess = false
     @Published var fixedCount = 0
     @Published var fixedHistory: [String] = []
-    
+
     init() {
         resetCategories()
     }
-    
+
     func resetCategories() {
         let fm = FileManager.default
         let userHome = fm.homeDirectoryForCurrentUser
         let userLibrary = userHome.appendingPathComponent("Library")
-        
+
         categories = [
             JunkCategory(
                 id: "userCaches",
@@ -83,64 +91,77 @@ class DiskCleanViewModel: ObservableObject {
             )
         ]
     }
-    
+
     func scanJunk() {
         isScanning = true
         showCleanSuccess = false
+        scanProgress = 0.05
+        scannedItemCount = 0
+        scanStatusText = "시스템 캐시 및 임시 파일 스캔 시작..."
         resetCategories()
-        
+
         let localCategories = categories
-        
+        let totalCategoriesCount = localCategories.count
+
         Task {
-            // TaskGroup을 사용하여 비동기 병렬 스캔 처리 (최신 Swift Concurrency 표준)
-            let updatedCategories = await withTaskGroup(of: (Int, [JunkSubItem], Int64).self) { group in
+            let updatedCategories = await Task.detached(priority: .userInitiated) { [weak self] () -> [JunkCategory] in
+                var results = localCategories
+                let fm = FileManager.default
+                var totalFoundCount = 0
+
                 for (index, cat) in localCategories.enumerated() {
-                    group.addTask(priority: .userInitiated) {
-                        let fm = FileManager.default
-                        var subItems: [JunkSubItem] = []
-                        var totalSize: Int64 = 0
-                        
-                        for url in cat.urls {
-                            let isAccessed = url.startAccessingSecurityScopedResource()
-                            defer {
-                                if isAccessed {
-                                    url.stopAccessingSecurityScopedResource()
-                                }
-                            }
-                            
-                            let contents = (try? fm.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [])) ?? []
-                            for childURL in contents {
-                                let childSize = Self.getDirectorySizeStatic(at: childURL)
-                                if childSize > 1024 {
-                                    let name = childURL.lastPathComponent
-                                    let subItem = JunkSubItem(id: childURL.path, url: childURL, name: name, size: childSize)
-                                    subItems.append(subItem)
-                                    totalSize += childSize
-                                }
+                    let catName = cat.name
+                    await MainActor.run {
+                        self?.currentScanCategory = catName
+                        self?.scanStatusText = "[\(catName)] 정크 항목 탐색 중..."
+                        self?.scanProgress = 0.05 + (Double(index) / Double(totalCategoriesCount) * 0.90)
+                    }
+
+                    var subItems: [JunkSubItem] = []
+                    var totalSize: Int64 = 0
+
+                    for url in cat.urls {
+                        let isAccessed = url.startAccessingSecurityScopedResource()
+                        defer {
+                            if isAccessed {
+                                url.stopAccessingSecurityScopedResource()
                             }
                         }
-                        
-                        subItems.sort { $0.size > $1.size }
-                        return (index, subItems, totalSize)
+
+                        let contents = (try? fm.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [])) ?? []
+                        for childURL in contents {
+                            let childSize = Self.getDirectorySizeStatic(at: childURL)
+                            if childSize > 1024 {
+                                let name = childURL.lastPathComponent
+                                let subItem = JunkSubItem(id: childURL.path, url: childURL, name: name, size: childSize)
+                                subItems.append(subItem)
+                                totalSize += childSize
+                                totalFoundCount += 1
+                            }
+                        }
                     }
-                }
-                
-                var results = localCategories
-                for await (index, subItems, totalSize) in group {
+
+                    subItems.sort { $0.size > $1.size }
                     results[index].subItems = subItems
                     results[index].size = totalSize
+
+                    let count = totalFoundCount
+                    await MainActor.run {
+                        self?.scannedItemCount = count
+                    }
                 }
+
                 return results
-            }
-            
+            }.value
+
             self.categories = updatedCategories
             self.recalculateTotalSize()
+            self.scanProgress = 1.0
             self.isScanning = false
             self.hasScanned = true
         }
     }
-    
-    // 카테고리 전체 체크/체크해제 시 하위 항목 일괄 동기화
+
     func toggleCategorySelection(at index: Int) {
         let newValue = !categories[index].isSelected
         categories[index].isSelected = newValue
@@ -149,17 +170,16 @@ class DiskCleanViewModel: ObservableObject {
         }
         recalculateTotalSize()
     }
-    
-    // 하위 개별 항목 체크 상태 변경
+
     func toggleSubItemSelection(categoryIndex: Int, subItemIndex: Int) {
         let newValue = !categories[categoryIndex].subItems[subItemIndex].isSelected
         categories[categoryIndex].subItems[subItemIndex].isSelected = newValue
-        
+
         let hasSelected = categories[categoryIndex].subItems.contains { $0.isSelected }
         categories[categoryIndex].isSelected = hasSelected
         recalculateTotalSize()
     }
-    
+
     func recalculateTotalSize() {
         var total: Int64 = 0
         for cat in categories {
@@ -171,20 +191,20 @@ class DiskCleanViewModel: ObservableObject {
         }
         totalJunkSize = total
     }
-    
+
     func cleanJunk() {
         var itemsToDelete: [JunkSubItem] = []
         for cat in categories {
             itemsToDelete.append(contentsOf: cat.subItems.filter { $0.isSelected })
         }
-        
+
         guard !itemsToDelete.isEmpty else { return }
         isCleaning = true
-        
+
         Task {
             let totalCleaned = await Task.detached(priority: .userInitiated) { () -> Int64 in
                 var cleaned: Int64 = 0
-                
+
                 for item in itemsToDelete {
                     let url = item.url
                     let isAccessed = url.startAccessingSecurityScopedResource()
@@ -193,22 +213,21 @@ class DiskCleanViewModel: ObservableObject {
                             url.stopAccessingSecurityScopedResource()
                         }
                     }
-                    
+
                     if FileSafety.moveToTrash(url) {
                         cleaned += item.size
                     }
                 }
                 return cleaned
             }.value
-            
+
             self.cleanedSize = totalCleaned
             self.isCleaning = false
             self.showCleanSuccess = true
-            self.scanJunk() // 정리 완료 후 화면 갱신
+            self.scanJunk()
         }
     }
-    
-    // Windows 한글 자모 풀림 문제 해결 메서드 (다중 파일 및 폴더 동시 지원)
+
     func runWindowsFilenameFixer() {
         let openPanel = NSOpenPanel()
         openPanel.allowedContentTypes = []
@@ -217,7 +236,7 @@ class DiskCleanViewModel: ObservableObject {
         openPanel.canChooseFiles = true
         openPanel.title = t("wincompat.panelTitle")
         openPanel.prompt = t("wincompat.panelPrompt")
-        
+
         openPanel.begin { [weak self] response in
             guard let self = self else { return }
             if response == .OK && !openPanel.urls.isEmpty {
@@ -228,18 +247,18 @@ class DiskCleanViewModel: ObservableObject {
             }
         }
     }
-    
+
     private func startWindowsFilenameFix(for urls: [URL]) async {
         isFixingFilenames = true
         showFixSuccess = false
         fixProgress = 0.0
-        
+
         let result = await Task.detached(priority: .userInitiated) { () -> (Int, [String]) in
             let fm = FileManager.default
             var renamedCount = 0
             var renamedPaths: [String] = []
             var itemsToProcess: Set<URL> = []
-            
+
             for url in urls {
                 let isAccessed = url.startAccessingSecurityScopedResource()
                 defer {
@@ -247,7 +266,7 @@ class DiskCleanViewModel: ObservableObject {
                         url.stopAccessingSecurityScopedResource()
                     }
                 }
-                
+
                 var isDir: ObjCBool = false
                 if fm.fileExists(atPath: url.path, isDirectory: &isDir) {
                     if isDir.boolValue {
@@ -257,7 +276,6 @@ class DiskCleanViewModel: ObservableObject {
                             includingPropertiesForKeys: [.isDirectoryKey],
                             options: [.skipsHiddenFiles]
                         ) {
-                            // NSEnumerator while-nextObject 구조로 변경하여 Sendability 준수
                             while let childURL = enumerator.nextObject() as? URL {
                                 itemsToProcess.insert(childURL)
                             }
@@ -267,10 +285,10 @@ class DiskCleanViewModel: ObservableObject {
                     }
                 }
             }
-            
+
             var itemsArray = Array(itemsToProcess)
             itemsArray.sort { $0.path.count > $1.path.count }
-            
+
             let totalItems = itemsArray.count
             for (index, url) in itemsArray.enumerated() {
                 let isAccessed = url.startAccessingSecurityScopedResource()
@@ -279,10 +297,10 @@ class DiskCleanViewModel: ObservableObject {
                         url.stopAccessingSecurityScopedResource()
                     }
                 }
-                
+
                 let originalName = url.lastPathComponent
                 let nfcName = originalName.precomposedStringWithCanonicalMapping
-                
+
                 if originalName != nfcName {
                     let destinationURL = url.deletingLastPathComponent().appendingPathComponent(nfcName)
                     do {
@@ -293,29 +311,29 @@ class DiskCleanViewModel: ObservableObject {
                         print("자모 복구 이름 변경 실패: \(url.path), 에러: \(error.localizedDescription)")
                     }
                 }
-                
+
                 let progressValue = totalItems > 0 ? Double(index + 1) / Double(totalItems) : 1.0
                 Task { @MainActor [weak self] in
                     self?.fixProgress = progressValue
                 }
             }
-            
+
             return (renamedCount, renamedPaths)
         }.value
-        
+
         self.fixedCount = result.0
         self.fixedHistory = result.1
         self.isFixingFilenames = false
         self.showFixSuccess = true
     }
-    
+
     nonisolated private static func getDirectorySizeStatic(at url: URL) -> Int64 {
         let fm = FileManager.default
         var size: Int64 = 0
         var isDir: ObjCBool = false
-        
+
         guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return 0 }
-        
+
         if !isDir.boolValue {
             var statInfo = stat()
             if lstat(url.path, &statInfo) == 0 {

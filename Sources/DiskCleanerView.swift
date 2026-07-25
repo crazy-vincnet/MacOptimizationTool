@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DiskCleanerView: View {
-    @StateObject private var viewModel = DiskCleanViewModel()
+    @ObservedObject private var viewModel = DiskCleanViewModel.shared
     @State private var showCleanConfirm = false
 
     var body: some View {
@@ -195,9 +195,39 @@ struct DiskCleanerView: View {
                 }
             }
             
-            // 로딩 오버레이
+            // 실시간 스캔 프로그레스 카드 오버레이
             if viewModel.isScanning {
-                ProgressOverlay(message: t("disk.progressScanning"))
+                ZStack {
+                    Theme.bgCardHover.opacity(0.88)
+                        .edgesIgnoringSafeArea(.all)
+
+                    VStack(spacing: 18) {
+                        Image(systemName: "opticaldisc.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(Theme.accent)
+
+                        Text(viewModel.scanStatusText)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(Theme.textPrimary)
+
+                        ProgressView(value: viewModel.scanProgress)
+                            .progressViewStyle(.linear)
+                            .tint(Theme.accent)
+                            .frame(width: 320)
+
+                        VStack(spacing: 4) {
+                            Text("현재 스캔 타겟: \(viewModel.currentScanCategory)")
+                                .font(.system(size: 11, design: .monospaced))
+                                .foregroundColor(Theme.textSecondary)
+
+                            Text("정크 항목 탐색: 총 \(viewModel.scannedItemCount)개 항목 발견 완료")
+                                .font(.system(size: 11))
+                                .foregroundColor(Theme.textSecondary)
+                        }
+                    }
+                    .padding(28)
+                    .glassCard(padding: 28, radius: Theme.radiusCard)
+                }
             }
 
             if viewModel.isCleaning {

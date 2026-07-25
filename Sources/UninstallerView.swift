@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct UninstallerView: View {
-    @StateObject private var viewModel = UninstallerViewModel()
+    @ObservedObject private var viewModel = UninstallerViewModel.shared
     @State private var isTargeted = false
     @State private var searchText = ""
     @State private var showDeleteConfirm = false
@@ -211,9 +211,13 @@ struct UninstallerView: View {
                     ProgressView()
                         .scaleEffect(1.0)
                         .tint(Theme.accent)
-                    Text(t("uninst.loadingApps"))
+                    Text(viewModel.scanStatusText.isEmpty ? t("uninst.loadingApps") : viewModel.scanStatusText)
                         .foregroundColor(Theme.textSecondary)
                         .font(.subheadline)
+                    ProgressView(value: viewModel.scanProgress)
+                        .progressViewStyle(.linear)
+                        .tint(Theme.accent)
+                        .frame(width: 280)
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -355,23 +359,30 @@ struct UninstallerView: View {
         .glassCard(padding: 12, radius: Theme.radiusControl)
     }
     
-    // 2. 스캔 로딩 뷰
+    // 2. 실시간 앱 잔여 찌꺼기 스캔 로딩 카드 뷰
     private var scanningView: some View {
         VStack(spacing: 20) {
             Spacer()
-            ProgressView()
-                .scaleEffect(1.5)
-                .tint(Theme.accent)
-            VStack(spacing: 5) {
-                Text(t("uninst.scanning"))
+            Image(systemName: "trash.circle.fill")
+                .font(.system(size: 40))
+                .foregroundColor(Theme.accent)
+
+            VStack(spacing: 6) {
+                Text(viewModel.scanStatusText.isEmpty ? t("uninst.scanning") : viewModel.scanStatusText)
                     .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .foregroundColor(Theme.textPrimary)
                 if let app = viewModel.selectedApp {
-                    Text("\(app.name) \(t("uninst.scanningDetail"))")
+                    Text("\(app.name) - \(viewModel.currentScanPath)")
                         .font(.subheadline)
                         .foregroundColor(Theme.textSecondary)
                 }
             }
+
+            ProgressView(value: viewModel.scanProgress)
+                .progressViewStyle(.linear)
+                .tint(Theme.accent)
+                .frame(width: 320)
+
             Spacer()
         }
         .frame(maxWidth: .infinity)

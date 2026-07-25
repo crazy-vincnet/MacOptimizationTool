@@ -77,7 +77,10 @@ struct MainView: View {
     @ObservedObject private var processGuard = ProcessGuardManager.shared
     @ObservedObject private var duplicateVM = DuplicateViewModel.shared
     @ObservedObject private var largeVM = LargeFilesViewModel.shared
+    @ObservedObject private var diskCleanVM = DiskCleanViewModel.shared
+    @ObservedObject private var uninstallerVM = UninstallerViewModel.shared
     @AppStorage("appTheme") private var appThemeRaw: String = AppTheme.light.rawValue
+
 
 
 
@@ -308,11 +311,17 @@ struct MainView: View {
             
             Spacer()
 
-            if (tab == .duplicateFinder && duplicateVM.isScanning) || (tab == .largeFiles && largeVM.isScanning) {
+            let isScanningTab = (tab == .duplicateFinder && duplicateVM.isScanning) ||
+                                (tab == .largeFiles && largeVM.isScanning) ||
+                                (tab == .diskCleaner && diskCleanVM.isScanning) ||
+                                (tab == .uninstaller && (uninstallerVM.isScanning || uninstallerVM.isSearchingApps))
+
+            if isScanningTab {
                 ProgressView()
                     .scaleEffect(0.55)
                     .frame(width: 14, height: 14)
             }
+
 
 
         }

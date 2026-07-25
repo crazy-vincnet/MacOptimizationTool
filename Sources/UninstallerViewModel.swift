@@ -4,6 +4,8 @@ import Combine
 
 @MainActor
 class UninstallerViewModel: ObservableObject {
+    static let shared = UninstallerViewModel()
+
     @Published var selectedApp: SelectedAppInfo? = nil
     @Published var leftoverItems: [LeftoverItem] = []
     @Published var isScanning = false
@@ -11,6 +13,12 @@ class UninstallerViewModel: ObservableObject {
     @Published var showCleanSuccess = false
     @Published var cleanedSize: Int64 = 0
     
+    // Real-Time Progress Tracking Properties
+    @Published var scanProgress: Double = 0.0
+    @Published var scanStatusText: String = ""
+    @Published var currentScanPath: String = ""
+    @Published var scannedAppCount: Int = 0
+
     // 설치된 앱 목록을 위한 변수
     @Published var installedApps: [SelectedAppInfo] = []
     @Published var isSearchingApps = false
@@ -22,13 +30,14 @@ class UninstallerViewModel: ObservableObject {
     func fetchInstalledApps() {
         isSearchingApps = true
         installedApps = []
+        scanProgress = 0.05
+        scanStatusText = "설치된 응용 프로그램 스캔 중..."
         
         Task {
-            let apps = await Task.detached(priority: .userInitiated) { () -> [SelectedAppInfo] in
+            let apps = await Task.detached(priority: .userInitiated) { [weak self] () -> [SelectedAppInfo] in
                 let fm = FileManager.default
                 let appsURL = URL(fileURLWithPath: "/Applications")
                 
-                // 샌드박스 접근 토큰 획득
                 let isAccessed = appsURL.startAccessingSecurityScopedResource()
                 defer {
                     if isAccessed {
@@ -41,7 +50,9 @@ class UninstallerViewModel: ObservableObject {
                 }
                 
                 var results: [SelectedAppInfo] = []
-                for url in contents {
+                let totalContents = contents.count
+
+                for (index, url) in contents.enumerated() {
                     if url.pathExtension.lowercased() == "app" {
                         let name = url.deletingPathExtension().lastPathComponent
                         let infoPlistURL = url.appendingPathComponent("Contents/Info.plist")
@@ -71,6 +82,16 @@ class UninstallerViewModel: ObservableObject {
                             installationDate: instDate
                         )
                         results.append(app)
+
+                        let count = results.count
+                        let appName = name
+                        let progress = 0.05 + (Double(index) / Double(totalContents) * 0.90)
+                        await MainActor.run {
+                            self?.scannedAppCount = count
+                            self?.currentScanPath = appName
+                            self?.scanStatusText = "앱 목록 탐색 중... (\(count)개 앱 발견)"
+                            self?.scanProgress = progress
+                        }
                     }
                 }
                 
@@ -79,6 +100,7 @@ class UninstallerViewModel: ObservableObject {
             }.value
             
             self.installedApps = apps
+            self.scanProgress = 1.0
             self.isSearchingApps = false
             self.loadAppSizesInBackground()
         }
@@ -116,7 +138,6 @@ class UninstallerViewModel: ObservableObject {
         }
     }
     
-    /// 앱 선택 창을 띄웁니다.
     func selectAppAndScan() {
         let openPanel = NSOpenPanel()
         openPanel.allowedContentTypes = [.application]
@@ -132,11 +153,12 @@ class UninstallerViewModel: ObservableObject {
         }
     }
     
-    /// Drag & Drop이나 선택 완료 후 앱 정보를 로드하고 스캔을 시작합니다.
     func loadAppAndScan(at url: URL) {
         isScanning = true
         showCleanSuccess = false
         leftoverItems = []
+        scanProgress = 0.05
+        scanStatusText = "선택된 앱 잔여 찌꺼기 파일 탐색 중..."
         
         Task {
             let appInfo = await Task.detached(priority: .userInitiated) {
@@ -172,24 +194,22 @@ class UninstallerViewModel: ObservableObject {
                     name: appName,
                     bundleID: bundleID,
                     version: version,
-                icon: icon,
-                size: appSize,
-                installationDate: instDate
-            )
-        }.value
-        
-        self.selectedApp = appInfo
-        await self.scanLeftovers(for: appInfo)
+                    icon: icon,
+                    size: appSize,
+                    installationDate: instDate
+                )
+            }.value
+            
+            self.selectedApp = appInfo
+            await self.scanLeftovers(for: appInfo)
         }
     }
     
-    /// 앱을 직접 드롭했을 때의 경로 처리
     func handleDroppedAppURL(_ url: URL) {
         guard url.pathExtension.lowercased() == "app" else { return }
         loadAppAndScan(at: url)
     }
     
-    /// 앱과 연관된 잔여 파일을 탐색합니다.
     private func scanLeftovers(for app: SelectedAppInfo) async {
         let fm = FileManager.default
         let userHome = fm.homeDirectoryForCurrentUser
@@ -217,20 +237,28 @@ class UninstallerViewModel: ObservableObject {
             (URL(fileURLWithPath: "/Library/LaunchDaemons"), .launchAgents)
         ]
         
-        let items = await Task.detached(priority: .userInitiated) { () -> [LeftoverItem] in
+        let totalDirs = scanDirectories.count
+
+        let items = await Task.detached(priority: .userInitiated) { [weak self] () -> [LeftoverItem] in
             let localFM = FileManager.default
             var results: [LeftoverItem] = []
             
-            // A. 앱 자체 파일 추가 (.app bundle)
             results.append(LeftoverItem(url: app.url, size: app.size, category: .appBundle, isSelected: true))
             
-            // B. 시스템 디렉토리 스캔
-            for (dirURL, category) in scanDirectories {
+            for (idx, (dirURL, category)) in scanDirectories.enumerated() {
                 let scanPath = dirURL.standardized.path
                 if FileSafety.isProtectedExact(scanPath) {
                     continue
                 }
                 
+                let dirName = dirURL.lastPathComponent
+                let progress = 0.10 + (Double(idx) / Double(totalDirs) * 0.85)
+                await MainActor.run {
+                    self?.currentScanPath = dirName
+                    self?.scanStatusText = "보조 라이브러리 스캔 중... (\(dirName))"
+                    self?.scanProgress = progress
+                }
+
                 let isAccessed = dirURL.startAccessingSecurityScopedResource()
                 defer {
                     if isAccessed {
@@ -266,6 +294,7 @@ class UninstallerViewModel: ObservableObject {
         }.value
         
         self.leftoverItems = items
+        self.scanProgress = 1.0
         self.isScanning = false
     }
     
@@ -294,20 +323,15 @@ class UninstallerViewModel: ObservableObject {
             return false
         }
         
-        // 앱 이름 매칭은 경계(구분자) 기준으로만 허용한다.
-        // 단순 substring contains 는 무관한 다른 앱의 파일을 오탐하므로 제거.
         if lowerAppName.count >= 4 {
             let delimiters: [Character] = [".", "-", "_", " "]
 
-            // "AppName" + 구분자 로 시작 (예: "myapp.helper.plist")
             for delim in delimiters {
                 if lowerName.hasPrefix(lowerAppName + String(delim)) {
                     return true
                 }
             }
 
-            // 구분자로 나눈 토큰 중 하나가 앱 이름과 정확히 일치할 때만 허용.
-            // (com.vendor.myapp / myapp-2024.log 등은 잡고, "myapplication" 오탐은 배제)
             let tokens = lowerName.split(whereSeparator: { delimiters.contains($0) })
             if tokens.contains(where: { String($0) == lowerAppName }) {
                 return true
@@ -394,5 +418,4 @@ class UninstallerViewModel: ObservableObject {
         isScanning = false
         isCleaning = false
     }
-
 }
