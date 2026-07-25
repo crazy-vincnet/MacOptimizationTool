@@ -89,36 +89,33 @@ struct SettingsView: View {
             .padding(.horizontal, Theme.pagePadding)
             .padding(.bottom, Theme.pagePadding)
         }
-        .alert(isPresented: $viewModel.showUpdateAlert) {
+        // 구형 `alert(isPresented:) { Alert(...) }` 는 조상 뷰(MainView)에도 같은 수정자가 걸려 있으면
+        // 자식 쪽 표시가 삼켜질 수 있다. 최신 API 로 바꿔 조상 알림과 독립적으로 표시되게 한다.
+        // 결과 자체는 앱 정보 카드의 상태 행에도 남으므로 알림을 놓쳐도 확인할 수 있다.
+        .alert(updateAlertTitle, isPresented: $viewModel.showUpdateAlert) {
             if viewModel.updateCheckFailed {
-                Alert(
-                    title: Text(t("update.alert.checkFailedTitle")),
-                    message: Text(viewModel.updateAlertMessage),
-                    primaryButton: .default(Text(t("update.alert.openReleasePage")), action: {
-                        if let url = viewModel.updateURL {
-                            NSWorkspace.shared.open(url)
-                        }
-                    }),
-                    secondaryButton: .cancel(Text(t("common.ok")))
-                )
+                Button(t("update.alert.openReleasePage")) {
+                    if let url = viewModel.updateURL {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+                Button(t("common.ok"), role: .cancel) {}
             } else if viewModel.hasNewVersion {
-                Alert(
-                    title: Text(t("update.alert.newTitle")),
-                    message: Text(viewModel.updateAlertMessage),
-                    primaryButton: .default(Text(t("update.alert.installNow")), action: {
-                        viewModel.startInAppUpdate()
-                    }),
-                    secondaryButton: .cancel(Text(t("disk.cancel")))
-                )
+                Button(t("update.alert.installNow")) {
+                    viewModel.startInAppUpdate()
+                }
+                Button(t("disk.cancel"), role: .cancel) {}
             } else {
-                Alert(
-                    title: Text(t("settings.checkUpdate")),
-                    message: Text(String(format: t("update.alert.redownloadMessage"), viewModel.updateAlertMessage)),
-                    primaryButton: .default(Text(t("update.alert.redownload")), action: {
-                        viewModel.startInAppUpdate()
-                    }),
-                    secondaryButton: .cancel(Text(t("common.ok")))
-                )
+                Button(t("update.alert.redownload")) {
+                    viewModel.startInAppUpdate()
+                }
+                Button(t("common.ok"), role: .cancel) {}
+            }
+        } message: {
+            if viewModel.updateCheckFailed || viewModel.hasNewVersion {
+                Text(viewModel.updateAlertMessage)
+            } else {
+                Text(String(format: t("update.alert.redownloadMessage"), viewModel.updateAlertMessage))
             }
         }
 
@@ -402,6 +399,12 @@ struct SettingsView: View {
             }
         }
         .glassCard()
+    }
+
+    private var updateAlertTitle: String {
+        if viewModel.updateCheckFailed { return t("update.alert.checkFailedTitle") }
+        if viewModel.hasNewVersion { return t("update.alert.newTitle") }
+        return t("settings.checkUpdate")
     }
 
     // MARK: - Update status row

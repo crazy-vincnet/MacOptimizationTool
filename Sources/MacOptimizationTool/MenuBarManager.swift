@@ -115,10 +115,12 @@ final class MenuBarManager: NSObject, ObservableObject {
 
         let now = Date()
         let timeInterval = now.timeIntervalSince(lastNetworkCheckTime)
-        if timeInterval > 0 && prevBytesIn > 0 {
-            let bytesInPerSec = Double(totalIn - prevBytesIn) / timeInterval
-            let bytesOutPerSec = Double(totalOut - prevBytesOut) / timeInterval
 
+        // 카운터가 되돌아간 주기는 계산하지 않고 기준선만 다시 잡는다.
+        // (u_int32_t 랩어라운드·인터페이스 재생성 시 누적치가 줄어든다.)
+        if prevBytesIn > 0,
+           let bytesInPerSec = NetworkThroughput.bytesPerSecond(current: totalIn, previous: prevBytesIn, interval: timeInterval),
+           let bytesOutPerSec = NetworkThroughput.bytesPerSecond(current: totalOut, previous: prevBytesOut, interval: timeInterval) {
             self.downloadSpeed = formatSpeed(bytesInPerSec)
             self.uploadSpeed = formatSpeed(bytesOutPerSec)
         }
