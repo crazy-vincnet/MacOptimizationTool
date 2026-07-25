@@ -1,17 +1,55 @@
-# macOS System Files
+# ==========================================
+# macOS System & Finder Metadata
+# ==========================================
 .DS_Store
 .AppleDouble
 .LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Build Artifacts & Large Binary Releases
+# ==========================================
+# Build Artifacts & Binary Releases
+# ==========================================
 *.app
+*.app/
 *.dmg
 *.pkg
 *.iconset
 *.o
 *.dSYM/
 *.tmp
+dmg_staging/
+pkg_staging/
+
+# Temporary Local App & Package Artifacts
 MacCleanOptimizer*.app
 MacCleanOptimizer 2.app/
 MacCleanOptimizer 3.app/
 MacCleanOptimizer 4.app/
+MacCleanOptimizer_Setup.dmg
+MacCleanOptimizer_AppStore.pkg
+
+# ==========================================
+# Xcode & Swift Package Manager Caches
+# ==========================================
+.build/
+Packages/
+xcuserdata/
+*.xcworkspace
+!default.xcworkspace
+*.moved-aside
+*.derivedData
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# ==========================================
+# Environment & IDE Caches
+# ==========================================
+.vscode/
+.idea/
+*.log
