@@ -95,14 +95,17 @@ final class StartupManagerViewModel: ObservableObject {
         if newEnabled {
             if currentItem.path.hasSuffix(".disabled") {
                 let newPath = currentItem.path.replacingOccurrences(of: ".disabled", with: ".plist")
+                try? fileManager.removeItem(atPath: newPath)
                 try? fileManager.moveItem(atPath: currentItem.path, toPath: newPath)
             }
         } else {
             if currentItem.path.hasSuffix(".plist") {
                 let newPath = currentItem.path + ".disabled"
+                try? fileManager.removeItem(atPath: newPath)
                 try? fileManager.moveItem(atPath: currentItem.path, toPath: newPath)
             }
         }
+
 
         startupItems[index].isEnabled = newEnabled
         scanStartupItems()

@@ -22,10 +22,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
         }
         
-        setupMenuBar()
         Task { @MainActor in
+            MenuBarManager.shared.setupMenuBar()
             ProcessGuardManager.shared.startGuard()
         }
+
 
     }
 

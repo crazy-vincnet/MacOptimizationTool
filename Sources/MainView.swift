@@ -74,7 +74,9 @@ struct MainView: View {
     @State private var selectedTab: MenuTab = .dashboard
     @State private var hoveredTab: MenuTab? = nil
     @ObservedObject private var langManager = LanguageManager.shared
+    @ObservedObject private var processGuard = ProcessGuardManager.shared
     @AppStorage("appTheme") private var appThemeRaw: String = AppTheme.light.rawValue
+
     
     private var currentColorScheme: ColorScheme? {
         (AppTheme(rawValue: appThemeRaw) ?? .light).colorScheme
@@ -134,7 +136,22 @@ struct MainView: View {
         }
         .frame(minWidth: 960, minHeight: 640)
         .preferredColorScheme(currentColorScheme)
+        .alert(isPresented: $processGuard.showAlertModal) {
+            if let proc = processGuard.alertProcess {
+                return Alert(
+                    title: Text("⚠️ 프로세스 자원 폭주 감지"),
+                    message: Text("프로세스 '\(proc.name)'(PID: \(proc.pid))가 \(proc.reason.rawValue) 상태입니다.\n(CPU: \(Int(proc.cpuPercent))%, RAM: \(Int(proc.memoryMB)) MB)\n\n지금 강제 종료하시겠습니까?"),
+                    primaryButton: .destructive(Text("프로세스 강제 종료"), action: {
+                        processGuard.killAlertProcess()
+                    }),
+                    secondaryButton: .cancel(Text("무시하기"))
+                )
+            } else {
+                return Alert(title: Text("알림"), message: Text(""), dismissButton: .default(Text("확인")))
+            }
+        }
     }
+
 
 
     // Top Global Header Bar
