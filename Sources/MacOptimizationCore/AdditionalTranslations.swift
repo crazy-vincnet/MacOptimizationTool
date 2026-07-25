@@ -243,7 +243,8 @@ enum AdditionalTranslations {
         "settings.guardEnable": "Runaway detection",
         "settings.guardEnableDesc": "Alerts when a process holds excessive CPU or memory for a long time. Off by default.",
         "settings.guardCPUThresh": "CPU threshold",
-        "settings.guardCPUThreshDesc": "Total across cores, so it can exceed 100% on multicore machines.",
+        // "100% on" 처럼 퍼센트 뒤에 공백+변환 문자가 오면 포맷 지정자로 오인된다. "100 percent" 로 우회한다.
+        "settings.guardCPUThreshDesc": "Total across cores, so it can exceed 100 percent on multicore machines.",
         "settings.guardMemThresh": "Memory threshold",
         "settings.guardSustain": "Sustained duration",
         "settings.guardSustainValue": "%@ min",
