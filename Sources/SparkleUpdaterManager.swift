@@ -45,8 +45,10 @@ final class SparkleUpdaterManager: NSObject, ObservableObject {
                         }
                     }
                     
-                    let currentVersion = "v1.0.1"
+                    let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+                    let currentVersion = appVer.starts(with: "v") ? appVer : "v\(appVer)"
                     let cleanTag = latestTag.starts(with: "v") ? latestTag : "v\(latestTag)"
+
                     
                     if cleanTag.compare(currentVersion, options: .numeric) == .orderedDescending {
                         let finalDownloadURL = dmgDownloadURL ?? URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/\(cleanTag)/MacCleanOptimizer_Setup.dmg")!
@@ -61,10 +63,15 @@ final class SparkleUpdaterManager: NSObject, ObservableObject {
                     }
                 }
                 
-                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: "v1.0.1", message: t("settings.updateAlert"), downloadURL: nil))
+                let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+                let currentVerString = "v\(appVer)"
+                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: t("settings.updateAlert"), downloadURL: nil))
             } catch {
-                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: "v1.0.1", message: t("settings.updateAlert"), downloadURL: nil))
+                let appVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+                let currentVerString = "v\(appVer)"
+                completion(UpdateCheckResult(hasNewVersion: false, latestVersion: currentVerString, message: t("settings.updateAlert"), downloadURL: nil))
             }
+
         }
     }
 

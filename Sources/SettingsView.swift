@@ -521,7 +521,8 @@ struct SettingsView: View {
                     .frame(width: 24)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("\(t("settings.version")): v1.0.0 • Lab98 Studio Edition")
+                    Text("\(t("settings.version")): v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1") • Lab98 Studio Edition")
+
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(Theme.textPrimary)
                     Text("\(t("settings.buildDate")): 2026-07-25")
