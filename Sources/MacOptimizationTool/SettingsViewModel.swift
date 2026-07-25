@@ -81,6 +81,8 @@ class SettingsViewModel: ObservableObject {
     @Published var hasNewVersion: Bool = false
     /// 확인 실패와 "최신 버전"은 서로 다른 결과다. 같은 문구로 묶으면 사용자가 오해한다.
     @Published var updateCheckFailed: Bool = false
+    /// 다운로드·검증·마운트의 최종 결과. 오버레이가 사라진 뒤에도 남는다.
+    @Published var updateResultMessage: String = ""
 
     
     private let fileManager = FileManager.default

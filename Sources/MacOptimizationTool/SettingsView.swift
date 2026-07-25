@@ -42,6 +42,8 @@ struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @ObservedObject private var langManager = LanguageManager.shared
     @ObservedObject private var processGuard = ProcessGuardManager.shared
+    /// 관찰하지 않고 `SparkleUpdaterManager.shared` 를 직접 읽으면 진행률·상태가 화면에 반영되지 않는다.
+    @ObservedObject private var updater = SparkleUpdaterManager.shared
     @State private var selectedSection: SettingsSection = .permissions
     
     var body: some View {
@@ -121,24 +123,31 @@ struct SettingsView: View {
         }
 
         .overlay {
-            if SparkleUpdaterManager.shared.isDownloading {
+            if updater.isDownloading {
                 ZStack {
                     Theme.bgCardHover.opacity(0.85)
                         .edgesIgnoringSafeArea(.all)
 
                     VStack(spacing: 16) {
-                        ProgressView(value: SparkleUpdaterManager.shared.downloadProgress)
+                        ProgressView(value: updater.downloadProgress)
                             .progressViewStyle(.linear)
                             .tint(Theme.accent)
                             .frame(width: 260)
 
-                        Text(SparkleUpdaterManager.shared.statusMessage)
+                        Text(updater.statusMessage)
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(Theme.textPrimary)
                     }
                     .padding(24)
                     .glassCard(padding: 24, radius: Theme.radiusCard)
                 }
+            }
+        }
+        // 다운로드가 끝난 뒤에도 결과 문구를 남긴다. 마운트 실패·검증 실패는
+        // 오버레이가 사라진 뒤에 확인할 방법이 없으면 "아무 일도 안 일어난" 것으로 보인다.
+        .onChange(of: updater.statusMessage) { _ in
+            if !updater.isDownloading, !updater.statusMessage.isEmpty {
+                viewModel.updateResultMessage = updater.statusMessage
             }
         }
 
@@ -658,6 +667,14 @@ struct SettingsView: View {
                 }
                 .buttonStyle(PrimaryActionButtonStyle())
                 .disabled(viewModel.isCheckingUpdate)
+            }
+
+            if !viewModel.updateResultMessage.isEmpty {
+                Text(viewModel.updateResultMessage)
+                    .font(.system(size: 11))
+                    .foregroundColor(Theme.textSecondary)
+                    .padding(.leading, 38)
+                    .textSelection(.enabled)
             }
 
             Divider().background(Theme.hairline)
