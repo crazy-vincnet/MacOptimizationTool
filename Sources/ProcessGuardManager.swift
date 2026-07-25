@@ -20,7 +20,8 @@ enum GuardReason: String {
 final class ProcessGuardManager: NSObject, ObservableObject {
     static let shared = ProcessGuardManager()
 
-    @Published var isGuardEnabled: Bool = true
+    @Published var isGuardEnabled: Bool = false // 임시 비활성화
+
     @Published var alertProcess: HighResourceProcess? = nil
     @Published var showAlertModal: Bool = false
 
@@ -32,13 +33,17 @@ final class ProcessGuardManager: NSObject, ObservableObject {
     }
 
     func startGuard() {
+        // 임시 주석 처리 (실시간 경고 알림 기능 일시 비활성화)
+        /*
         guard monitorTimer == nil else { return }
         monitorTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.inspectProcesses()
             }
         }
+        */
     }
+
 
     func stopGuard() {
         monitorTimer?.invalidate()
