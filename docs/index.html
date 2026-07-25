@@ -3,99 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mac Clean Optimizer - macOS 전용 프리미엄 최적화 툴키트 | Lab98 Studio</title>
+    <title>Mac Clean Optimizer - Apple Silicon & Intel 전용 고성능 macOS 최적화 | Lab98 Studio</title>
     <meta name="description" content="Mac Clean Optimizer - 실시간 자원 대시보드, 4단계 스마트 앱 완전 삭제기, 캐시 정리기, 대용량 및 중복 파일 탐색기를 포함한 macOS 전용 고성능 무료 최적화 앱입니다.">
     <meta property="og:title" content="Mac Clean Optimizer - macOS 전용 프리미엄 최적화 툴키트">
     <meta property="og:description" content="빠르고 스마트한 Mac 최적화. 원클릭 메모리 최적화, 잔여 파일 완전 삭제, 4개 국어 및 라이트/다크 테마 지원.">
-    <meta property="og:type" content="website">
+    <meta property="og:image" content="AppIcon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.35);
-            --accent-hover: #2563eb;
-            --card-bg: rgba(255, 255, 255, 0.04);
-            --card-border: rgba(255, 255, 255, 0.08);
+            --bg-dark: #07090e;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.06);
+            --card-radius: 24px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            background: var(--bg-gradient);
+            background-color: var(--bg-dark);
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
             overflow-x: hidden;
+            position: relative;
         }
 
-        /* Ambient Glow Effect */
-        .ambient-glow {
+        /* Animated Mesh Background Aurora */
+        .aurora-bg {
             position: fixed;
-            top: -20%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 800px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 80%);
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
             z-index: 0;
-            filter: blur(60px);
+            overflow: hidden;
+        }
+
+        .aurora-blob {
+            position: absolute;
+            filter: blur(100px);
+            opacity: 0.35;
+            border-radius: 50%;
+            animation: float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: 20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        .blob-2 {
+            top: 30%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #8b5cf6 0%, #4c1d95 100%);
+            animation-delay: -7s;
+        }
+
+        .blob-3 {
+            bottom: -10%;
+            left: 10%;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, #06b6d4 0%, #0e7490 100%);
+            animation-delay: -14s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            50% { transform: translate(60px, 40px) rotate(180deg) scale(1.1); }
+            100% { transform: translate(-40px, 80px) rotate(360deg) scale(0.95); }
         }
 
         .container {
-            max-width: 1140px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 28px;
             position: relative;
             z-index: 1;
         }
 
-        /* Navbar */
-        nav {
+        /* Glass Header */
+        header {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            margin-bottom: 40px;
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 14px 28px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 32px 0;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             text-decoration: none;
             color: var(--text-primary);
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .brand-name {
+            font-size: 1.2rem;
             font-weight: 700;
-            font-size: 1.15rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .brand img {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-        }
-
-        .nav-links {
+        .nav-actions {
             display: flex;
-            gap: 24px;
             align-items: center;
+            gap: 20px;
         }
 
         .nav-link {
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.95rem;
             font-weight: 500;
+            font-size: 0.95rem;
             transition: color 0.2s ease;
         }
 
@@ -103,285 +167,565 @@
             color: var(--text-primary);
         }
 
+        .btn-header-cta {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-header-cta:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
         /* Hero Section */
         .hero {
             text-align: center;
-            padding: 70px 0 90px;
+            padding: 40px 0 60px;
         }
 
-        .hero-badge {
+        .version-pill {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.25);
+            gap: 10px;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.3);
             color: #60a5fa;
-            padding: 6px 16px;
+            padding: 8px 20px;
             border-radius: 30px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 28px;
             backdrop-filter: blur(10px);
         }
 
-        .hero-icon {
-            width: 128px;
-            height: 128px;
-            margin: 0 auto 32px;
-            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 30px rgba(59, 130, 246, 0.3));
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #3b82f6;
+            animation: pulse 2s infinite;
         }
 
-        .hero-icon:hover {
-            transform: scale(1.06) rotate(-2deg);
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
 
         .hero-title {
-            font-size: 3.5rem;
+            font-size: 4.2rem;
             font-weight: 800;
-            letter-spacing: -0.03em;
-            line-height: 1.15;
-            margin-bottom: 20px;
-            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 50%, #64748b 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .hero-subtitle {
-            font-size: 1.25rem;
+        .hero-title span {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 1.3rem;
             color: var(--text-secondary);
-            max-width: 680px;
-            margin: 0 auto 40px;
+            max-width: 720px;
+            margin: 0 auto 44px;
             font-weight: 400;
+            line-height: 1.6;
         }
 
-        .cta-buttons {
+        .cta-group {
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: 20px;
             flex-wrap: wrap;
+            margin-bottom: 60px;
         }
 
-        .btn-primary {
+        .btn-download {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #ffffff;
+            padding: 18px 40px;
+            border-radius: 16px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            text-decoration: none;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(59, 130, 246, 0.6), inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        /* Shine sweep effect */
+        .btn-download::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+            transform: rotate(30deg);
+            animation: shine 6s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            20% { transform: translateX(100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+
+        .btn-github {
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: #ffffff;
-            padding: 16px 36px;
-            border-radius: 14px;
-            font-weight: 600;
-            font-size: 1.05rem;
-            text-decoration: none;
-            box-shadow: 0 10px 30px var(--accent-glow), 0 2px 10px rgba(0,0,0,0.2);
-            transition: all 0.25s ease;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
-            background: linear-gradient(135deg, #60a5fa 0%, #1d4ed8 100%);
-        }
-
-        .btn-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             color: var(--text-primary);
-            padding: 16px 28px;
-            border-radius: 14px;
+            padding: 18px 32px;
+            border-radius: 16px;
+            font-size: 1.05rem;
             font-weight: 600;
-            font-size: 1.05rem;
             text-decoration: none;
-            backdrop-filter: blur(10px);
-            transition: all 0.25s ease;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .meta-info {
-            margin-top: 18px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        /* Features Section */
-        .features-section {
-            padding: 60px 0 100px;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            margin-bottom: 50px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
-        .feature-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 32px;
             backdrop-filter: blur(20px);
             transition: all 0.3s ease;
         }
 
-        .feature-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(59, 130, 246, 0.4);
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        .btn-github:hover {
+            background: var(--glass-hover);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
         }
 
-        .feature-icon {
-            font-size: 2.2rem;
-            margin-bottom: 20px;
-            display: inline-block;
+        /* Interactive macOS UI Mockup Frame */
+        .app-window-frame {
+            max-width: 980px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7), 0 0 80px rgba(59, 130, 246, 0.15);
+            overflow: hidden;
+            text-align: left;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .feature-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 10px;
+        .app-window-frame:hover {
+            transform: translateY(-6px);
         }
 
-        .feature-desc {
+        .window-header {
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+        }
+
+        .light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .light-red { background-color: #ff5f56; border: 1px solid #e0443e; }
+        .light-yellow { background-color: #ffbd2e; border: 1px solid #dea123; }
+        .light-green { background-color: #27c93f; border: 1px solid #1aab29; }
+
+        .window-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin: 0 auto;
+            transform: translateX(-24px);
+        }
+
+        .window-body {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            min-height: 480px;
+        }
+
+        /* Sidebar Mockup */
+        .mock-sidebar {
+            background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid var(--glass-border);
+            padding: 20px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .mock-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
             color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mock-item.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        /* Content Mockup */
+        .mock-content {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .fill-cpu { width: 18%; background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .fill-mem { width: 42%; background: linear-gradient(90deg, #8b5cf6, #c084fc); }
+        .fill-disk { width: 28%; background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+
+        .optimize-banner {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .banner-btn {
+            background: #3b82f6;
+            color: #ffffff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Bento Grid Section */
+        .bento-section {
+            padding: 120px 0 80px;
+        }
+
+        .bento-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .bento-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+
+        .bento-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .bento-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 36px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-box:hover {
+            background: var(--glass-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-6px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .bento-box.span-2 {
+            grid-column: span 2;
+        }
+
+        .bento-icon-tag {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+        }
+
+        .bento-box-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .bento-box-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.65;
         }
 
         /* Footer */
         footer {
-            border-top: 1px solid var(--card-border);
-            padding: 40px 0;
+            border-top: 1px solid var(--glass-border);
+            padding: 60px 0 40px;
+            margin-top: 100px;
             text-align: center;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         footer a {
             color: var(--text-secondary);
             text-decoration: none;
+            transition: color 0.2s ease;
         }
 
         footer a:hover {
-            color: var(--accent);
+            color: var(--accent-blue);
         }
     </style>
 </head>
 <body>
-    <div class="ambient-glow"></div>
+    <!-- Aurora Ambient Glow Background -->
+    <div class="aurora-bg">
+        <div class="aurora-blob blob-1"></div>
+        <div class="aurora-blob blob-2"></div>
+        <div class="aurora-blob blob-3"></div>
+    </div>
 
     <div class="container">
-        <!-- Navigation -->
-        <nav>
-            <a href="#" class="brand">
-                <img src="AppIcon.png" alt="Mac Clean Optimizer Icon">
-                <span>Mac Clean Optimizer</span>
-            </a>
-            <div class="nav-links">
-                <a href="#features" class="nav-link">주요 기능</a>
-                <a href="https://github.com/crazy-vincnet/MacOptimizationTool" class="nav-link" target="_blank">GitHub</a>
-                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" class="nav-link" target="_blank">릴리즈 노트</a>
-            </div>
-        </nav>
+        <!-- Navigation Bar -->
+        <header>
+            <nav class="navbar">
+                <a href="#" class="brand">
+                    <img src="AppIcon.png" alt="Mac Clean Optimizer Icon" class="brand-icon">
+                    <span class="brand-name">Mac Clean Optimizer</span>
+                </a>
+                <div class="nav-actions">
+                    <a href="#features" class="nav-link">주요 기능</a>
+                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="nav-link">GitHub</a>
+                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" target="_blank" class="btn-header-cta">v1.1.0 다운로드</a>
+                </div>
+            </nav>
+        </header>
 
         <!-- Hero Section -->
         <section class="hero">
-            <div class="hero-badge">
-                <span>✨ 최신 v1.1.0 정식 배포</span>
+            <div class="version-pill">
+                <div class="pulse-dot"></div>
+                <span>Lab98 Studio 공식 v1.1.0 메이저 릴리즈</span>
             </div>
-            
-            <img src="AppIcon.png" alt="Mac Clean Optimizer Large Icon" class="hero-icon">
-            
-            <h1 class="hero-title">더 빠르고 깨끗한 macOS를 위한<br>프리미엄 최적화 툴키트</h1>
-            
-            <p class="hero-subtitle">
-                실시간 자원 모니터링, 4단계 스마트 앱 완전 삭제, 시스템 디스크 정리 및 인앱 자동 업데이트까지 하나로 완벽하게 관리하세요.
+
+            <h1 class="hero-title">
+                당신의 Mac을 위한<br>
+                <span>압도적인 성능 최적화</span>
+            </h1>
+
+            <p class="hero-desc">
+                실시간 자원 대시보드, 4단계 앱 완전 삭제기, 캐시 정리기, 중복 파일 탐색기부터 인앱 자동 업데이트까지. 번잡한 과정 없이 맥의 잠재력을 극대화하세요.
             </p>
 
-            <div class="cta-buttons">
-                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.1.0/MacCleanOptimizer_Setup.dmg" class="btn-primary">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="cta-group">
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.1.0/MacCleanOptimizer_Setup.dmg" class="btn-download">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    <span>macOS 전용 설치 파일 다운로드 (.dmg)</span>
+                    <span>macOS 무료 다운로드 (.dmg)</span>
                 </a>
-                
-                <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="btn-secondary">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="btn-github">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
-                    <span>GitHub 저장소 방문</span>
+                    <span>GitHub 소스 코드</span>
                 </a>
             </div>
 
-            <div class="meta-info">
-                <span>버전 1.1.0 • macOS 14.0 (Sonoma) 이상 권장 • Apple Silicon & Intel Universal</span>
+            <!-- Real Live App UI Frame Mockup -->
+            <div class="app-window-frame">
+                <div class="window-header">
+                    <div class="traffic-lights">
+                        <div class="light light-red"></div>
+                        <div class="light light-yellow"></div>
+                        <div class="light light-green"></div>
+                    </div>
+                    <div class="window-title">Mac Clean Optimizer — Dashboard</div>
+                </div>
+
+                <div class="window-body">
+                    <div class="mock-sidebar">
+                        <div class="mock-item active">⚡ 시스템 대시보드</div>
+                        <div class="mock-item">🗑️ 앱 완전 삭제기</div>
+                        <div class="mock-item">🧹 스마트 디스크 정리</div>
+                        <div class="mock-item">🔍 대용량 파일 탐색</div>
+                        <div class="mock-item">👯 중복 파일 비교기</div>
+                        <div class="mock-item">⚙️ 설정 & 환경설정</div>
+                    </div>
+
+                    <div class="mock-content">
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <span>CPU 사용량</span>
+                                    <span style="color: #60a5fa;">18%</span>
+                                </div>
+                                <div class="stat-value">Apple M3 Pro</div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill fill-cpu"></div></div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <span>메모리 사용량</span>
+                                    <span style="color: #c084fc;">42%</span>
+                                </div>
+                                <div class="stat-value">13.44 / 32 GB</div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill fill-mem"></div></div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <span>여유 공간</span>
+                                    <span style="color: #22d3ee;">720 GB</span>
+                                </div>
+                                <div class="stat-value">1.0 TB SSD</div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill fill-disk"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="optimize-banner">
+                            <div>
+                                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 4px;">시스템 메모리가 쾌적한 상태입니다</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">원클릭 버튼을 눌러 비활성 메모리 및 가상 수거 영역을 즉시 환수할 수 있습니다.</p>
+                            </div>
+                            <button class="banner-btn">메모리 즉시 최적화</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Features Grid -->
-        <section id="features" class="features-section">
-            <h2 class="section-title">왜 Mac Clean Optimizer 인가요?</h2>
-            <p class="section-subtitle">복잡한 설정 없이 직관적이고 강력한 6가지 핵심 기능을 제공합니다.</p>
+        <!-- Bento Grid Features Section -->
+        <section id="features" class="bento-section">
+            <div class="bento-header">
+                <h2 class="bento-title">완벽한 Mac 최적화 툴키트</h2>
+                <p class="bento-subtitle">macOS 시스템 모니터링부터 안전한 파일 관리까지 단 하나의 앱으로 결합했습니다.</p>
+            </div>
 
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3 class="feature-title">실시간 자원 대시보드</h3>
-                    <p class="feature-desc">CPU, GPU, 메모리, 디스크, 시스템 온도 및 배터리 전원 상태를 실시간 모니터링하고 원클릭 메모리 가상 공간 수거를 수행합니다.</p>
+            <div class="bento-grid">
+                <div class="bento-box span-2">
+                    <div class="bento-icon-tag">🗑️</div>
+                    <h3 class="bento-box-title">4단계 스마트 앱 완전 삭제 엔진</h3>
+                    <p class="bento-box-desc">단순히 앱 파일만 삭제하는 것이 아니라, `~/Library/Caches`, `Application Support` 등에 숨어 있는 잔여 찌꺼기 파일까지 완벽하게 추적합니다. 루트 권한이 필요한 보호된 애플리케이션도 안전하게 삭제합니다.</p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">🗑️</div>
-                    <h3 class="feature-title">4단계 앱 완전 삭제기</h3>
-                    <p class="feature-desc">일반 파일 이동부터 루트 관리자 권한 승격 삭제까지 지원하여 라이브러리 및 캐시에 남은 앱 찌꺼기를 완벽하게 지워냅니다.</p>
+                <div class="bento-box">
+                    <div class="bento-icon-tag">⚡</div>
+                    <h3 class="bento-box-title">실시간 메모리 퍼지</h3>
+                    <p class="bento-box-desc">비활성화된 가상 메모리를 1초 만에 시스템에 환수하여 무거운 무비 편집기나 개발 툴 실행 시 쾌적한 속도를 보장합니다.</p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">🧹</div>
-                    <h3 class="feature-title">스마트 디스크 정리</h3>
-                    <p class="feature-desc">시스템 Caches, Logs, Xcode DerivedData 및 휴지통에 방치된 수 십 GB 용량의 낭비 공간을 손쉽게 정리합니다.</p>
+                <div class="bento-box">
+                    <div class="bento-icon-tag">🔍</div>
+                    <h3 class="bento-box-title">이진 해시 중복 파일 분류</h3>
+                    <p class="bento-box-desc">파일명이 달라도 바이트 단위 해시 비교를 통해 100% 동일한 중복 파일만 스마트하게 선별하여 원본 1개를 안전 보존합니다.</p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">🔍</div>
-                    <h3 class="feature-title">중복 및 대용량 파일 탐색기</h3>
-                    <p class="feature-desc">이진 해시 비교 검사를 통해 원본 1개를 안전하게 보존하면서 중복 파일과 방치된 대용량 파일을 고속 분류합니다.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">☀️</div>
-                    <h3 class="feature-title">라이트 / 다크 테마 엔진</h3>
-                    <p class="feature-desc">서체 앤티앨리어싱을 고려한 0% 텍스트 블러와 고대비 obsidian black 문자로 구성되어 눈이 편안한 디자인 시스템을 경험하세요.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3 class="feature-title">인앱 원클릭 자동 업데이트</h3>
-                    <p class="feature-desc">Sparkle 2 및 GitHub Release API 연동으로 웹 브라우저를 열 필요 없이 앱 내에서 새 버전을 자동으로 다운로드하고 설치합니다.</p>
+                <div class="bento-box span-2">
+                    <div class="bento-icon-tag">☀️</div>
+                    <h3 class="bento-box-title">눈이 편안한 라이트 & 다크 스튜디오 디자인</h3>
+                    <p class="bento-box-desc">서체 앤티앨리어싱을 해치는 텍스트 블러를 완벽하게 배제하고, obsidian black `#020617` 고대비 텍스트와 4개 국어(한국어, English, 简体中文, 日本語) 네이티브 지원으로 설계되었습니다.</p>
                 </div>
             </div>
         </section>
@@ -391,7 +735,7 @@
     <footer>
         <div class="container">
             <p>Copyright © 2026 Lab98 Studio. All rights reserved.</p>
-            <p style="margin-top: 6px;">Designed & Engineered for macOS by Vincent Jeon @ Lab98 Studio</p>
+            <p style="margin-top: 8px;">Designed & Engineered for macOS by Vincent Jeon @ Lab98 Studio</p>
         </div>
     </footer>
 </body>
