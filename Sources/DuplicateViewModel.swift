@@ -72,25 +72,30 @@ class DuplicateViewModel: ObservableObject {
         self.scanDuplicates()
     }
     
+    private var scanTask: Task<Void, Never>?
+
+    func cancelScan() {
+        isCancelled = true
+        scanTask?.cancel()
+        scanTask = nil
+        isScanning = false
+        scanProgress = 0.0
+        scanStatusText = "스캔이 취소되었습니다."
+    }
+
     func scanDuplicates() {
         guard let rootURL = selectedFolderURL else { return }
         
-        if isScanning {
-            isCancelled = true
-            Task {
-                try? await Task.sleep(nanoseconds: 100_000_000)
-                self.isCancelled = false
-                await self.startScanExecution(rootURL: rootURL)
-            }
-        } else {
-            isCancelled = false
-            Task {
-                await self.startScanExecution(rootURL: rootURL)
-            }
+        cancelScan()
+        isCancelled = false
+        
+        scanTask = Task {
+            await self.startScanExecution(rootURL: rootURL)
         }
     }
     
     private func startScanExecution(rootURL: URL) async {
+
         isScanning = true
         hasScanned = false
         showDeleteSuccess = false
@@ -340,7 +345,12 @@ class DuplicateViewModel: ObservableObject {
             self.scanProgress = 1.0
             self.isScanning = false
             self.hasScanned = true
+        } else {
+            self.isScanning = false
+            self.scanProgress = 0.0
+            self.scanStatusText = "스캔이 취소되었습니다."
         }
+
     }
     
     func deleteSelectedDuplicates() {

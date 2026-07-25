@@ -73,7 +73,21 @@ final class OldDownloadsViewModel: ObservableObject {
         items.filter { $0.isSelected }.count
     }
 
+    @Published var isCancelled: Bool = false
+    private var scanTask: Task<Void, Never>?
+
+    func cancelScan() {
+        isCancelled = true
+        scanTask?.cancel()
+        scanTask = nil
+        isScanning = false
+        scanProgress = 0.0
+        scanStatusText = "스캔이 취소되었습니다."
+    }
+
     func scanOldDownloads() {
+        cancelScan()
+        isCancelled = false
         isScanning = true
         hasScanned = false
         showCleanSuccess = false
@@ -85,17 +99,15 @@ final class OldDownloadsViewModel: ObservableObject {
 
         let thresholdDays = selectedAgeThreshold.rawValue
 
-        Task {
+        scanTask = Task {
             let resultItems = await Task.detached(priority: .userInitiated) { [weak self] () -> [OldDownloadItem] in
                 let fm = FileManager.default
                 let downloadsURL = fm.homeDirectoryForCurrentUser.appendingPathComponent("Downloads")
                 let now = Date()
                 var list: [OldDownloadItem] = []
 
-                // Downloads 폴더 직속(최상위 1단계) 방치 파일만 초고속 스캔하도록 하위 디렉토리 탐색 생략 옵션 추가
                 let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants]
                 let keys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey, .isDirectoryKey, .isPackageKey]
-
 
                 guard let enumerator = fm.enumerator(
                     at: downloadsURL,
@@ -108,6 +120,9 @@ final class OldDownloadsViewModel: ObservableObject {
                 var localMatched = 0
 
                 while let fileURL = enumerator.nextObject() as? URL {
+                    if Task.isCancelled { break }
+
+
                     localScanned += 1
                     let path = fileURL.standardized.path
 
@@ -175,11 +190,18 @@ final class OldDownloadsViewModel: ObservableObject {
                 return list
             }.value
 
-            self.items = resultItems
-            self.scanProgress = 1.0
-            self.isScanning = false
-            self.hasScanned = true
+            if !self.isCancelled {
+                self.items = resultItems
+                self.scanProgress = 1.0
+                self.isScanning = false
+                self.hasScanned = true
+            } else {
+                self.isScanning = false
+                self.scanProgress = 0.0
+                self.scanStatusText = "스캔이 취소되었습니다."
+            }
         }
+
     }
 
     func deleteSelectedItems() {

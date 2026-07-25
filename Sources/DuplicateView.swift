@@ -250,8 +250,9 @@ struct DuplicateView: View {
                         }
 
                         Button(action: {
-                            viewModel.isCancelled = true
+                            viewModel.cancelScan()
                         }) {
+
                             Text("스캔 취소")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(Theme.textSecondary)

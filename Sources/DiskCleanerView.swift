@@ -224,6 +224,19 @@ struct DiskCleanerView: View {
                                 .font(.system(size: 11))
                                 .foregroundColor(Theme.textSecondary)
                         }
+
+                        Button(action: {
+                            viewModel.cancelScan()
+                        }) {
+                            Text("스캔 취소")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Theme.textSecondary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(Theme.bgCardHover)
+                                .cornerRadius(Theme.radiusControl)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(28)
                     .glassCard(padding: 28, radius: Theme.radiusCard)
@@ -263,6 +276,8 @@ struct DiskCleanerView: View {
 struct ProgressOverlay: View {
     let message: String
     var progress: Double? = nil
+    var onCancel: (() -> Void)? = nil
+
     
     var body: some View {
         ZStack {
@@ -289,8 +304,23 @@ struct ProgressOverlay: View {
                             .foregroundColor(.secondary)
                     }
                 }
+
+                if let onCancel = onCancel {
+                    Button(action: onCancel) {
+                        Text("스캔 취소")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Theme.textSecondary)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 6)
+                            .background(Theme.bgCardHover)
+                            .cornerRadius(Theme.radiusControl)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 4)
+                }
             }
             .glassCard(padding: 28, highlighted: true)
         }
     }
 }
+

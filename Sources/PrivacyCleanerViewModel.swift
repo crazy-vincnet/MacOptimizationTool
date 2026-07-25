@@ -63,7 +63,21 @@ final class PrivacyCleanerViewModel: ObservableObject {
         categories.reduce(0) { $0 + $1.totalSize }
     }
     
+    @Published var isCancelled: Bool = false
+    private var scanTask: Task<Void, Never>?
+
+    func cancelScan() {
+        isCancelled = true
+        scanTask?.cancel()
+        scanTask = nil
+        isScanning = false
+        scanProgress = 0.0
+        scanStatusText = "스캔이 취소되었습니다."
+    }
+
     func scanPrivacyData() {
+        cancelScan()
+        isCancelled = false
         isScanning = true
         hasScanned = false
         showCleanSuccess = false
@@ -72,12 +86,13 @@ final class PrivacyCleanerViewModel: ObservableObject {
         scanStatusText = "브라우저 및 개인정보 데이터 탐색 준비 중..."
         scannedItemCount = 0
         
-        Task {
+        scanTask = Task {
             let resultCategories = await Task.detached(priority: .userInitiated) { [weak self] () -> [PrivacyItemCategory] in
                 var list: [PrivacyItemCategory] = []
                 let fm = FileManager.default
                 let home = fm.homeDirectoryForCurrentUser
                 let library = home.appendingPathComponent("Library")
+
                 
                 // 브라우저별 스캔 타겟 정의
                 let browserTargets: [(String, String, [(PrivacyItemType, URL)])] = [
@@ -162,11 +177,18 @@ final class PrivacyCleanerViewModel: ObservableObject {
                 return list
             }.value
             
-            self.categories = resultCategories
-            self.scanProgress = 1.0
-            self.isScanning = false
-            self.hasScanned = true
+            if !self.isCancelled {
+                self.categories = resultCategories
+                self.scanProgress = 1.0
+                self.isScanning = false
+                self.hasScanned = true
+            } else {
+                self.isScanning = false
+                self.scanProgress = 0.0
+                self.scanStatusText = "스캔이 취소되었습니다."
+            }
         }
+
     }
     
     func cleanPrivacyData() {

@@ -53,11 +53,25 @@ struct PrivacyCleanerView: View {
                                 .font(.system(size: 11))
                                 .foregroundColor(Theme.textSecondary)
                         }
+
+                        Button(action: {
+                            viewModel.cancelScan()
+                        }) {
+                            Text("스캔 취소")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Theme.textSecondary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(Theme.bgCardHover)
+                                .cornerRadius(Theme.radiusControl)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(28)
                     .glassCard(padding: 28, radius: Theme.radiusCard)
                 }
             }
+
             
             // 정리 작업 오버레이
             if viewModel.isCleaning {

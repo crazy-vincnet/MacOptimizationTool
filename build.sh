@@ -75,7 +75,9 @@ echo "-> 컴파일 완료! macOS .app 번들 구조 생성 중..."
 
 # 5. Ad-hoc 코드 서명 (codesign)
 echo "-> macOS TCC 및 알림 서비스를 위한 코드 서명(ad-hoc codesign) 적용 중..."
+xattr -cr "$APP_DIR"
 codesign --force --deep --sign - "$APP_DIR"
+
 
 echo "-> .app 패키징 및 코드 서명 완료: MacOptimizationTool.app"
 

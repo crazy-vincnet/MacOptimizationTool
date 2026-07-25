@@ -92,7 +92,21 @@ class DiskCleanViewModel: ObservableObject {
         ]
     }
 
+    @Published var isCancelled: Bool = false
+    private var scanTask: Task<Void, Never>?
+
+    func cancelScan() {
+        isCancelled = true
+        scanTask?.cancel()
+        scanTask = nil
+        isScanning = false
+        scanProgress = 0.0
+        scanStatusText = "스캔이 취소되었습니다."
+    }
+
     func scanJunk() {
+        cancelScan()
+        isCancelled = false
         isScanning = true
         showCleanSuccess = false
         scanProgress = 0.05
@@ -103,13 +117,15 @@ class DiskCleanViewModel: ObservableObject {
         let localCategories = categories
         let totalCategoriesCount = localCategories.count
 
-        Task {
+        scanTask = Task {
             let updatedCategories = await Task.detached(priority: .userInitiated) { [weak self] () -> [JunkCategory] in
                 var results = localCategories
                 let fm = FileManager.default
                 var totalFoundCount = 0
 
                 for (index, cat) in localCategories.enumerated() {
+                    if Task.isCancelled { break }
+
                     let catName = cat.name
                     await MainActor.run {
                         self?.currentScanCategory = catName
@@ -121,6 +137,8 @@ class DiskCleanViewModel: ObservableObject {
                     var totalSize: Int64 = 0
 
                     for url in cat.urls {
+                        if Task.isCancelled { break }
+
                         let isAccessed = url.startAccessingSecurityScopedResource()
                         defer {
                             if isAccessed {
@@ -130,6 +148,8 @@ class DiskCleanViewModel: ObservableObject {
 
                         let contents = (try? fm.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [])) ?? []
                         for childURL in contents {
+                            if Task.isCancelled { break }
+
                             let childSize = Self.getDirectorySizeStatic(at: childURL)
                             if childSize > 1024 {
                                 let name = childURL.lastPathComponent
@@ -154,13 +174,20 @@ class DiskCleanViewModel: ObservableObject {
                 return results
             }.value
 
-            self.categories = updatedCategories
-            self.recalculateTotalSize()
-            self.scanProgress = 1.0
-            self.isScanning = false
-            self.hasScanned = true
+            if !self.isCancelled {
+                self.categories = updatedCategories
+                self.recalculateTotalSize()
+                self.scanProgress = 1.0
+                self.isScanning = false
+                self.hasScanned = true
+            } else {
+                self.isScanning = false
+                self.scanProgress = 0.0
+                self.scanStatusText = "스캔이 취소되었습니다."
+            }
         }
     }
+
 
     func toggleCategorySelection(at index: Int) {
         let newValue = !categories[index].isSelected
