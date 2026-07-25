@@ -9,13 +9,36 @@ struct TranslationTests {
 
     private static let languages: [AppLanguage] = [.korean, .english, .chinese, .japanese]
 
-    @Test("모든 언어가 동일한 키 집합을 가진다", arguments: TranslationTests.languages)
+    @Test("추가 사전의 모든 언어가 동일한 키 집합을 가진다", arguments: TranslationTests.languages)
     func allLanguagesShareTheSameKeySet(language: AppLanguage) throws {
         let base = Set(try #require(AdditionalTranslations.all[.korean]).keys)
         #expect(!base.isEmpty)
 
         let keys = Set(try #require(AdditionalTranslations.all[language]).keys)
         #expect(keys == base, "\(language.rawValue) 사전의 키 집합이 한국어와 다르다")
+    }
+
+    /// 실제 조회는 base + Generated + Additional 을 병합한 사전으로 이루어진다.
+    /// 추가 사전만 검사하면 base 사전의 누락(메뉴 항목에 키가 그대로 노출되던 버그)을 놓친다.
+    @Test("병합된 사전의 모든 언어가 동일한 키 집합을 가진다", arguments: TranslationTests.languages)
+    func mergedDictionariesShareTheSameKeySet(language: AppLanguage) throws {
+        let merged = LanguageManager.mergedTranslationsForTesting
+        let allKeys = Set(merged.values.flatMap(\.keys))
+        let keys = Set(try #require(merged[language]).keys)
+
+        let missing = allKeys.subtracting(keys).sorted()
+        #expect(missing.isEmpty, "\(language.rawValue) 사전에 없는 키: \(missing.joined(separator: ", "))")
+    }
+
+    /// 어떤 언어에서도 조회 결과가 키 문자열 그대로 나오면 안 된다.
+    @Test("번역 결과가 키 문자열로 새어 나오지 않는다", arguments: TranslationTests.languages)
+    func noKeyLeaksAsTranslation(language: AppLanguage) throws {
+        let merged = LanguageManager.mergedTranslationsForTesting
+        let dictionary = try #require(merged[language])
+
+        for (key, value) in dictionary {
+            #expect(value != key, "\(language.rawValue) / \(key) 의 값이 키와 같다")
+        }
     }
 
     @Test("빈 번역 값이 없다", arguments: TranslationTests.languages)

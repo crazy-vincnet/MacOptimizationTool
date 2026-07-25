@@ -113,6 +113,10 @@ public final class LanguageManager: ObservableObject, @unchecked Sendable {
         return merged
     }()
 
+    /// 병합된 최종 사전. 언어별 키 누락은 이 값으로 검증한다.
+    /// (`AdditionalTranslations` 만 검사하면 base 사전의 누락을 놓친다.)
+    static var mergedTranslationsForTesting: [AppLanguage: [String: String]] { translations }
+
     private static let baseTranslations: [AppLanguage: [String: String]] = [
         .korean: [
             "menu.dashboard": "대시보드",
@@ -260,7 +264,12 @@ public final class LanguageManager: ObservableObject, @unchecked Sendable {
             "settings.checkUpdate": "Check for Updates",
             "settings.updateAlert": "You are currently running the latest version (v%@).",
 
-            "settings.testNotif": "Test Notification"
+            "settings.testNotif": "Test Notification",
+
+            // 사이드바 메뉴 및 테마 문구 (기존 사전에서 누락되어 키가 그대로 노출되던 항목)
+            "menu.privacyCleaner": "Browser & Privacy",
+            "menu.oldDownloads": "Stale Downloads",
+            "menu.diskHealth": "Disk Health & S.M.A.R.T"
         ],
 
         .chinese: [
@@ -332,7 +341,12 @@ public final class LanguageManager: ObservableObject, @unchecked Sendable {
             "settings.checkUpdate": "检查更新",
             "settings.updateAlert": "您当前使用的是最新版本 (v%@)。",
 
-            "settings.testNotif": "测试通知"
+            "settings.testNotif": "测试通知",
+
+            // 사이드바 메뉴 및 테마 문구 (기존 사전에서 누락되어 키가 그대로 노출되던 항목)
+            "menu.privacyCleaner": "浏览器与隐私",
+            "menu.oldDownloads": "闲置下载分类",
+            "menu.diskHealth": "磁盘健康与 S.M.A.R.T"
         ],
 
         .japanese: [
@@ -398,7 +412,18 @@ public final class LanguageManager: ObservableObject, @unchecked Sendable {
             "settings.checkUpdate": "アップデートを確認",
             "settings.updateAlert": "現在、最新バージョン (v%@) を使用しています。",
 
-            "settings.testNotif": "テスト通知"
+            "settings.testNotif": "テスト通知",
+
+            // 사이드바 메뉴 및 테마 문구 (기존 사전에서 누락되어 키가 그대로 노출되던 항목)
+            "menu.privacyCleaner": "ブラウザ & プライバシー",
+            "menu.oldDownloads": "放置ダウンロード分類",
+            "menu.diskHealth": "ディスクヘルス & S.M.A.R.T",
+            "settings.themeSettings": "テーマと外観設定 (Appearance)",
+            "settings.themeSelect": "アプリのテーマ",
+            "settings.themeDesc": "ライトモード（デフォルト）、ダークモード、または macOS のシステム設定への自動同期を選択できます。",
+            "theme.light": "ライトモード",
+            "theme.dark": "ダークモード",
+            "theme.system": "システム設定に合わせる"
         ]
     ]
 }

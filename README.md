@@ -94,14 +94,16 @@ v1.6.0에서 아래 규칙을 명문화하고 단위 테스트로 고정했습�
 이 경로는 **AppleScript 문자열 파싱 → 셸 파싱** 두 단계를 거치므로, 두 레이어를 모두 이스케이프해야 합니다.
 
 ```swift
-// 1) 셸 단어로 안전하게 감싸고
-let quoted = shellQuoted(path)              // '...'  (내부 ' 는 '''  로 치환)
-// 2) AppleScript 문자열로 다시 이스케이프한다 (백슬래시를 반드시 먼저)
-let literal = appleScriptStringLiteral(cmd) // \ 먼저, 그다음 "
+// 1) 경로를 POSIX 셸 단어 하나로 감싼다.
+//    내부의 작은따옴표는 '\'' 시퀀스로 치환된다.
+let quoted = shellQuoted(path)
+
+// 2) 완성된 셸 명령을 AppleScript 문자열 리터럴로 다시 이스케이프한다.
+//    백슬래시를 먼저, 그다음 큰따옴표를 치환해야 순서가 어긋나지 않는다.
+let literal = appleScriptStringLiteral("rm -rf " + quoted)
 ```
 
-제어 문자(`
-`, ` ` 등)가 포함된 경로는 어떤 이스케이프로도 안전을 보장할 수 없으므로 삭제 자체를 거부합니다.
+제어 문자(개행, NUL 등)가 포함된 경로는 어떤 이스케이프로도 안전을 보장할 수 없으므로 삭제 자체를 거부합니다.
 
 ### 사전 인증 (Pre-Authorization)
 
