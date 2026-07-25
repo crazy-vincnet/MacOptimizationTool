@@ -51,7 +51,7 @@ final class SparkleUpdaterManager: NSObject, ObservableObject {
 
                     
                     if cleanTag.compare(currentVersion, options: .numeric) == .orderedDescending {
-                        let finalDownloadURL = dmgDownloadURL ?? URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/\(cleanTag)/MacCleanOptimizer_Setup.dmg")!
+                        let finalDownloadURL = dmgDownloadURL ?? URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/\(cleanTag)/MacOptimizationTool_Setup.dmg")!
                         let result = UpdateCheckResult(
                             hasNewVersion: true,
                             latestVersion: cleanTag,
@@ -87,7 +87,7 @@ final class SparkleUpdaterManager: NSObject, ObservableObject {
         Task {
             do {
                 let (tempLocalURL, _) = try await URLSession.shared.download(from: downloadURL)
-                let destinationURL = FileManager.default.temporaryDirectory.appendingPathComponent("MacCleanOptimizer_Setup.dmg")
+                let destinationURL = FileManager.default.temporaryDirectory.appendingPathComponent("MacOptimizationTool_Setup.dmg")
                 
                 try? FileManager.default.removeItem(at: destinationURL)
                 try FileManager.default.moveItem(at: tempLocalURL, to: destinationURL)

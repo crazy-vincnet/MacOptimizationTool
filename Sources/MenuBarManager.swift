@@ -28,7 +28,8 @@ final class MenuBarManager: NSObject, ObservableObject {
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "bolt.horizontal.circle.fill", accessibilityDescription: "Mac Clean Optimizer")
+            button.image = NSImage(systemSymbolName: "bolt.horizontal.circle.fill", accessibilityDescription: "MacOptimizationTool")
+
             button.action = #selector(togglePopover)
             button.target = self
         }
@@ -138,7 +139,8 @@ struct MenuBarMiniView: View {
                 Image(systemName: "bolt.circle.fill")
                     .foregroundColor(Theme.accent)
                     .font(.title2)
-                Text("Mac Clean Optimizer Mini")
+                Text("MacOptimizationTool Mini")
+
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
                 Spacer()

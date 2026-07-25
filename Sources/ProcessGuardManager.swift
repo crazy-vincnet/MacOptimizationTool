@@ -79,7 +79,8 @@ final class ProcessGuardManager: NSObject, ObservableObject {
                     let name = (path as NSString).lastPathComponent
 
                     // Ignore system apps / MacCleanOptimizer itself
-                    if name == "MacCleanOptimizer" || name == "WindowServer" || pid == ProcessInfo.processInfo.processIdentifier {
+                    if name == "MacOptimizationTool" || name == "WindowServer" || pid == ProcessInfo.processInfo.processIdentifier {
+
                         continue
                     }
 

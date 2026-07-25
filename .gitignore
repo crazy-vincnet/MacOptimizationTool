@@ -24,13 +24,17 @@ Thumbs.db
 dmg_staging/
 pkg_staging/
 
-# Temporary Local App & Package Artifacts
+# Temporary Local App & Package# Build outputs
 MacCleanOptimizer*.app
 MacCleanOptimizer 2.app/
 MacCleanOptimizer 3.app/
 MacCleanOptimizer 4.app/
 MacCleanOptimizer_Setup.dmg
 MacCleanOptimizer_AppStore.pkg
+MacOptimizationTool*.app
+MacOptimizationTool_Setup.dmg
+MacOptimizationTool_AppStore.pkg
+
 
 # ==========================================
 # Xcode & Swift Package Manager Caches

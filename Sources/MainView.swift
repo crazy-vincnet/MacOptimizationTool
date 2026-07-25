@@ -283,7 +283,8 @@ struct MainView: View {
                     .fill(Theme.accent)
                     .frame(width: 8, height: 8)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Mac Clean Optimizer")
+                    Text("MacOptimizationTool")
+
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(Theme.textPrimary)
                     Text("© 2026 Lab98 Studio. All rights reserved.")

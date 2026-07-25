@@ -1,92 +1,88 @@
 #!/bin/bash
 
-# 에러 발생 시 스크립트 중단
+# 에러 발생 시 즉시 중단
 set -e
 
-echo "=== Mac Clean Optimizer 빌드 시작 ==="
+echo "=== MacOptimizationTool 빌드 시작 ==="
 
-# 1. 이전 빌드 산출물 제거
-rm -rf MacCleanOptimizer.app MacCleanOptimizer testApp main.swift
+# 1. 이전 빌드 결과물 정리
+rm -rf MacOptimizationTool.app MacOptimizationTool testApp main.swift
 
-# 2. 컴파일 대상 확인 및 바이너리 빌드
+# 2. Sources 디렉토리 내의 모든 Swift 소스 파일 탐색
+SWIFT_FILES=$(find Sources -name "*.swift")
+
 echo "-> Sources 디렉토리 내 Swift 소스 파일 컴파일 중..."
-SDK_PATH=$(xcrun --show-sdk-path)
-swiftc -sdk "$SDK_PATH" \
-       -target arm64-apple-macosx14.0 \
+swiftc -O \
        -parse-as-library \
-       Sources/*.swift \
-       -o MacCleanOptimizer
+       $SWIFT_FILES \
+       -o MacOptimizationTool
 
-echo "-> 컴파일 완료! macOS .app 번들 구조 생성 중..."
-
-# 3. .app 번들 폴더 구조 생성
-APP_DIR="MacCleanOptimizer.app"
-MACOS_DIR="$APP_DIR/Contents/MacOS"
-RESOURCES_DIR="$APP_DIR/Contents/Resources"
+# 3. macOS .app 번들 구조 생성
+APP_DIR="MacOptimizationTool.app"
+CONTENTS_DIR="$APP_DIR/Contents"
+MACOS_DIR="$CONTENTS_DIR/MacOS"
+RESOURCES_DIR="$CONTENTS_DIR/Resources"
 
 mkdir -p "$MACOS_DIR"
 mkdir -p "$RESOURCES_DIR"
 
-# 4. 컴파일된 바이너리를 번들 내부로 이동 및 권한 부여
-mv MacCleanOptimizer "$MACOS_DIR/MacCleanOptimizer"
-chmod +x "$MACOS_DIR/MacCleanOptimizer"
+# 실행 바이너리 이동
+mv MacOptimizationTool "$MACOS_DIR/MacOptimizationTool"
+chmod +x "$MACOS_DIR/MacOptimizationTool"
 
-# 5. Info.plist 메타데이터 파일 작성
-cat <<EOF > "$APP_DIR/Contents/Info.plist"
+# 앱 아이콘 복사 (존재하는 경우)
+if [ -f "AppIcon.icns" ]; then
+    cp AppIcon.icns "$RESOURCES_DIR/"
+fi
+
+# 4. Info.plist 동적 생성
+cat <<EOF > "$CONTENTS_DIR/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>MacCleanOptimizer</string>
+    <string>MacOptimizationTool</string>
     <key>CFBundleIdentifier</key>
-    <string>com.cleanoptimizer.MacCleanOptimizer</string>
+    <string>com.lab98.MacOptimizationTool</string>
     <key>CFBundleName</key>
-    <string>MacCleanOptimizer</string>
+    <string>MacOptimizationTool</string>
+    <key>CFBundleDisplayName</key>
+    <string>MacOptimizationTool</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.3.0</string>
-
-    <key>CFBundleSignature</key>
-    <string>????</string>
-    <key>CFBundleIconFile</key>
-    <string>AppIcon.icns</string>
-    <key>NSHumanReadableCopyright</key>
-    <string>Copyright © 2026 Lab98 Studio. All rights reserved.</string>
-    <key>SUFeedURL</key>
-    <string>https://lab98.studio/mac-clean-optimizer/appcast.xml</string>
-    <key>SUPublicEDKey</key>
-    <string>YOUR_SPARKLE_PUBLIC_EDDSA_KEY</string>
+    <string>1.4.0</string>
+    <key>CFBundleVersion</key>
+    <string>1.4.0</string>
     <key>LSMinimumSystemVersion</key>
-
-
-    <string>14.0</string>
+    <string>13.0</string>
+    <key>LSUIElement</key>
+    <false/>
     <key>NSHighResolutionCapable</key>
     <true/>
-    <key>NSUserNotificationUsageDescription</key>
-    <string>Mac Clean Optimizer가 실시간 시스템 모니터링 및 메모리 최적화 상태 알림을 제공합니다.</string>
-    <key>NSFullDiskAccessUsageDescription</key>
-    <string>대용량 파일 탐색 및 불필요한 시스템 정리를 위해 전체 디스크 접근 권한이 필요합니다.</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>MacOptimizationTool이 실시간 시스템 모니터링 및 메모리 최적화 상태 알림을 제공합니다.</string>
 </dict>
 </plist>
 EOF
 
-# 5-1. 앱 아이콘 리소스 복사
-if [ -f "AppIcon.icns" ]; then
-    cp -f AppIcon.icns "$RESOURCES_DIR/AppIcon.icns"
-fi
+echo "-> 컴파일 완료! macOS .app 번들 구조 생성 중..."
 
-
-# 6. 코드 서명 (ad-hoc codesign - macOS TCC 알림/권한 시스템 등록 필수)
+# 5. Ad-hoc 코드 서명 (codesign)
 echo "-> macOS TCC 및 알림 서비스를 위한 코드 서명(ad-hoc codesign) 적용 중..."
 codesign --force --deep --sign - "$APP_DIR"
 
-echo "-> .app 패키징 및 코드 서명 완료: MacCleanOptimizer.app"
+echo "-> .app 패키징 및 코드 서명 완료: MacOptimizationTool.app"
 
-echo "=== 빌드 성공! 앱을 실행합니다 ==="
-
-# 6. 앱 실행
-killall MacCleanOptimizer 2>/dev/null || true
-sleep 0.5
-open MacCleanOptimizer.app
+# 6. 실행 (CLI 직접 빌드 검증용)
+if [ "$1" != "--no-run" ]; then
+    echo "=== 빌드 성공! 앱을 실행합니다 ==="
+    killall MacOptimizationTool 2>/dev/null || true
+    sleep 0.5
+    open MacOptimizationTool.app
+fi
