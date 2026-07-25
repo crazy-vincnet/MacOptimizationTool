@@ -160,13 +160,13 @@ enum FileSafety {
         defer { try? file.close() }
 
         var hasher = SHA256()
-        let headData = file.readData(ofLength: 16_384)
+        let headData = file.readData(ofLength: 8_192)
         hasher.update(data: headData)
 
         let fileSize = (try? file.seekToEnd()) ?? 0
-        if fileSize > 32_768 {
-            try? file.seek(toOffset: fileSize - 16_384)
-            let tailData = file.readData(ofLength: 16_384)
+        if fileSize > 16_384 {
+            try? file.seek(toOffset: fileSize - 8_192)
+            let tailData = file.readData(ofLength: 8_192)
             hasher.update(data: tailData)
         }
 
@@ -179,7 +179,7 @@ enum FileSafety {
         defer { try? file.close() }
 
         var hasher = SHA256()
-        let chunkSize = 65_536
+        let chunkSize = 524_288
         while true {
             let data = file.readData(ofLength: chunkSize)
             if data.isEmpty { break }
@@ -188,4 +188,5 @@ enum FileSafety {
         let digest = hasher.finalize()
         return digest.map { String(format: "%02x", $0) }.joined()
     }
+
 }

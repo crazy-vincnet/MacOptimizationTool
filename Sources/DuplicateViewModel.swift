@@ -158,12 +158,14 @@ class DuplicateViewModel: ObservableObject {
             
             if Task.isCancelled { return [] }
             
-            // 2단계: 동일 크기 파일들만 추출하여 1단계 16KB 고속 부분 해시 비교
-            var sameSizeCandidates: [[URL]] = []
+            // 2단계: 동일 크기 파일들만 추출하여 1단계 8KB 병렬 초고속 부분 해시 비교
+            var sameSizeCandidates: [(url: URL, size: Int64)] = []
             var totalCandidatesCount = 0
-            for (_, urls) in sizeToURLs {
+            for (size, urls) in sizeToURLs {
                 if urls.count > 1 {
-                    sameSizeCandidates.append(urls)
+                    for u in urls {
+                        sameSizeCandidates.append((url: u, size: size))
+                    }
                     totalCandidatesCount += urls.count
                 }
             }
@@ -171,24 +173,29 @@ class DuplicateViewModel: ObservableObject {
             await MainActor.run {
                 self?.candidateCount = totalCandidatesCount
                 self?.scanProgress = 0.40
-                self?.scanStatusText = "고속 해시 1차 검증 중... (대상: \(totalCandidatesCount)개 파일)"
+                self?.scanStatusText = "병렬 고속 해시 1차 검증 중... (대상: \(totalCandidatesCount)개 파일)"
             }
             
             var partialHashGroups: [String: [URL]] = [:]
             var processedCandidateCount = 0
             
-            for urls in sameSizeCandidates {
-                if Task.isCancelled { break }
-                for url in urls {
+            await withTaskGroup(of: (URL, Int64, String?).self) { group in
+                for item in sameSizeCandidates {
+                    group.addTask {
+                        let hash = FileSafety.partialFileHash(for: item.url)
+                        return (item.url, item.size, hash)
+                    }
+                }
+                
+                for await (url, size, hashOpt) in group {
                     if Task.isCancelled { break }
-                    if let partialHash = FileSafety.partialFileHash(for: url) {
-                        let fileSize = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
-                        let key = "\(fileSize)_\(partialHash)"
+                    if let partialHash = hashOpt {
+                        let key = "\(size)_\(partialHash)"
                         partialHashGroups[key, default: []].append(url)
                     }
                     
                     processedCandidateCount += 1
-                    if Date().timeIntervalSince(lastUIUpdate) > 0.08 {
+                    if Date().timeIntervalSince(lastUIUpdate) > 0.05 {
                         lastUIUpdate = Date()
                         let processed = processedCandidateCount
                         let total = max(1, totalCandidatesCount)
@@ -196,7 +203,7 @@ class DuplicateViewModel: ObservableObject {
                         await MainActor.run {
                             self?.currentScanPath = currentPath
                             self?.scanProgress = 0.40 + (Double(processed) / Double(total) * 0.35)
-                            self?.scanStatusText = "1차 고속 해시 비교 중... (\(processed)/\(total))"
+                            self?.scanStatusText = "1차 병렬 고속 해시 비교 중... (\(processed)/\(total))"
                         }
                     }
                 }
@@ -204,35 +211,44 @@ class DuplicateViewModel: ObservableObject {
             
             if Task.isCancelled { return [] }
             
-            // 3단계: 1단계 부분 해시까지 100% 동일한 후보만 2단계 전체 SHA-256 해시 최종 검증
+            // 3단계: 1단계 부분 해시까지 100% 동일한 후보만 2단계 병렬 SHA-256 해시 최종 검증
             var finalDuplicateMap: [String: [URL]] = [:]
-            var fullHashCandidates: [[URL]] = []
+            var fullHashCandidates: [(url: URL, size: Int64)] = []
             var totalFullHashCount = 0
-            for (_, urls) in partialHashGroups {
+            for (key, urls) in partialHashGroups {
                 if urls.count > 1 {
-                    fullHashCandidates.append(urls)
+                    let sizeStr = key.components(separatedBy: "_").first ?? "0"
+                    let size = Int64(sizeStr) ?? 0
+                    for u in urls {
+                        fullHashCandidates.append((url: u, size: size))
+                    }
                     totalFullHashCount += urls.count
                 }
             }
             
             await MainActor.run {
                 self?.scanProgress = 0.75
-                self?.scanStatusText = "정밀 2차 SHA-256 검증 중... (대상: \(totalFullHashCount)개 파일)"
+                self?.scanStatusText = "정밀 2차 SHA-256 병렬 검증 중... (대상: \(totalFullHashCount)개 파일)"
             }
             
             var processedFullCount = 0
-            for urls in fullHashCandidates {
-                if Task.isCancelled { break }
-                for url in urls {
+            await withTaskGroup(of: (URL, Int64, String?).self) { group in
+                for item in fullHashCandidates {
+                    group.addTask {
+                        let hash = FileSafety.fullFileHash(for: item.url)
+                        return (item.url, item.size, hash)
+                    }
+                }
+                
+                for await (url, size, hashOpt) in group {
                     if Task.isCancelled { break }
-                    if let fullHash = FileSafety.fullFileHash(for: url) {
-                        let fileSize = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
-                        let key = "\(fileSize)_\(fullHash)"
+                    if let fullHash = hashOpt {
+                        let key = "\(size)_\(fullHash)"
                         finalDuplicateMap[key, default: []].append(url)
                     }
                     
                     processedFullCount += 1
-                    if Date().timeIntervalSince(lastUIUpdate) > 0.08 {
+                    if Date().timeIntervalSince(lastUIUpdate) > 0.05 {
                         lastUIUpdate = Date()
                         let processed = processedFullCount
                         let total = max(1, totalFullHashCount)
@@ -245,6 +261,7 @@ class DuplicateViewModel: ObservableObject {
                     }
                 }
             }
+
             
             if Task.isCancelled { return [] }
             
