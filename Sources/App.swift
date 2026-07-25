@@ -12,6 +12,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
 
+        // 초기 윈도우 크기를 권장 기본 크기(1100x720)로 정밀 조정 및 화면 중앙 배치
+        DispatchQueue.main.async {
+            if let window = NSApp.windows.first(where: { $0.isVisible || $0.canBecomeMain }) {
+                window.setContentSize(NSSize(width: 1100, height: 720))
+                window.center()
+                window.makeKeyAndOrderFront(nil)
+            }
+        }
+
         // UNUserNotificationCenter 델리게이트 설정 (포그라운드 알림 노출에 필수)
         UNUserNotificationCenter.current().delegate = self
         
@@ -26,8 +35,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             MenuBarManager.shared.setupMenuBar()
             ProcessGuardManager.shared.startGuard()
         }
-
-
     }
 
     // 포그라운드(앱이 화면에 켜져있을 때) 알림도 배너, 리스트, 소리로 즉시 노출
@@ -52,7 +59,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         
         let menu = NSMenu()
         
-        let headerItem = NSMenuItem(title: "Mac Clean Optimizer", action: nil, keyEquivalent: "")
+        let headerItem = NSMenuItem(title: "MacOptimizationTool", action: nil, keyEquivalent: "")
         headerItem.isEnabled = false
         menu.addItem(headerItem)
         
@@ -132,7 +139,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     
     @objc func openMainWindow() {
         NSApp.activate(ignoringOtherApps: true)
-        if let window = NSApp.windows.first {
+        if let window = NSApp.windows.first(where: { $0.isVisible || $0.canBecomeMain }) {
+            window.setContentSize(NSSize(width: 1100, height: 720))
+            window.center()
             window.makeKeyAndOrderFront(nil)
         }
     }
@@ -151,8 +160,9 @@ struct MacCleanOptimizerApp: App {
     var body: some Scene {
         WindowGroup {
             MainView()
-                .frame(minWidth: 900, minHeight: 600)
+                .frame(minWidth: 960, idealWidth: 1100, maxWidth: .infinity, minHeight: 650, idealHeight: 720, maxHeight: .infinity)
         }
+        .defaultSize(width: 1100, height: 720)
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unifiedCompact)
     }
