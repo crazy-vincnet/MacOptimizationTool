@@ -35,7 +35,7 @@ class UninstallerViewModel: ObservableObject {
         scanStatusText = t("uninst.status.scanningApps")
         
         Task {
-            let apps = await Task.detached(priority: .userInitiated) { [weak self] () -> [SelectedAppInfo] in
+            let scanned = await Task.detached(priority: .userInitiated) { [weak self] () -> [AppMetadata] in
                 let fm = FileManager.default
                 let appsURL = URL(fileURLWithPath: "/Applications")
                 
@@ -50,7 +50,7 @@ class UninstallerViewModel: ObservableObject {
                     return []
                 }
                 
-                var results: [SelectedAppInfo] = []
+                var results: [AppMetadata] = []
                 let totalContents = contents.count
 
                 for (index, url) in contents.enumerated() {
@@ -67,18 +67,16 @@ class UninstallerViewModel: ObservableObject {
                             }
                         }
                         
-                        let icon = NSWorkspace.shared.icon(forFile: url.path)
                         var instDate = Date()
                         if let attrs = try? fm.attributesOfItem(atPath: url.path) {
                             instDate = attrs[.creationDate] as? Date ?? attrs[.modificationDate] as? Date ?? Date()
                         }
-                        
-                        let app = SelectedAppInfo(
+
+                        let app = AppMetadata(
                             url: url,
                             name: name,
                             bundleID: bundleID,
                             version: version,
-                            icon: icon,
                             size: 0,
                             installationDate: instDate
                         )
@@ -101,7 +99,8 @@ class UninstallerViewModel: ObservableObject {
                 return results
             }.value
             
-            self.installedApps = apps
+            // 아이콘은 메인 액터에서 붙인다 (NSImage 는 Sendable 이 아니다).
+            self.installedApps = scanned.map { SelectedAppInfo(metadata: $0) }
             self.scanProgress = 1.0
             self.isSearchingApps = false
             self.loadAppSizesInBackground()
@@ -163,7 +162,7 @@ class UninstallerViewModel: ObservableObject {
         scanStatusText = t("uninst.status.scanningLeftovers")
         
         Task {
-            let appInfo = await Task.detached(priority: .userInitiated) {
+            let metadata = await Task.detached(priority: .userInitiated) { () -> AppMetadata in
                 let fm = FileManager.default
                 let isAccessed = url.startAccessingSecurityScopedResource()
                 defer {
@@ -184,24 +183,23 @@ class UninstallerViewModel: ObservableObject {
                     }
                 }
                 
-                let icon = NSWorkspace.shared.icon(forFile: url.path)
                 let appSize = Self.getDirectorySizeStatic(at: url)
                 var instDate = Date()
                 if let attrs = try? fm.attributesOfItem(atPath: url.path) {
                     instDate = attrs[.creationDate] as? Date ?? attrs[.modificationDate] as? Date ?? Date()
                 }
                 
-                return SelectedAppInfo(
+                return AppMetadata(
                     url: url,
                     name: appName,
                     bundleID: bundleID,
                     version: version,
-                    icon: icon,
                     size: appSize,
                     installationDate: instDate
                 )
             }.value
-            
+
+            let appInfo = SelectedAppInfo(metadata: metadata)
             self.selectedApp = appInfo
             await self.scanLeftovers(for: appInfo)
         }

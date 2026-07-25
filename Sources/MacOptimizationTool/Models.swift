@@ -90,6 +90,17 @@ enum AppSortOption: String, CaseIterable, Identifiable {
     }
 }
 
+/// 백그라운드 스캔이 돌려주는 앱 메타데이터.
+/// `NSImage` 는 Sendable 이 아니므로 아이콘은 여기에 담지 않고, 메인 액터에서 붙인다.
+struct AppMetadata: Sendable {
+    let url: URL
+    let name: String
+    let bundleID: String?
+    let version: String?
+    let size: Int64
+    let installationDate: Date
+}
+
 /// 삭제할 대상 앱 정보
 struct SelectedAppInfo: Identifiable, Equatable, Hashable {
     var id: URL { url }
@@ -106,6 +117,28 @@ struct SelectedAppInfo: Identifiable, Equatable, Hashable {
         return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
     
+    init(url: URL, name: String, bundleID: String?, version: String?, icon: NSImage, size: Int64, installationDate: Date) {
+        self.url = url
+        self.name = name
+        self.bundleID = bundleID
+        self.version = version
+        self.icon = icon
+        self.size = size
+        self.installationDate = installationDate
+    }
+
+    /// 메인 액터에서 메타데이터에 아이콘을 붙여 완성한다.
+    @MainActor
+    init(metadata: AppMetadata) {
+        self.url = metadata.url
+        self.name = metadata.name
+        self.bundleID = metadata.bundleID
+        self.version = metadata.version
+        self.icon = NSWorkspace.shared.icon(forFile: metadata.url.path)
+        self.size = metadata.size
+        self.installationDate = metadata.installationDate
+    }
+
     static func == (lhs: SelectedAppInfo, rhs: SelectedAppInfo) -> Bool {
         return lhs.url == rhs.url && lhs.size == rhs.size && lhs.installationDate == rhs.installationDate
     }

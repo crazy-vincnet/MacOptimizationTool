@@ -212,19 +212,29 @@ class SettingsViewModel: ObservableObject {
         }
     }
     
-    /// 알림 권한 체크 (Async/Await)
+    /// 현재 알림 권한 상태. `UNNotificationSettings` 는 Sendable 이 아니므로
+    /// 완료 핸들러 안에서 필요한 값만 뽑아 액터 경계를 넘긴다.
+    private static func currentAuthorizationStatus() async -> UNAuthorizationStatus {
+        await withCheckedContinuation { continuation in
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                continuation.resume(returning: settings.authorizationStatus)
+            }
+        }
+    }
+
+    /// 알림 권한 체크
     func checkNotificationPermission() {
         Task { @MainActor in
-            let settings = await UNUserNotificationCenter.current().notificationSettings()
-            self.notificationPermissionGranted = (settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional)
+            let status = await Self.currentAuthorizationStatus()
+            self.notificationPermissionGranted = (status == .authorized || status == .provisional)
         }
     }
     
     /// 알림 권한 요청 및 시스템 설정 연결
     func requestNotificationPermission() {
         Task { @MainActor in
-            let settings = await UNUserNotificationCenter.current().notificationSettings()
-            if settings.authorizationStatus == .denied {
+            let status = await Self.currentAuthorizationStatus()
+            if status == .denied {
                 self.openSystemSettingsForNotifications()
                 return
             }
