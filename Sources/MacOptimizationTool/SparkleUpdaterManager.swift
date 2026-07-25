@@ -10,6 +10,9 @@ struct UpdateCheckResult {
     let downloadURL: URL?
     /// GitHub Release API 가 제공하는 자산 다이제스트 (`sha256:...`). 없으면 nil.
     let expectedSHA256: String?
+    /// 확인 자체가 실패했는지 여부. 실패를 "최신 버전"으로 보고하면
+    /// 사용자는 업데이트가 없는 것으로 오해하고, 원인 파악도 불가능해진다.
+    let checkFailed: Bool
 }
 
 /// GitHub Release 기반 인앱 업데이터.
@@ -29,8 +32,9 @@ final class SparkleUpdaterManager: NSObject, ObservableObject, URLSessionDownloa
     private var downloadTask: URLSessionDownloadTask?
     private var downloadContinuation: CheckedContinuation<URL, Error>?
 
-    private static let releaseAPIURL = URL(string: "https://api.github.com/repos/crazy-vincnet/MacOptimizationTool/releases/latest")!
-    private static let releasesPageURL = URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest")!
+    /// 불변 상수이므로 액터 격리 밖에서도 안전하게 읽는다.
+    nonisolated private static let releaseAPIURL = URL(string: "https://api.github.com/repos/crazy-vincnet/MacOptimizationTool/releases/latest")!
+    nonisolated private static let releasesPageURL = URL(string: "https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest")!
 
     private override init() {
         super.init()
@@ -54,15 +58,41 @@ final class SparkleUpdaterManager: NSObject, ObservableObject, URLSessionDownloa
         Task {
             let current = UpdateVerification.normalizedVersion(Self.currentVersion)
 
-            guard let payload = try? await URLSession.shared.data(for: request),
-                  let httpResponse = payload.1 as? HTTPURLResponse, httpResponse.statusCode == 200,
-                  let json = try? JSONSerialization.jsonObject(with: payload.0) as? [String: Any],
-                  let latestTag = json["tag_name"] as? String else {
+            /// 실패 사유를 문구에 담아 돌려준다. "최신 버전"과 절대 섞이면 안 된다.
+            func reportFailure(_ reason: String) {
                 completion(UpdateCheckResult(hasNewVersion: false,
                                              latestVersion: "v\(current)",
-                                             message: String(format: t("settings.updateAlert"), current),
+                                             message: String(format: t("update.checkFailed"), reason),
                                              downloadURL: Self.releasesPageURL,
-                                             expectedSHA256: nil))
+                                             expectedSHA256: nil,
+                                             checkFailed: true))
+            }
+
+            let payload: (Data, URLResponse)
+            do {
+                payload = try await URLSession.shared.data(for: request)
+            } catch {
+                reportFailure(error.localizedDescription)
+                return
+            }
+
+            guard let httpResponse = payload.1 as? HTTPURLResponse else {
+                reportFailure(t("update.checkFailed.noResponse"))
+                return
+            }
+
+            guard httpResponse.statusCode == 200 else {
+                // 비인증 GitHub API 는 IP 당 시간당 60회로 제한된다. 초과 시 403/429 가 온다.
+                let reason = httpResponse.statusCode == 403 || httpResponse.statusCode == 429
+                    ? t("update.checkFailed.rateLimited")
+                    : String(format: t("update.checkFailed.httpStatus"), httpResponse.statusCode)
+                reportFailure(reason)
+                return
+            }
+
+            guard let json = try? JSONSerialization.jsonObject(with: payload.0) as? [String: Any],
+                  let latestTag = json["tag_name"] as? String else {
+                reportFailure(t("update.checkFailed.badPayload"))
                 return
             }
 
@@ -90,7 +120,8 @@ final class SparkleUpdaterManager: NSObject, ObservableObject, URLSessionDownloa
                     ? String(format: t("update.newVersionMessage"), displayTag)
                     : String(format: t("settings.updateAlert"), current),
                 downloadURL: dmgDownloadURL ?? Self.releasesPageURL,
-                expectedSHA256: digest
+                expectedSHA256: digest,
+                checkFailed: false
             ))
         }
     }

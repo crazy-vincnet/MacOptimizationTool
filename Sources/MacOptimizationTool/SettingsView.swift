@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import MacOptimizationCore
 
 enum SettingsSection: String, CaseIterable, Identifiable {
@@ -87,7 +88,18 @@ struct SettingsView: View {
             .padding(.bottom, Theme.pagePadding)
         }
         .alert(isPresented: $viewModel.showUpdateAlert) {
-            if viewModel.hasNewVersion {
+            if viewModel.updateCheckFailed {
+                Alert(
+                    title: Text(t("update.alert.checkFailedTitle")),
+                    message: Text(viewModel.updateAlertMessage),
+                    primaryButton: .default(Text(t("update.alert.openReleasePage")), action: {
+                        if let url = viewModel.updateURL {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }),
+                    secondaryButton: .cancel(Text(t("common.ok")))
+                )
+            } else if viewModel.hasNewVersion {
                 Alert(
                     title: Text(t("update.alert.newTitle")),
                     message: Text(viewModel.updateAlertMessage),

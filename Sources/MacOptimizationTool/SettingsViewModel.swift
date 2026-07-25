@@ -79,6 +79,8 @@ class SettingsViewModel: ObservableObject {
     /// 릴리스 API 가 알려준 자산 SHA-256. 없으면 자동 마운트하지 않는다.
     @Published var updateExpectedSHA256: String? = nil
     @Published var hasNewVersion: Bool = false
+    /// 확인 실패와 "최신 버전"은 서로 다른 결과다. 같은 문구로 묶으면 사용자가 오해한다.
+    @Published var updateCheckFailed: Bool = false
 
     
     private let fileManager = FileManager.default
@@ -300,6 +302,7 @@ class SettingsViewModel: ObservableObject {
                 self?.updateURL = result.downloadURL
                 self?.updateExpectedSHA256 = result.expectedSHA256
                 self?.hasNewVersion = result.hasNewVersion
+                self?.updateCheckFailed = result.checkFailed
                 self?.isCheckingUpdate = false
                 self?.showUpdateAlert = true
             }
