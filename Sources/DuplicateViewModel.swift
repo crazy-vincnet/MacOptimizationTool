@@ -180,21 +180,37 @@ class DuplicateViewModel: ObservableObject {
             var processedCandidateCount = 0
             
             await withTaskGroup(of: (URL, Int64, String?).self) { group in
-                for item in sameSizeCandidates {
+                let maxConcurrency = 16
+                var index = 0
+
+                while index < sameSizeCandidates.count && index < maxConcurrency {
+                    let item = sameSizeCandidates[index]
+                    index += 1
                     group.addTask {
                         let hash = FileSafety.partialFileHash(for: item.url)
                         return (item.url, item.size, hash)
                     }
                 }
-                
-                for await (url, size, hashOpt) in group {
+
+                while let (url, size, hashOpt) = await group.next() {
                     if Task.isCancelled { break }
+
                     if let partialHash = hashOpt {
                         let key = "\(size)_\(partialHash)"
                         partialHashGroups[key, default: []].append(url)
                     }
-                    
+
                     processedCandidateCount += 1
+
+                    if index < sameSizeCandidates.count {
+                        let item = sameSizeCandidates[index]
+                        index += 1
+                        group.addTask {
+                            let hash = FileSafety.partialFileHash(for: item.url)
+                            return (item.url, item.size, hash)
+                        }
+                    }
+
                     if Date().timeIntervalSince(lastUIUpdate) > 0.05 {
                         lastUIUpdate = Date()
                         let processed = processedCandidateCount
@@ -233,21 +249,37 @@ class DuplicateViewModel: ObservableObject {
             
             var processedFullCount = 0
             await withTaskGroup(of: (URL, Int64, String?).self) { group in
-                for item in fullHashCandidates {
+                let maxConcurrency = 16
+                var index = 0
+
+                while index < fullHashCandidates.count && index < maxConcurrency {
+                    let item = fullHashCandidates[index]
+                    index += 1
                     group.addTask {
                         let hash = FileSafety.fullFileHash(for: item.url)
                         return (item.url, item.size, hash)
                     }
                 }
-                
-                for await (url, size, hashOpt) in group {
+
+                while let (url, size, hashOpt) = await group.next() {
                     if Task.isCancelled { break }
+
                     if let fullHash = hashOpt {
                         let key = "\(size)_\(fullHash)"
                         finalDuplicateMap[key, default: []].append(url)
                     }
-                    
+
                     processedFullCount += 1
+
+                    if index < fullHashCandidates.count {
+                        let item = fullHashCandidates[index]
+                        index += 1
+                        group.addTask {
+                            let hash = FileSafety.fullFileHash(for: item.url)
+                            return (item.url, item.size, hash)
+                        }
+                    }
+
                     if Date().timeIntervalSince(lastUIUpdate) > 0.05 {
                         lastUIUpdate = Date()
                         let processed = processedFullCount
@@ -261,6 +293,7 @@ class DuplicateViewModel: ObservableObject {
                     }
                 }
             }
+
 
             
             if Task.isCancelled { return [] }

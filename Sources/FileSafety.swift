@@ -156,6 +156,10 @@ enum FileSafety {
     // MARK: - Hashing
 
     static func partialFileHash(for url: URL) -> String? {
+        guard let vals = try? url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
+              vals.isRegularFile == true,
+              let fileSize = vals.fileSize, fileSize > 0 else { return nil }
+
         guard let file = try? FileHandle(forReadingFrom: url) else { return nil }
         defer { try? file.close() }
 
@@ -163,9 +167,8 @@ enum FileSafety {
         let headData = file.readData(ofLength: 8_192)
         hasher.update(data: headData)
 
-        let fileSize = (try? file.seekToEnd()) ?? 0
         if fileSize > 16_384 {
-            try? file.seek(toOffset: fileSize - 8_192)
+            try? file.seek(toOffset: UInt64(fileSize - 8_192))
             let tailData = file.readData(ofLength: 8_192)
             hasher.update(data: tailData)
         }
@@ -175,6 +178,15 @@ enum FileSafety {
     }
 
     static func fullFileHash(for url: URL) -> String? {
+        guard let vals = try? url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
+              vals.isRegularFile == true,
+              let fileSize = vals.fileSize, fileSize > 0 else { return nil }
+
+        // 2GB 초과 거대 파일은 16KB 고속 부분 해시로 대체하여 시스템 IO 블로킹 원천 차단
+        if fileSize > 2_000_000_000 {
+            return partialFileHash(for: url)
+        }
+
         guard let file = try? FileHandle(forReadingFrom: url) else { return nil }
         defer { try? file.close() }
 
@@ -188,5 +200,6 @@ enum FileSafety {
         let digest = hasher.finalize()
         return digest.map { String(format: "%02x", $0) }.joined()
     }
+
 
 }
