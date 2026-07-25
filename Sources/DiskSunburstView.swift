@@ -108,9 +108,10 @@ struct DiskSunburstView: View {
                 VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.2)
+                        .tint(Theme.accent)
                     Text("전체 폴더 및 하위 파일 용량 100% 전수 계산 중...")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(Theme.textSecondary)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Theme.textPrimary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let root = viewModel.rootNode {
@@ -121,7 +122,7 @@ struct DiskSunburstView: View {
         }
         .background(Theme.appBackground)
         .onAppear {
-            viewModel.scanPath(targetPath: viewModel.currentPath)
+            // 사용자가 [시작] 또는 [폴더 선택] 버튼을 누를 때만 스캔이 실행되도록 자동 스캔 비활성화
         }
     }
 
@@ -138,26 +139,40 @@ struct DiskSunburstView: View {
 
             Spacer()
 
-            Button(action: {
-                let panel = NSOpenPanel()
-                panel.canChooseFiles = false
-                panel.canChooseDirectories = true
-                if panel.runModal() == .OK, let url = panel.url {
-                    viewModel.scanPath(targetPath: url.path)
+            HStack(spacing: 10) {
+                if viewModel.rootNode != nil {
+                    Button(action: {
+                        viewModel.scanPath(targetPath: viewModel.currentPath)
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.clockwise")
+                            Text("다시 스캔")
+                        }
+                    }
+                    .buttonStyle(SecondaryButtonStyle())
                 }
-            }) {
-                HStack(spacing: 6) {
-                    Image(systemName: "folder")
-                    Text("폴더 선택")
+
+                Button(action: {
+                    let panel = NSOpenPanel()
+                    panel.canChooseFiles = false
+                    panel.canChooseDirectories = true
+                    if panel.runModal() == .OK, let url = panel.url {
+                        viewModel.scanPath(targetPath: url.path)
+                    }
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "folder")
+                        Text("폴더 선택")
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Theme.accent)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Theme.accentGlow)
+                    .cornerRadius(Theme.radiusControl)
                 }
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(Theme.accent)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Theme.accentGlow)
-                .cornerRadius(Theme.radiusControl)
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
@@ -171,12 +186,12 @@ struct DiskSunburstView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Theme.textPrimary)
                         Text(root.path)
-                            .font(.system(size: 11))
+                            .font(.system(size: 11, design: .monospaced))
                             .foregroundColor(Theme.textSecondary)
                     }
                     Spacer()
                     Text(viewModel.formatBytes(root.size))
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundColor(Theme.accent)
                 }
                 .padding(20)
@@ -217,7 +232,7 @@ struct DiskSunburstView: View {
                                 Spacer()
 
                                 Text(viewModel.formatBytes(child.size))
-                                    .font(.system(size: 13, weight: .bold))
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundColor(Theme.textSecondary)
 
                                 Button(action: {
@@ -227,7 +242,7 @@ struct DiskSunburstView: View {
                                     }
                                 }) {
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 12))
+                                        .font(.system(size: 12, weight: .bold))
                                         .foregroundColor(Theme.textSecondary)
                                 }
                                 .buttonStyle(.plain)
@@ -244,13 +259,37 @@ struct DiskSunburstView: View {
     }
 
     private var emptyView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
+            Spacer()
             Image(systemName: "chart.pie.fill")
-                .font(.system(size: 44))
+                .font(.system(size: 70))
+                .foregroundStyle(Theme.accentGradient)
+                .padding(.bottom, 10)
+                .shadow(color: Theme.accent.opacity(0.25), radius: 12)
+
+            Text("시각적 디스크 용량 맵 탐색")
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundColor(Theme.textPrimary)
+
+            Text("사용자 홈 디렉토리 또는 지정한 폴더의 모든 하위 파일 용량을\n100% 전수 계산하여 시각적 차트로 시각화합니다.")
+                .font(.subheadline)
                 .foregroundColor(Theme.textSecondary)
-            Text("폴더를 선택하여 시각적 디스크 용량 맵을 탐색하세요.")
-                .font(.system(size: 14))
-                .foregroundColor(Theme.textSecondary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+                .frame(maxWidth: 480)
+                .padding(.horizontal, 20)
+
+            Button(action: {
+                viewModel.scanPath(targetPath: viewModel.currentPath)
+            }) {
+                HStack {
+                    Image(systemName: "play.fill")
+                    Text("디스크 용량 맵 탐색 시작")
+                }
+            }
+            .buttonStyle(PrimaryActionButtonStyle())
+
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
