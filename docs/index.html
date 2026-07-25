@@ -75,7 +75,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 28px;
+            padding: 0 24px;
             position: relative;
             z-index: 1;
         }
@@ -83,17 +83,18 @@
         /* Header */
         header {
             position: sticky;
-            top: 20px;
+            top: 16px;
             z-index: 100;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .navbar {
-            background: rgba(15, 23, 42, 0.65);
+            background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 14px 28px;
+            padding: 12px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -103,19 +104,19 @@
         .brand {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             text-decoration: none;
             color: var(--text-primary);
         }
 
         .brand-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
         }
 
         .brand-name {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
             background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
             -webkit-background-clip: text;
@@ -125,51 +126,51 @@
         .nav-actions {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .nav-link {
             color: var(--text-secondary);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             transition: color 0.2s ease;
         }
 
         .nav-link:hover { color: var(--text-primary); }
 
         .btn-header-cta {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            padding: 8px 18px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            padding: 8px 16px;
             border-radius: 12px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.2s ease;
         }
 
-        .btn-header-cta:hover { background: rgba(255, 255, 255, 0.16); }
+        .btn-header-cta:hover { background: rgba(59, 130, 246, 0.3); }
 
         /* Hero Section */
         .hero {
             text-align: center;
-            padding: 40px 0 60px;
+            padding: 30px 0 50px;
         }
 
         .version-pill {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: rgba(59, 130, 246, 0.12);
             border: 1px solid rgba(59, 130, 246, 0.3);
             color: #60a5fa;
-            padding: 8px 20px;
+            padding: 6px 16px;
             border-radius: 30px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
         .pulse-dot {
@@ -188,11 +189,11 @@
         }
 
         .hero-title {
-            font-size: 4.2rem;
+            font-size: 4rem;
             font-weight: 800;
             letter-spacing: -0.04em;
             line-height: 1.1;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 50%, #64748b 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -205,10 +206,10 @@
         }
 
         .hero-desc {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: var(--text-secondary);
-            max-width: 720px;
-            margin: 0 auto 44px;
+            max-width: 680px;
+            margin: 0 auto 36px;
             font-weight: 400;
         }
 
@@ -216,21 +217,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 16px;
             flex-wrap: wrap;
-            margin-bottom: 60px;
+            margin-bottom: 50px;
         }
 
         .btn-download {
-            position: relative;
             display: inline-flex;
             align-items: center;
-            gap: 14px;
+            justify-content: center;
+            gap: 12px;
             background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             color: #ffffff;
-            padding: 18px 40px;
+            padding: 16px 36px;
             border-radius: 16px;
-            font-size: 1.15rem;
+            font-size: 1.08rem;
             font-weight: 700;
             text-decoration: none;
             box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
@@ -238,20 +239,21 @@
         }
 
         .btn-download:hover {
-            transform: translateY(-3px) scale(1.02);
+            transform: translateY(-3px);
             box-shadow: 0 25px 50px rgba(59, 130, 246, 0.6);
         }
 
         .btn-github {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            gap: 10px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             color: var(--text-primary);
-            padding: 18px 32px;
+            padding: 16px 28px;
             border-radius: 16px;
-            font-size: 1.05rem;
+            font-size: 1.02rem;
             font-weight: 600;
             text-decoration: none;
             backdrop-filter: blur(20px);
@@ -267,15 +269,10 @@
         .hero-screenshot-window {
             max-width: 1000px;
             margin: 0 auto;
-            border-radius: 20px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 60px rgba(59, 130, 246, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(59, 130, 246, 0.2);
             border: 1px solid var(--glass-border);
-            transition: transform 0.4s ease;
-        }
-
-        .hero-screenshot-window:hover {
-            transform: translateY(-6px);
         }
 
         .hero-screenshot-window img {
@@ -284,36 +281,36 @@
             display: block;
         }
 
-        /* Screenshot Showcases Section */
+        /* Showcase Section */
         .showcase-section {
-            padding: 120px 0;
+            padding: 80px 0;
         }
 
         .section-header {
             text-align: center;
-            margin-bottom: 70px;
+            margin-bottom: 50px;
         }
 
         .section-title {
-            font-size: 2.8rem;
+            font-size: 2.4rem;
             font-weight: 800;
             letter-spacing: -0.03em;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .section-subtitle {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             color: var(--text-secondary);
-            max-width: 600px;
+            max-width: 540px;
             margin: 0 auto;
         }
 
         .showcase-item {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 60px;
+            gap: 40px;
             align-items: center;
-            margin-bottom: 100px;
+            margin-bottom: 80px;
         }
 
         .showcase-item.reverse {
@@ -325,15 +322,10 @@
         }
 
         .showcase-image-box {
-            border-radius: 20px;
+            border-radius: 16px;
             overflow: hidden;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-            transition: transform 0.3s ease;
-        }
-
-        .showcase-image-box:hover {
-            transform: scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
         }
 
         .showcase-image-box img {
@@ -345,32 +337,32 @@
         .showcase-tag {
             display: inline-block;
             color: #60a5fa;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .showcase-h3 {
-            font-size: 2.2rem;
+            font-size: 1.9rem;
             font-weight: 800;
             line-height: 1.25;
-            margin-bottom: 18px;
+            margin-bottom: 14px;
         }
 
         .showcase-p {
             color: var(--text-secondary);
-            font-size: 1.05rem;
-            line-height: 1.7;
-            margin-bottom: 24px;
+            font-size: 1rem;
+            line-height: 1.65;
+            margin-bottom: 20px;
         }
 
         .feature-bullets {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .feature-bullets li {
@@ -378,7 +370,7 @@
             align-items: center;
             gap: 10px;
             color: var(--text-primary);
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             font-weight: 500;
         }
 
@@ -390,10 +382,87 @@
         /* Footer */
         footer {
             border-top: 1px solid var(--glass-border);
-            padding: 60px 0 40px;
+            padding: 40px 0;
             text-align: center;
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+        }
+
+        /* ==========================================
+           RESPONSIVE MOBILE BREAKPOINTS (Mobile & Tablet)
+           ========================================== */
+        @media (max-width: 900px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+
+            .showcase-item, .showcase-item.reverse {
+                grid-template-columns: 1fr;
+                direction: ltr;
+                gap: 24px;
+                margin-bottom: 60px;
+            }
+
+            .showcase-h3 {
+                font-size: 1.6rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            header {
+                top: 10px;
+                margin-bottom: 20px;
+            }
+
+            .navbar {
+                padding: 10px 16px;
+            }
+
+            .brand-name {
+                font-size: 1rem;
+            }
+
+            .nav-link.hide-mobile {
+                display: none;
+            }
+
+            .hero {
+                padding: 20px 0 40px;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+                letter-spacing: -0.02em;
+            }
+
+            .hero-desc {
+                font-size: 1rem;
+                margin-bottom: 28px;
+            }
+
+            .cta-group {
+                flex-direction: column;
+                width: 100%;
+                gap: 12px;
+            }
+
+            .btn-download, .btn-github {
+                width: 100%;
+                padding: 14px 20px;
+                font-size: 0.98rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .section-subtitle {
+                font-size: 0.95rem;
+            }
         }
     </style>
 </head>
@@ -413,9 +482,9 @@
                     <span class="brand-name">Mac Clean Optimizer</span>
                 </a>
                 <div class="nav-actions">
-                    <a href="#showcase" class="nav-link">기능 스크린샷</a>
-                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="nav-link">GitHub</a>
-                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" target="_blank" class="btn-header-cta">v1.1.0 다운로드</a>
+                    <a href="#showcase" class="nav-link hide-mobile">기능 스크린샷</a>
+                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="nav-link hide-mobile">GitHub</a>
+                    <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/latest" target="_blank" class="btn-header-cta">v1.2.0 다운로드</a>
                 </div>
             </nav>
         </header>
@@ -424,7 +493,7 @@
         <section class="hero">
             <div class="version-pill">
                 <div class="pulse-dot"></div>
-                <span>Lab98 Studio 공식 v1.1.0 메이저 릴리즈</span>
+                <span>Lab98 Studio 공식 v1.2.0 메이저 릴리즈</span>
             </div>
 
             <h1 class="hero-title">
@@ -433,12 +502,12 @@
             </h1>
 
             <p class="hero-desc">
-                실시간 자원 대시보드, 4단계 앱 완전 삭제기, 캐시 정리기, 중복 파일 탐색기부터 인앱 자동 업데이트까지. 실제 앱 스크린샷으로 강력한 성능을 확인하세요.
+                실시간 자원 대시보드, 메뉴바 미니 컨트롤러, 4단계 앱 완전 삭제기, 프로세스 폭주 가드부터 시각적 디스크 맵까지 단 하나로 해결하세요.
             </p>
 
             <div class="cta-group">
-                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.1.0/MacCleanOptimizer_Setup.dmg" class="btn-download">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <a href="https://github.com/crazy-vincnet/MacOptimizationTool/releases/download/v1.2.0/MacCleanOptimizer_Setup.dmg" class="btn-download">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -447,7 +516,7 @@
                 </a>
 
                 <a href="https://github.com/crazy-vincnet/MacOptimizationTool" target="_blank" class="btn-github">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
                     <span>GitHub 소스 코드</span>
@@ -460,7 +529,7 @@
             </div>
         </section>
 
-        <!-- Detailed Feature Showcases with Real Screenshots -->
+        <!-- Detailed Feature Showcases -->
         <section id="showcase" class="showcase-section">
             <div class="section-header">
                 <h2 class="section-title">실제 앱 구동 화면 및 스크린샷</h2>
@@ -474,14 +543,14 @@
                 </div>
                 <div class="showcase-text">
                     <span class="showcase-tag">Real-Time Monitoring</span>
-                    <h3 class="showcase-h3">⚡ 실시간 시스템 자원 대시보드</h3>
+                    <h3 class="showcase-h3">⚡ 실시간 시스템 자원 대시보드 & 메뉴바 미니 컨트롤러</h3>
                     <p class="showcase-p">
                         Mac의 CPU, 메모리(App/Wired/Compressed), 디스크 여유 공간, 시스템 온도 및 배터리 전원 상태를 1초 단위로 감시합니다.
                     </p>
                     <ul class="feature-bullets">
                         <li><span class="bullet-icon">✓</span> <strong>원클릭 메모리 최적화</strong>: 비활성 메모리 및 가상 수거 영역 즉시 환수</li>
-                        <li><span class="bullet-icon">✓</span> <strong>하드웨어 감시</strong>: CPU 10-core 및 Apple Silicon / Intel 상태 동적 측정</li>
-                        <li><span class="bullet-icon">✓</span> <strong>자동 임계값 알림</strong>: 메모리 부족 시 macOS 시스템 알림 수신</li>
+                        <li><span class="bullet-icon">✓</span> <strong>메뉴바 미니 컨트롤러</strong>: 상태바에서 실시간 RAM% 및 네트워크 업/다운로드 속도 조망</li>
+                        <li><span class="bullet-icon">✓</span> <strong>프로세스 폭주 가드</strong>: CPU 85% 이상 독점 앱 실시간 감지 및 강제 종료 지원</li>
                     </ul>
                 </div>
             </div>
@@ -500,7 +569,7 @@
                     <ul class="feature-bullets">
                         <li><span class="bullet-icon">✓</span> <strong>드롭존 지원</strong>: 앱 아이콘을 드래그 앤 드롭하여 1초 만에 잔여 파일 탐색</li>
                         <li><span class="bullet-icon">✓</span> <strong>4단계 폴백 엔진</strong>: Trash ➔ NSWorkspace ➔ Direct Delete ➔ Admin Privilege Escalation</li>
-                        <li><span class="bullet-icon">✓</span> <strong>보호 애플리케이션 수거</strong>: 루트 권한이 필요한 복잡한 시스템 앱 안전 수거</li>
+                        <li><span class="bullet-icon">✓</span> <strong>시동 프로그램 관리자</strong>: 부팅 시 실행되는 백그라운드 에이전트 선택적 비활성화</li>
                     </ul>
                 </div>
             </div>
