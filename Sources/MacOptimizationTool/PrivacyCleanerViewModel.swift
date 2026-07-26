@@ -156,7 +156,7 @@ final class PrivacyCleanerViewModel: ObservableObject {
                         
                         var isDir: ObjCBool = false
                         if fm.fileExists(atPath: path, isDirectory: &isDir) {
-                            let size = Self.calculateSizeStatic(at: targetURL)
+                            let size = DirectorySize.measure(at: targetURL, isCancelled: { Task.isCancelled }).localBytes
                             if size > 0 {
                                 foundCount += 1
                                 subItems.append(PrivacySubItem(
@@ -227,7 +227,7 @@ final class PrivacyCleanerViewModel: ObservableObject {
                 var freed: Int64 = 0
                 let fm = FileManager.default
                 for url in deletionTargets {
-                    let size = Self.calculateSizeStatic(at: url)
+                    let size = DirectorySize.measure(at: url).localBytes
                     if FileSafety.moveToTrash(url) {
                         freed += size
                     } else {
@@ -245,35 +245,4 @@ final class PrivacyCleanerViewModel: ObservableObject {
         }
     }
     
-    nonisolated private static func calculateSizeStatic(at url: URL) -> Int64 {
-        let fm = FileManager.default
-        var isDir: ObjCBool = false
-        guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return 0 }
-        
-        if !isDir.boolValue {
-            var statInfo = stat()
-            if lstat(url.path, &statInfo) == 0 {
-                return Int64(statInfo.st_size)
-            }
-            return 0
-        }
-        
-        guard let enumerator = fm.enumerator(
-            at: url,
-            includingPropertiesForKeys: [.fileSizeKey, .isDirectoryKey],
-            options: [.skipsHiddenFiles, .skipsPackageDescendants],
-            errorHandler: { _, _ in return true }
-        ) else { return 0 }
-        
-        var total: Int64 = 0
-        while let fileURL = enumerator.nextObject() as? URL {
-            if let vals = try? fileURL.resourceValues(forKeys: [.fileSizeKey, .isDirectoryKey]),
-               let isDirectory = vals.isDirectory, !isDirectory,
-               let fileSize = vals.fileSize {
-                total += Int64(fileSize)
-            }
-        }
-        return total
-    }
-
 }

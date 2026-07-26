@@ -37,6 +37,15 @@ class LargeFilesViewModel: ObservableObject {
     @Published var isDeleting = false
     @Published var sizeThresholdMB: Double = 100.0 // 기본 100MB
     @Published var ageThresholdMonths: Int = 0 // 0: 상관없음, 3: 3개월 이상, 6: 6개월 이상, 12: 1년 이상
+    /// node_modules·DerivedData 등 개발 캐시를 스캔에서 뺄지 여부.
+    /// 기본 꺼짐 — 그 안의 대용량 바이너리도 실제로 디스크를 차지하므로, 숨기는 것은 사용자 선택이다.
+    @Published var excludeDeveloperCaches: Bool {
+        didSet { UserDefaults.standard.set(excludeDeveloperCaches, forKey: Self.excludeDevCachesKey) }
+    }
+    /// 진입 전에 가지치기한 디렉터리 수.
+    @Published var prunedDirectoryCount: Int = 0
+
+    private static let excludeDevCachesKey = "largeFilesExcludeDeveloperCaches"
     @Published var targetFolderPath: String = t("common.noFolderSelected")
     @Published var selectedFolderURL: URL? = nil
     @Published var hasScanned = false
@@ -58,6 +67,8 @@ class LargeFilesViewModel: ObservableObject {
     @Published var deletedCount = 0
 
     init() {
+        excludeDeveloperCaches = UserDefaults.standard.bool(forKey: Self.excludeDevCachesKey)
+
         let defaultURL = SettingsViewModel.getSavedDefaultScanURL()
         selectedFolderURL = defaultURL
         targetFolderPath = defaultURL.path
@@ -149,6 +160,8 @@ class LargeFilesViewModel: ObservableObject {
         let calendar = Calendar.current
         let now = Date()
         let ageMonths = ageThresholdMonths
+        let skipDeveloperCaches = excludeDeveloperCaches
+        let homeDirectory = NSHomeDirectory()
 
         let foundFiles = await Task.detached(priority: .userInitiated) { [weak self] () -> [LargeFileItem] in
             let fm = FileManager.default
@@ -172,6 +185,7 @@ class LargeFilesViewModel: ObservableObject {
 
 
             var totalScanned = 0
+            var prunedDirectories = 0
             var lastUIUpdate = Date()
 
             while let url = enumerator.nextObject() as? URL {
@@ -179,14 +193,27 @@ class LargeFilesViewModel: ObservableObject {
                     break
                 }
 
-                let path = url.path
-                if path.contains("/Library") || path.contains("/.gemini") || path.contains("/System") {
+                guard let resourceValues = try? url.resourceValues(forKeys: Set(resourceKeys)) else {
                     continue
                 }
 
-                guard let resourceValues = try? url.resourceValues(forKeys: Set(resourceKeys)),
-                      let isDir = resourceValues.isDirectory, !isDir,
-                      let fileSize = resourceValues.fileSize,
+                // 제외 대상은 진입 전에 가지치기한다. 이전 구현은 시스템·Library 트리를
+                // 전부 열거한 뒤 결과만 버려서, 홈 전체 스캔에서 19만 항목의 비용을 그대로 냈다.
+                if resourceValues.isDirectory == true {
+                    var shouldPrune = ScanExclusion.isExcluded(path: url.path, homeDirectory: homeDirectory)
+                    // 개발 캐시 제외는 선택 사항이다. 켜면 훨씬 빠르지만 node_modules 안의
+                    // 100MB 넘는 바이너리가 결과에서 사라진다 — 실제로 디스크를 차지하는 파일이다.
+                    if !shouldPrune && skipDeveloperCaches {
+                        shouldPrune = ScanExclusion.shouldPruneDirectory(named: url.lastPathComponent)
+                    }
+                    if shouldPrune {
+                        enumerator.skipDescendants()
+                        prunedDirectories += 1
+                    }
+                    continue
+                }
+
+                guard let fileSize = resourceValues.fileSize,
                       let modDate = resourceValues.contentModificationDate else {
                     continue
                 }
@@ -230,6 +257,10 @@ class LargeFilesViewModel: ObservableObject {
             }
 
             results.sort { $0.size > $1.size }
+            let prunedTotal = prunedDirectories
+            await MainActor.run { [weak self] in
+                self?.prunedDirectoryCount = prunedTotal
+            }
             return results
         }.value
 

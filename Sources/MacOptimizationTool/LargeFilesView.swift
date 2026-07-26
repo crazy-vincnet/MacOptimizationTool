@@ -34,6 +34,31 @@ struct LargeFilesView: View {
                         .buttonStyle(PrimaryActionButtonStyle(enabled: !viewModel.isScanning))
                         .disabled(viewModel.isScanning)
                     }
+
+                    Divider().background(Theme.hairline)
+
+                    HStack(alignment: .center, spacing: 10) {
+                        Toggle(isOn: $viewModel.excludeDeveloperCaches) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(t("large.excludeDevCaches"))
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(Theme.textPrimary)
+                                Text(t("large.excludeDevCachesDesc"))
+                                    .font(.system(size: 11))
+                                    .foregroundColor(Theme.textSecondary)
+                            }
+                        }
+                        .toggleStyle(.switch)
+                        .disabled(viewModel.isScanning)
+
+                        Spacer()
+
+                        if viewModel.hasScanned && viewModel.prunedDirectoryCount > 0 {
+                            Text(String(format: t("large.prunedSummary"), viewModel.prunedDirectoryCount))
+                                .font(.system(size: 11))
+                                .foregroundColor(Theme.textSecondary)
+                        }
+                    }
                 }
                 .glassCard(padding: 14, radius: Theme.radiusControl)
                 .padding(.horizontal, Theme.pagePadding)

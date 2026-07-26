@@ -151,7 +151,7 @@ class DiskCleanViewModel: ObservableObject {
                         for childURL in contents {
                             if Task.isCancelled { break }
 
-                            let childSize = Self.getDirectorySizeStatic(at: childURL)
+                            let childSize = DirectorySize.measure(at: childURL, isCancelled: { Task.isCancelled }).localBytes
                             if childSize > 1024 {
                                 let name = childURL.lastPathComponent
                                 let subItem = JunkSubItem(id: childURL.path, url: childURL, name: name, size: childSize)
@@ -359,38 +359,4 @@ class DiskCleanViewModel: ObservableObject {
         self.showFixSuccess = true
     }
 
-    nonisolated private static func getDirectorySizeStatic(at url: URL) -> Int64 {
-        let fm = FileManager.default
-        var size: Int64 = 0
-        var isDir: ObjCBool = false
-
-        guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return 0 }
-
-        if !isDir.boolValue {
-            var statInfo = stat()
-            if lstat(url.path, &statInfo) == 0 {
-                size = Int64(statInfo.st_size)
-            }
-        } else {
-            let keys: [URLResourceKey] = [.fileSizeKey, .isDirectoryKey]
-            guard let enumerator = fm.enumerator(
-                at: url,
-                includingPropertiesForKeys: keys,
-                options: [.skipsHiddenFiles, .skipsPackageDescendants],
-                errorHandler: { _, _ in return true }
-            ) else {
-
-                return 0
-            }
-            while let fileURL = enumerator.nextObject() as? URL {
-                if let resourceValues = try? fileURL.resourceValues(forKeys: Set(keys)) {
-                    if let isDirectory = resourceValues.isDirectory, !isDirectory,
-                       let fileSize = resourceValues.fileSize {
-                        size += Int64(fileSize)
-                    }
-                }
-            }
-        }
-        return size
-    }
 }

@@ -122,7 +122,7 @@ class UninstallerViewModel: ObservableObject {
                             appURL.stopAccessingSecurityScopedResource()
                         }
                     }
-                    return Self.getDirectorySizeStatic(at: appURL)
+                    return DirectorySize.measure(at: appURL, isCancelled: { Task.isCancelled }).localBytes
                 }.value
 
                 if let index = self.installedApps.firstIndex(where: { $0.url == appURL }) {
@@ -185,7 +185,7 @@ class UninstallerViewModel: ObservableObject {
                     }
                 }
                 
-                let appSize = Self.getDirectorySizeStatic(at: url)
+                let appSize = DirectorySize.measure(at: url, isCancelled: { Task.isCancelled }).localBytes
                 var instDate = Date()
                 if let attrs = try? fm.attributesOfItem(atPath: url.path) {
                     instDate = attrs[.creationDate] as? Date ?? attrs[.modificationDate] as? Date ?? Date()
@@ -292,7 +292,7 @@ class UninstallerViewModel: ObservableObject {
                     
                     let fileName = itemURL.lastPathComponent
                     if LeftoverMatcher.matches(fileName: fileName, appName: appName, bundleID: appBundleID) {
-                        let size = Self.getDirectorySizeStatic(at: itemURL)
+                        let size = DirectorySize.measure(at: itemURL, isCancelled: { Task.isCancelled }).localBytes
                         if !results.contains(where: { $0.url.standardized.path == itemPath }) {
                             results.append(LeftoverItem(url: itemURL, size: size, category: category, isSelected: true))
                         }
@@ -305,41 +305,6 @@ class UninstallerViewModel: ObservableObject {
         self.leftoverItems = items
         self.scanProgress = 1.0
         self.isScanning = false
-    }
-    
-    nonisolated private static func getDirectorySizeStatic(at url: URL) -> Int64 {
-        let fm = FileManager.default
-        var size: Int64 = 0
-        var isDir: ObjCBool = false
-        
-        guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return 0 }
-        
-        if !isDir.boolValue {
-            var statInfo = stat()
-            if lstat(url.path, &statInfo) == 0 {
-                size = Int64(statInfo.st_size)
-            }
-        } else {
-            let keys: [URLResourceKey] = [.fileSizeKey, .isDirectoryKey]
-            guard let enumerator = fm.enumerator(
-                at: url,
-                includingPropertiesForKeys: keys,
-                options: [.skipsHiddenFiles, .skipsPackageDescendants],
-                errorHandler: { _, _ in return true }
-            ) else {
-
-                return 0
-            }
-            while let fileURL = enumerator.nextObject() as? URL {
-                if let resourceValues = try? fileURL.resourceValues(forKeys: Set(keys)) {
-                    if let isDirectory = resourceValues.isDirectory, !isDirectory,
-                       let fileSize = resourceValues.fileSize {
-                        size += Int64(fileSize)
-                    }
-                }
-            }
-        }
-        return size
     }
     
     @Published var showAuthError: Bool = false

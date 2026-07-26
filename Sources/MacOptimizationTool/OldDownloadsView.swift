@@ -156,6 +156,16 @@ struct OldDownloadsView: View {
                     Text(String(format: t("old.reclaimable"), ByteCountFormatter.string(fromByteCount: viewModel.selectedSize, countStyle: .file)))
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundStyle(Theme.accentGradient)
+
+                    // 회수 용량은 로컬 점유 기준이다. 클라우드에만 있는 파일이 섞이면
+                    // 파일 크기 합계와 어긋나므로 그 이유를 함께 보여준다.
+                    if viewModel.selectedCloudOnlyCount > 0 {
+                        Text(String(format: t("old.cloudOnlyNote"),
+                                    ByteCountFormatter.string(fromByteCount: viewModel.selectedLogicalSize, countStyle: .file),
+                                    viewModel.selectedCloudOnlyCount))
+                            .font(.system(size: 11))
+                            .foregroundColor(Theme.textSecondary)
+                    }
                 }
                 Spacer()
 
@@ -235,9 +245,22 @@ struct OldDownloadsView: View {
 
             Spacer()
 
-            Text(item.wrappedValue.readableSize)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(Theme.textPrimary)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(item.wrappedValue.readableSize)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(Theme.textPrimary)
+
+                if item.wrappedValue.isCloudOnly {
+                    Text(t("old.cloudOnlyBadge"))
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(Theme.textSecondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(
+                            RoundedRectangle(cornerRadius: 4).fill(Theme.bgCardHover)
+                        )
+                }
+            }
         }
         .padding(12)
         .glassCard(padding: 0, radius: Theme.radiusControl)

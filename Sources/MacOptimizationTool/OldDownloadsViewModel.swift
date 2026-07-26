@@ -9,11 +9,21 @@ struct OldDownloadItem: Identifiable {
     let name: String
     let path: String
     let size: Int64
+    /// 실제로 로컬 디스크를 점유하는 양. iCloud 에서 내려받지 않은 파일은 0 이다.
+    /// `size` 는 사용자가 아는 파일 크기, 이 값은 삭제로 회수되는 용량이다.
+    let localSize: Int64
     let category: OldDownloadCategory
     let daysOld: Int
     let modificationDate: Date
     var isSelected: Bool = true
     
+    /// 로컬에 블록이 없는 파일. 지워도 디스크 공간이 회수되지 않는다.
+    var isCloudOnly: Bool { localSize == 0 && size > 0 }
+
+    var readableLocalSize: String {
+        ByteCountFormatter.string(fromByteCount: localSize, countStyle: .file)
+    }
+
     var readableSize: String {
         ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
@@ -74,8 +84,19 @@ final class OldDownloadsViewModel: ObservableObject {
     @Published var matchedCount: Int = 0
     @Published var currentScanPath: String = ""
 
+    /// 삭제 시 실제로 회수되는 용량 (로컬 점유 합).
     var selectedSize: Int64 {
+        items.filter { $0.isSelected }.reduce(0) { $0 + $1.localSize }
+    }
+
+    /// 선택한 파일들의 파일 크기 합. 클라우드 전용 파일도 원래 크기로 센다.
+    var selectedLogicalSize: Int64 {
         items.filter { $0.isSelected }.reduce(0) { $0 + $1.size }
+    }
+
+    /// 선택 항목 중 클라우드에만 있는 파일 수.
+    var selectedCloudOnlyCount: Int {
+        items.filter { $0.isSelected && $0.isCloudOnly }.count
     }
 
     var selectedCount: Int {
@@ -145,12 +166,11 @@ final class OldDownloadsViewModel: ObservableObject {
                     // 폴더나 패키지 내부 깊은 탐색은 스킵
                     let isDirectoryOrPkg = isDir || isPkg
                     
-                    let size: Int64
-                    if isDirectoryOrPkg {
-                        size = Self.calculateSizeStatic(at: fileURL)
-                    } else {
-                        size = Int64(vals.fileSize ?? 0)
-                    }
+                    // 파일 크기(논리)와 실제 로컬 점유를 함께 잡는다.
+                    // 클라우드에만 있는 파일은 지워도 공간이 회수되지 않으므로 구분해서 보여준다.
+                    let measurement = DirectorySize.measure(at: fileURL, isCancelled: { Task.isCancelled })
+                    let size = measurement.logicalBytes
+                    let localSize = measurement.localBytes
 
                     guard size > 0 else { continue }
 
@@ -173,6 +193,7 @@ final class OldDownloadsViewModel: ObservableObject {
                             name: fileURL.lastPathComponent,
                             path: path,
                             size: size,
+                            localSize: localSize,
                             category: category,
                             daysOld: days,
                             modificationDate: modDate,
@@ -226,7 +247,8 @@ final class OldDownloadsViewModel: ObservableObject {
                 var totalCleaned: Int64 = 0
                 for item in targets {
                     if FileSafety.moveToTrash(item.url) {
-                        totalCleaned += item.size
+                        // 회수 용량은 로컬 점유 기준이다. 클라우드 전용 파일은 0 을 더한다.
+                        totalCleaned += item.localSize
                     }
                 }
                 return totalCleaned
@@ -239,34 +261,4 @@ final class OldDownloadsViewModel: ObservableObject {
         }
     }
 
-    nonisolated private static func calculateSizeStatic(at url: URL) -> Int64 {
-        let fm = FileManager.default
-        var isDir: ObjCBool = false
-        guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return 0 }
-        
-        if !isDir.boolValue {
-            var statInfo = stat()
-            if lstat(url.path, &statInfo) == 0 {
-                return Int64(statInfo.st_size)
-            }
-            return 0
-        }
-        
-        guard let enumerator = fm.enumerator(
-            at: url,
-            includingPropertiesForKeys: [.fileSizeKey, .isDirectoryKey],
-            options: [.skipsHiddenFiles, .skipsPackageDescendants],
-            errorHandler: nil
-        ) else { return 0 }
-        
-        var total: Int64 = 0
-        for case let fileURL as URL in enumerator {
-            if let vals = try? fileURL.resourceValues(forKeys: [.fileSizeKey, .isDirectoryKey]),
-               let isDirectory = vals.isDirectory, !isDirectory,
-               let fileSize = vals.fileSize {
-                total += Int64(fileSize)
-            }
-        }
-        return total
-    }
 }

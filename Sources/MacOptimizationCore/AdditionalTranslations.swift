@@ -114,6 +114,9 @@ enum AdditionalTranslations {
         "large.status.scanning": "대용량 파일 스캔 중... (%d개 탐색, %d개 발견)",
         "large.scan.currentPath": "현재 경로: %@",
         "large.scan.progress": "탐색 진행: %d개 파일 스캔 완료 (%d개 조건 부합)",
+        "large.excludeDevCaches": "개발 캐시 폴더 제외",
+        "large.excludeDevCachesDesc": "node_modules·DerivedData·Pods 등을 건너뜁니다. 훨씬 빠르지만 그 안의 대용량 파일은 결과에 나오지 않습니다.",
+        "large.prunedSummary": "건너뛴 폴더 %d개",
 
         // 방치된 다운로드
         "old.title": "방치된 다운로드 / 미사용 파일 분류기",
@@ -139,6 +142,8 @@ enum AdditionalTranslations {
         "old.reclaimable": "정리 가능 용량: %@",
         "old.moveSelected": "선택한 방치 파일 휴지통으로 이동 (%@)",
         "old.itemDetail": "%d일 동안 방치됨 • %@",
+        "old.cloudOnlyNote": "파일 크기 합계는 %@ 입니다. 이 중 %d개는 클라우드에만 있어 삭제해도 로컬 공간이 회수되지 않습니다.",
+        "old.cloudOnlyBadge": "클라우드 전용",
 
         // 개인정보 정리
         "priv.title": "브라우저 & 개인정보 정리",
@@ -335,6 +340,9 @@ enum AdditionalTranslations {
         "large.status.scanning": "Scanning large files... (%d scanned, %d matched)",
         "large.scan.currentPath": "Current path: %@",
         "large.scan.progress": "Progress: %d files scanned (%d matched)",
+        "large.excludeDevCaches": "Exclude developer caches",
+        "large.excludeDevCachesDesc": "Skips node_modules, DerivedData, Pods and similar. Much faster, but large files inside them will not appear in the results.",
+        "large.prunedSummary": "Skipped %d folders",
 
         "old.title": "Stale downloads / unused file sorter",
         "old.subtitle": "Automatically sorts old installers (.dmg/.pkg) and large files left in your Downloads folder.",
@@ -359,6 +367,8 @@ enum AdditionalTranslations {
         "old.reclaimable": "Reclaimable space: %@",
         "old.moveSelected": "Move selected stale files to the Trash (%@)",
         "old.itemDetail": "Untouched for %d days • %@",
+        "old.cloudOnlyNote": "Total file size is %@. %d of these live only in the cloud, so deleting them reclaims no local space.",
+        "old.cloudOnlyBadge": "Cloud only",
 
         "priv.title": "Browser & privacy cleanup",
         "priv.subtitle": "Safely removes web caches, cookies and stored data from Safari, Chrome, Edge and Firefox.",
@@ -546,6 +556,9 @@ enum AdditionalTranslations {
         "large.status.scanning": "正在扫描大文件…（已扫描 %d 个，符合 %d 个）",
         "large.scan.currentPath": "当前路径：%@",
         "large.scan.progress": "扫描进度：已扫描 %d 个文件（符合条件 %d 个）",
+        "large.excludeDevCaches": "排除开发缓存文件夹",
+        "large.excludeDevCachesDesc": "跳过 node_modules、DerivedData、Pods 等。速度快得多，但其中的大文件不会出现在结果中。",
+        "large.prunedSummary": "已跳过 %d 个文件夹",
 
         "old.title": "闲置下载 / 未使用文件分类器",
         "old.subtitle": "自动分类下载文件夹中长期闲置的安装文件（.dmg/.pkg）与大文件。",
@@ -570,6 +583,8 @@ enum AdditionalTranslations {
         "old.reclaimable": "可清理空间：%@",
         "old.moveSelected": "将所选闲置文件移到废纸篓（%@）",
         "old.itemDetail": "闲置 %d 天 • %@",
+        "old.cloudOnlyNote": "文件大小合计为 %@。其中 %d 个仅存于云端，删除后不会释放本地空间。",
+        "old.cloudOnlyBadge": "仅云端",
 
         "priv.title": "浏览器与隐私清理",
         "priv.subtitle": "安全清除 Safari、Chrome、Edge、Firefox 的网页缓存、Cookie 与存储数据。",
@@ -757,6 +772,9 @@ enum AdditionalTranslations {
         "large.status.scanning": "大容量ファイルをスキャン中…（%d 件走査、%d 件該当）",
         "large.scan.currentPath": "現在のパス: %@",
         "large.scan.progress": "進捗: %d 件スキャン完了（該当 %d 件）",
+        "large.excludeDevCaches": "開発キャッシュフォルダを除外",
+        "large.excludeDevCachesDesc": "node_modules・DerivedData・Pods などをスキップします。大幅に高速ですが、その中の大容量ファイルは結果に表示されません。",
+        "large.prunedSummary": "スキップしたフォルダ %d 件",
 
         "old.title": "放置ダウンロード / 未使用ファイル分類",
         "old.subtitle": "ダウンロードフォルダに放置された古いインストーラ（.dmg/.pkg）や大容量ファイルを自動分類します。",
@@ -781,6 +799,8 @@ enum AdditionalTranslations {
         "old.reclaimable": "回収可能な容量: %@",
         "old.moveSelected": "選択した放置ファイルをゴミ箱へ移動（%@）",
         "old.itemDetail": "%d 日間放置 • %@",
+        "old.cloudOnlyNote": "ファイルサイズの合計は %@ です。うち %d 件はクラウドのみに存在するため、削除してもローカル容量は回復しません。",
+        "old.cloudOnlyBadge": "クラウドのみ",
 
         "priv.title": "ブラウザ & プライバシー整理",
         "priv.subtitle": "Safari、Chrome、Edge、Firefox のキャッシュ、Cookie、保存データを安全に削除します。",
