@@ -61,7 +61,12 @@ struct DuplicateView: View {
                 }
                 .glassCard(padding: 14, radius: Theme.radiusControl)
                 .padding(.horizontal, Theme.pagePadding)
-                .padding(.bottom, 20)
+                .padding(.bottom, 12)
+
+                // 스캔 범위·조건 카드. 전체 디스크를 훑지 않게 하는 가장 직접적인 수단이다.
+                scanOptionsCard
+                    .padding(.horizontal, Theme.pagePadding)
+                    .padding(.bottom, 20)
 
                 
                 // 중복 그룹 목록 영역 또는 스캔 준비 화면
@@ -295,5 +300,75 @@ struct DuplicateView: View {
         .onAppear {
             // 자동 스캔 비활성화
         }
+    }
+
+    // MARK: - 스캔 범위 및 조건
+
+    private var scanOptionsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center, spacing: 20) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(t("dup.scope"))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Theme.textSecondary)
+
+                    Picker("", selection: Binding(
+                        get: { viewModel.scanScope },
+                        set: { viewModel.applyScope($0) }
+                    )) {
+                        Text(t("dup.scope.downloads")).tag(DuplicateScanScope.downloads)
+                        Text(t("dup.scope.desktop")).tag(DuplicateScanScope.desktop)
+                        Text(t("dup.scope.documents")).tag(DuplicateScanScope.documents)
+                        Text(t("dup.scope.home")).tag(DuplicateScanScope.home)
+                        Text(t("dup.scope.custom")).tag(DuplicateScanScope.custom)
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .disabled(viewModel.isScanning)
+                }
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(t("dup.minSize"))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Theme.textSecondary)
+
+                    Picker("", selection: $viewModel.minimumSize) {
+                        ForEach(DuplicateMinimumSize.allCases) { size in
+                            Text(size.displayName).tag(size)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(width: 190)
+                    .disabled(viewModel.isScanning)
+                }
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(t("dup.mode"))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Theme.textSecondary)
+
+                    Picker("", selection: $viewModel.scanMode) {
+                        Text(t("dup.mode.fast")).tag(DuplicateScanMode.fast)
+                        Text(t("dup.mode.thorough")).tag(DuplicateScanMode.thorough)
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(width: 190)
+                    .disabled(viewModel.isScanning)
+                }
+            }
+
+            Text(viewModel.scanMode == .fast ? t("dup.mode.fastDesc") : t("dup.mode.thoroughDesc"))
+                .font(.system(size: 11))
+                .foregroundColor(Theme.textSecondary)
+
+            if viewModel.hasScanned && (viewModel.prunedDirectoryCount > 0 || viewModel.hardLinkSkippedCount > 0) {
+                Text(String(format: t("dup.scanSummary"), viewModel.prunedDirectoryCount, viewModel.hardLinkSkippedCount))
+                    .font(.system(size: 11))
+                    .foregroundColor(Theme.textSecondary)
+            }
+        }
+        .glassCard(padding: 14, radius: Theme.radiusControl)
     }
 }

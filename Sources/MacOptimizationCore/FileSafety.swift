@@ -280,6 +280,40 @@ public enum FileSafety {
         return digest.map { String(format: "%02x", $0) }.joined()
     }
 
+    /// 앞·중간·뒤 8KB 를 읽어 만드는 샘플 해시.
+    ///
+    /// `partialFileHash` 는 앞뒤만 본다. 같은 헤더/푸터를 쓰는 형식(동일 카메라의 RAW,
+    /// 같은 툴로 만든 zip, 컨테이너 동영상)에서는 앞뒤가 일치하는 경우가 흔해
+    /// 전체 해시 대상이 불필요하게 늘어난다. 중간 청크를 하나 더 보면 그 후보가 크게 줄고,
+    /// 읽는 양은 24KB 로 여전히 고정이다.
+    public static func sampledFileHash(for url: URL) -> String? {
+        guard let vals = try? url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
+              vals.isRegularFile == true,
+              let fileSize = vals.fileSize, fileSize > 0 else { return nil }
+
+        guard let file = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { try? file.close() }
+
+        let chunk = 8_192
+        var hasher = SHA256()
+        // 크기를 해시에 포함해, 크기가 다른 파일이 같은 샘플을 가질 때 충돌하지 않게 한다.
+        hasher.update(data: withUnsafeBytes(of: Int64(fileSize).littleEndian) { Data($0) })
+        hasher.update(data: file.readData(ofLength: chunk))
+
+        if fileSize > chunk * 3 {
+            let middleOffset = UInt64(fileSize / 2 - Int(chunk / 2))
+            try? file.seek(toOffset: middleOffset)
+            hasher.update(data: file.readData(ofLength: chunk))
+        }
+
+        if fileSize > chunk * 2 {
+            try? file.seek(toOffset: UInt64(fileSize - chunk))
+            hasher.update(data: file.readData(ofLength: chunk))
+        }
+
+        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+    }
+
     public static func fullFileHash(for url: URL) -> String? {
         guard let vals = try? url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
               vals.isRegularFile == true,
