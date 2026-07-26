@@ -2,14 +2,14 @@
 
 ![App Icon](AppIcon.png)
 
-# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.7.3
+# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.8.0
 
 **macOS 전용 프리미엄 고성능 시스템 최적화, 디스크 정리, 자원 가드 및 개인정보 보호 종합 툴키트**
 
 [![macOS](https://img.shields.io/badge/macOS-13.0%2B-000000?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos)
 [![Swift](https://img.shields.io/badge/Swift-6.0-F05138?style=for-the-badge&logo=swift&logoColor=white)](https://swift.org)
-[![Tests](https://img.shields.io/badge/Tests-56%20passing-3ECF8E?style=for-the-badge)](Tests)
-[![Version](https://img.shields.io/badge/Version-v1.7.3-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
+[![Tests](https://img.shields.io/badge/Tests-87%20passing-3ECF8E?style=for-the-badge)](Tests)
+[![Version](https://img.shields.io/badge/Version-v1.8.0-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
 [![License](https://img.shields.io/badge/License-MIT-059669?style=for-the-badge)](LICENSE)
 
 ---
@@ -24,8 +24,8 @@
 5. [변경 이력 (Changelog)](#-변경-이력-changelog)
 6. [라이선스 및 저작권 (License & Copyright)](#-라이선스-및-저작권-license--copyright)
 
-> **v1.7.3 릴리스 안내** — 인앱 업데이트를 눌러도 진행률이 표시되지 않던 문제를 수정했습니다. v1.7.2 에서는 업데이트 확인 실패가 "최신 버전입니다" 로 표시되던 문제를 수정했습니다.
-> v1.7.0 에서는 프로세스 자원 폭주 경고가 너무 자주 뜨던 문제를 해결했습니다. 감지 기능은 **기본 꺼짐**이 되었고, 임계값·지속 시간 조건을 설정에서 직접 조절할 수 있습니다.
+> **v1.8.0 릴리스 안내** — 중복 파일 검사가 전체 디스크를 훑지 않습니다. 홈 디렉터리 실측으로 방문 파일 606,495개 → 36,533개, 열거 30.3초 → 1.7초, 해시 후보 133,644개 → 155개로 줄었습니다.
+> 메뉴바 네트워크 카운터 랩어라운드 크래시와, 오프라인에서 "최신 버전입니다" 로 표시되던 업데이트 확인 결함도 수정했습니다.
 > 전체 감사 내역은 [`CODE_REVIEW.md`](CODE_REVIEW.md), 변경 요약은 [`CHANGELOG.md`](CHANGELOG.md) 를 참고하세요.
 
 ---
@@ -164,7 +164,7 @@ SwiftPM 릴리스 빌드(`swift build -c release`), `xattr` 정리, ad-hoc 코�
 
 ### 3. GitHub Release 자동 게시
 ```bash
-./release.sh v1.7.3 "릴리즈 노트 내용"
+./release.sh v1.8.0 "릴리즈 노트 내용"
 ```
 버전 커밋, Git 태그 생성, DMG 패키징, `gh release create`를 통해 GitHub Release 게시 및 DMG 첨부를 자동 진행합니다.
 릴리스 노트에는 DMG 의 SHA-256 체크섬이 함께 게시되며, 인앱 업데이터는 이 값으로 무결성을 검증합니다.
@@ -231,7 +231,21 @@ MacOptimizationTool/
 
 버전별 상세 변경 사항은 [`CHANGELOG.md`](CHANGELOG.md) 에 정리되어 있습니다.
 
-### v1.7.3 (최신)
+### v1.8.0 (최신)
+
+스캔 성능을 실측 기반으로 개선하고, 폴더 크기 계산의 정확성 결함을 수정한 릴리스입니다.
+
+| 분류 | 내용 |
+|---|---|
+| ⚡ 성능 | 중복 검사: 방문 606,495 → 36,533개, 열거 30.3 → 1.7초, 해시 후보 133,644 → 155개 |
+| ⚡ 성능 | 대용량 파일 검사: 방문 606,520 → 414,739개, 32.9 → 21.0초 (결과 동일) |
+| ✨ 추가 | 중복 검사 범위 프리셋·최소 크기·검사 정밀도, 해시 결과 디스크 캐시 |
+| ✨ 추가 | 대용량 검사 "개발 캐시 폴더 제외" 토글 (기본 꺼짐), 업데이트 확인 결과 상시 표시 |
+| 🐛 수정 | 메뉴바 네트워크 카운터 랩어라운드로 인한 앱 종료 (32비트 카운터 언더플로) |
+| 🐛 수정 | 오프라인에서 캐시된 응답으로 "최신 버전" 오보고, 하드링크 폴더 크기 과대 계산, 크기 계산 중 취소 불가 |
+| 🧱 구조 | 폴더 크기 계산 4중복을 `DirectorySize` 로 통합, Core 모듈 6개 추가, 테스트 29개 추가 |
+
+### v1.7.3
 
 인앱 업데이트 진행 상황이 화면에 표시되지 않던 문제를 수정한 패치 릴리스입니다.
 
