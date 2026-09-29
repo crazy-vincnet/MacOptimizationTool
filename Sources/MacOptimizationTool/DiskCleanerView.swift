@@ -62,7 +62,7 @@ struct DiskCleanerView: View {
                                     Text(t("disk.reclaimableSpace"))
                                         .font(.subheadline)
                                         .foregroundColor(Theme.textSecondary)
-                                    Text(ByteCountFormatter.string(fromByteCount: viewModel.categories.reduce(0) { $0 + ($1.isSelected ? $1.size : 0) }, countStyle: .file))
+                                    Text(ByteCountFormatter.string(fromByteCount: viewModel.totalJunkSize, countStyle: .file))
                                         .font(.system(size: 36, weight: .bold, design: .rounded))
                                         .foregroundStyle(Theme.accentGradient)
                                 }
@@ -264,7 +264,18 @@ struct DiskCleanerView: View {
             Alert(
                 title: Text(t("disk.successTitle")),
                 message: Text("\(t("disk.successMessagePrefix"))\(ByteCountFormatter.string(fromByteCount: viewModel.cleanedSize, countStyle: .file))\(t("disk.successMessageSuffix"))"),
-                dismissButton: .default(Text(t("disk.ok")))
+                dismissButton: .default(Text(t("disk.ok"))) {
+                    viewModel.scanJunk()
+                }
+            )
+        }
+        .alert(isPresented: $viewModel.showCleanError) {
+            Alert(
+                title: Text(t("disk.cleanErrorTitle")),
+                message: Text(t("disk.cleanErrorMessage")),
+                dismissButton: .default(Text(t("disk.ok"))) {
+                    viewModel.scanJunk()
+                }
             )
         }
         .onAppear {

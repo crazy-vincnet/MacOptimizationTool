@@ -147,19 +147,136 @@ public enum FileSafety {
             }
         }
 
-        // 일반 항목 및 잔여 항목 휴지통 수거
+        // 일반 항목 및 잔여 항목 휴지통 수거. 하나라도 남으면 부분 실패로 보고한다.
         var totalCleaned: Int64 = 0
+        var allSucceeded = true
         for item in validItems {
             if fm.fileExists(atPath: item.url.path) {
                 if moveToTrash(item.url) {
                     totalCleaned += item.size
+                } else {
+                    allSucceeded = false
                 }
             } else {
+                // 관리자 권한 사전 삭제 단계에서 이미 제거된 항목이다.
                 totalCleaned += item.size
             }
         }
 
-        return (totalCleaned, true)
+        return (totalCleaned, allSucceeded)
+    }
+
+    /// 디스크 정리 전용 일괄 삭제 엔진.
+    ///
+    /// 시스템 캐시와 쓰기 권한이 없는 항목을 먼저 모아 관리자 인증을 정확히 한 번만 요청한다.
+    /// 인증 실패나 취소 시 일반 항목을 건드리지 않고 전면 중단한다. 이후 일반 항목 처리에서는
+    /// 관리자 권한 폴백을 사용하지 않아 항목별 인증창이 다시 나타나지 않는다.
+    public static func deleteDiskCleanupBatch(items: [(url: URL, size: Int64)]) -> (cleanedSize: Int64, isSuccess: Bool) {
+        let fm = FileManager.default
+        var seenPaths: Set<String> = []
+
+        let validItems = items.filter { item in
+            let clean = canonical(item.url.path)
+            guard seenPaths.insert(clean).inserted,
+                  isAllowedDiskCleanupPath(clean),
+                  isShellSafePath(item.url.path),
+                  fm.fileExists(atPath: item.url.path) else { return false }
+            return true
+        }
+
+        guard !validItems.isEmpty else { return (0, items.isEmpty) }
+        var allSucceeded = validItems.count == items.count
+
+        let adminRequiredItems = validItems.filter { item in
+            let clean = canonical(item.url.path)
+            return isSystemDiskCleanupPath(clean) || !fm.isWritableFile(atPath: item.url.path)
+        }
+
+        if !adminRequiredItems.isEmpty {
+            let escapedPaths = adminRequiredItems.map { shellQuoted($0.url.path) }.joined(separator: " ")
+            guard runElevated(shellCommand: "rm -rf \(escapedPaths)") else {
+                print("디스크 정리 관리자 인증 실패/취소: 삭제를 시작하지 않았습니다.")
+                return (0, false)
+            }
+        }
+
+        var totalCleaned: Int64 = 0
+        let adminPaths = Set(adminRequiredItems.map { canonical($0.url.path) })
+
+        for item in validItems {
+            let clean = canonical(item.url.path)
+            if adminPaths.contains(clean) {
+                if fm.fileExists(atPath: item.url.path) {
+                    allSucceeded = false
+                } else {
+                    totalCleaned += item.size
+                }
+                continue
+            }
+
+            if moveToTrashWithoutElevation(item.url) {
+                totalCleaned += item.size
+            } else {
+                allSucceeded = false
+            }
+        }
+
+        return (totalCleaned, allSucceeded)
+    }
+
+    /// 디스크 정리에서 허용하는 루트의 하위 항목인지 검사한다. 루트 자체는 허용하지 않는다.
+    private static func isAllowedDiskCleanupPath(_ canonicalPath: String) -> Bool {
+        let home = FileManager.default.homeDirectoryForCurrentUser.standardized.path.lowercased()
+        let roots = [
+            home + "/library/caches/",
+            home + "/library/logs/",
+            home + "/library/developer/xcode/deriveddata/",
+            home + "/.trash/",
+            "/library/caches/",
+            "/library/logs/"
+        ]
+        return roots.contains { canonicalPath.hasPrefix($0) && canonicalPath.count > $0.count }
+    }
+
+    private static func isSystemDiskCleanupPath(_ canonicalPath: String) -> Bool {
+        canonicalPath.hasPrefix("/library/caches/") || canonicalPath.hasPrefix("/library/logs/")
+    }
+
+    /// 휴지통 이동 또는 기존 휴지통 항목의 영구 삭제만 수행하며 권한 상승은 절대 하지 않는다.
+    private static func moveToTrashWithoutElevation(_ url: URL) -> Bool {
+        let fm = FileManager.default
+        let path = url.standardized.path
+        guard !isProtectedExact(path), fm.fileExists(atPath: url.path) else { return false }
+
+        if isInsideTrash(path) {
+            do {
+                try fm.removeItem(at: url)
+                return true
+            } catch {
+                print("휴지통 항목 삭제 실패 (\(url.path)): \(error.localizedDescription)")
+                return false
+            }
+        }
+
+        do {
+            try fm.trashItem(at: url, resultingItemURL: nil)
+            return true
+        } catch {
+            print("휴지통 이동 실패 (\(url.path)): \(error.localizedDescription)")
+        }
+
+        if !Thread.isMainThread {
+            let outcome = CompletionFlag()
+            let semaphore = DispatchSemaphore(value: 0)
+            NSWorkspace.shared.recycle([url]) { _, error in
+                outcome.set(error == nil)
+                semaphore.signal()
+            }
+            _ = semaphore.wait(timeout: .now() + 2.0)
+            if outcome.value { return true }
+        }
+
+        return false
     }
 
     /// 단일 파일 휴지통 이동.
@@ -319,11 +436,8 @@ public enum FileSafety {
               vals.isRegularFile == true,
               let fileSize = vals.fileSize, fileSize > 0 else { return nil }
 
-        // 2GB 초과 거대 파일은 16KB 고속 부분 해시로 대체하여 시스템 IO 블로킹 원천 차단
-        if fileSize > 2_000_000_000 {
-            return partialFileHash(for: url)
-        }
-
+        // 정밀 중복 검사는 파일 크기와 관계없이 전체 내용을 스트리밍 해시한다.
+        // 큰 파일을 부분 해시로 대체하면 서로 다른 파일을 중복으로 오판해 데이터 손실로 이어질 수 있다.
         guard let file = try? FileHandle(forReadingFrom: url) else { return nil }
         defer { try? file.close() }
 

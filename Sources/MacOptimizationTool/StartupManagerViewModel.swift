@@ -2,7 +2,7 @@ import Foundation
 import Combine
 import MacOptimizationCore
 
-struct LaunchAgentItem: Identifiable {
+struct LaunchAgentItem: Identifiable, Sendable {
     let id = UUID()
     let name: String
     let label: String
@@ -97,27 +97,29 @@ final class StartupManagerViewModel: ObservableObject {
     }
 
     func toggleStartupItem(_ item: LaunchAgentItem) {
-        guard let index = startupItems.firstIndex(where: { $0.id == item.id }) else { return }
-        let currentItem = startupItems[index]
+        guard let currentItem = startupItems.first(where: { $0.id == item.id }) else { return }
         let newEnabled = !currentItem.isEnabled
+        let destinationPath: String
 
-        if newEnabled {
-            if currentItem.path.hasSuffix(".disabled") {
-                let newPath = currentItem.path.replacingOccurrences(of: ".disabled", with: ".plist")
-                try? fileManager.removeItem(atPath: newPath)
-                try? fileManager.moveItem(atPath: currentItem.path, toPath: newPath)
-            }
+        if newEnabled, currentItem.path.hasSuffix(".disabled") {
+            destinationPath = currentItem.path.replacingOccurrences(of: ".disabled", with: ".plist")
+        } else if !newEnabled, currentItem.path.hasSuffix(".plist") {
+            destinationPath = currentItem.path + ".disabled"
         } else {
-            if currentItem.path.hasSuffix(".plist") {
-                let newPath = currentItem.path + ".disabled"
-                try? fileManager.removeItem(atPath: newPath)
-                try? fileManager.moveItem(atPath: currentItem.path, toPath: newPath)
-            }
+            statusMessage = t("startup.changeFailPrefix") + currentItem.path + t("startup.changeFailSuffix")
+            return
         }
 
-
-        startupItems[index].isEnabled = newEnabled
-        scanStartupItems()
+        do {
+            // 기존 목적지를 먼저 삭제하면 다른 설정 파일을 잃을 수 있으므로 충돌은 실패로 처리한다.
+            guard !fileManager.fileExists(atPath: destinationPath) else {
+                throw CocoaError(.fileWriteFileExists)
+            }
+            try fileManager.moveItem(atPath: currentItem.path, toPath: destinationPath)
+            scanStartupItems()
+        } catch {
+            statusMessage = t("startup.changeFailPrefix") + error.localizedDescription
+        }
     }
 
     /// 삭제는 관리자 권한 프롬프트와 파일 I/O를 동반하므로 메인 스레드를 막지 않도록 비동기 처리한다.

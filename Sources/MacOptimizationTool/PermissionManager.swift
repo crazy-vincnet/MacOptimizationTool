@@ -82,8 +82,12 @@ final class PermissionManager: ObservableObject {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
         task.arguments = ["-n", bundlePath]
-        try? task.run()
-        NSApplication.shared.terminate(nil)
+        do {
+            try task.run()
+            NSApplication.shared.terminate(nil)
+        } catch {
+            print("앱 재실행 실패: \(error.localizedDescription)")
+        }
     }
 
     /// macOS 시스템 설정 > 프라이버시 및 보안 > 전체 디스크 접근 권한 페이지 직접 오픈

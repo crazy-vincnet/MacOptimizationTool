@@ -2,14 +2,14 @@
 
 ![App Icon](AppIcon.png)
 
-# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v1.8.0
+# ⚡ Mac Clean Optimizer (Lab98 Studio Edition) v2.0.0
 
 **macOS 전용 프리미엄 고성능 시스템 최적화, 디스크 정리, 자원 가드 및 개인정보 보호 종합 툴키트**
 
 [![macOS](https://img.shields.io/badge/macOS-13.0%2B-000000?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos)
 [![Swift](https://img.shields.io/badge/Swift-6.0-F05138?style=for-the-badge&logo=swift&logoColor=white)](https://swift.org)
 [![Tests](https://img.shields.io/badge/Tests-87%20passing-3ECF8E?style=for-the-badge)](Tests)
-[![Version](https://img.shields.io/badge/Version-v1.8.0-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
+[![Version](https://img.shields.io/badge/Version-v2.0.0-3ECF8E?style=for-the-badge)](https://github.com/crazy-vincnet/MacOptimizationTool/releases)
 [![License](https://img.shields.io/badge/License-MIT-059669?style=for-the-badge)](LICENSE)
 
 ---
@@ -24,9 +24,9 @@
 5. [변경 이력 (Changelog)](#-변경-이력-changelog)
 6. [라이선스 및 저작권 (License & Copyright)](#-라이선스-및-저작권-license--copyright)
 
-> **v1.8.0 릴리스 안내** — 중복 파일 검사가 전체 디스크를 훑지 않습니다. 홈 디렉터리 실측으로 방문 파일 606,495개 → 36,533개, 열거 30.3초 → 1.7초, 해시 후보 133,644개 → 155개로 줄었습니다.
-> 메뉴바 네트워크 카운터 랩어라운드 크래시와, 오프라인에서 "최신 버전입니다" 로 표시되던 업데이트 확인 결함도 수정했습니다.
-> 전체 감사 내역은 [`CODE_REVIEW.md`](CODE_REVIEW.md), 변경 요약은 [`CHANGELOG.md`](CHANGELOG.md) 를 참고하세요.
+> **v2.0.0 릴리스 안내** — 삭제 안전성과 결과 정확성을 전면 개선했습니다. 디스크 정리의 관리자 인증은 최대 한 번만 요청하며, 인증 취소 시 삭제를 시작하지 않습니다.
+> 2GB 초과 파일도 전체 SHA-256으로 재검증하고, 삭제 실패 용량과 측정하지 않은 디스크 건강 수치를 성공값으로 표시하지 않습니다.
+> 전체 변경 내역은 [`RELEASE_NOTES.md`](RELEASE_NOTES.md), 버전별 기록은 [`CHANGELOG.md`](CHANGELOG.md) 를 참고하세요.
 
 ---
 
@@ -164,7 +164,7 @@ SwiftPM 릴리스 빌드(`swift build -c release`), `xattr` 정리, ad-hoc 코�
 
 ### 3. GitHub Release 자동 게시
 ```bash
-./release.sh v1.8.0 "릴리즈 노트 내용"
+./release.sh v2.0.0 "릴리즈 노트 내용"
 ```
 버전 커밋, Git 태그 생성, DMG 패키징, `gh release create`를 통해 GitHub Release 게시 및 DMG 첨부를 자동 진행합니다.
 릴리스 노트에는 DMG 의 SHA-256 체크섬이 함께 게시되며, 인앱 업데이터는 이 값으로 무결성을 검증합니다.
@@ -231,7 +231,22 @@ MacOptimizationTool/
 
 버전별 상세 변경 사항은 [`CHANGELOG.md`](CHANGELOG.md) 에 정리되어 있습니다.
 
-### v1.8.0 (최신)
+### v2.0.0 (최신)
+
+삭제 안전성, 결과 정확성, 시스템 명령 실행과 배포 안정성을 전면 개선한 메이저 릴리스입니다.
+
+| 분류 | 내용 |
+|---|---|
+| 🔐 안전성 | 디스크 정리 관리자 인증을 최대 한 번으로 통합하고, 취소 시 삭제 시작 전 전면 중단 |
+| 🔐 안전성 | 캐시·로그·DerivedData·휴지통 전용 경로 화이트리스트와 심볼릭 링크 실제 경로 검증 |
+| 🎯 정확성 | 2GB 초과 파일도 정밀 검사에서 전체 SHA-256 스트리밍 재검증 |
+| 🐛 수정 | 개인정보 정리 삭제 실패 용량 오보고, 일괄 삭제 부분 실패 오보고, 시동 항목 충돌 시 기존 파일 삭제 문제 |
+| ⚙️ 안정성 | 외부 시스템 명령의 시작 오류·종료 상태를 공통 처리하고 앱 재실행 실패 시 종료 방지 |
+| 📊 표시 | 고정 SMART·온도·건강도 제거, 미측정 값과 정리 실패를 명시적으로 표시 |
+| 📦 배포 | FileProvider-safe 임시 서명, App Store 배포 인증서·프로비저닝 검증 |
+| ✅ 검증 | Swift 6 빌드, 8개 스위트 87개 테스트, 앱 코드 서명 검증 |
+
+### v1.8.0
 
 스캔 성능을 실측 기반으로 개선하고, 폴더 크기 계산의 정확성 결함을 수정한 릴리스입니다.
 

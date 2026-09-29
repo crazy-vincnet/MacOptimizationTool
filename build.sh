@@ -1,31 +1,51 @@
 #!/bin/bash
-
-# 에러 발생 시 즉시 중단
 set -e
 
-# iCloud 동기화 폴더에서는 fileprovider 데몬이 com.apple.FinderInfo 를 비동기로 다시 붙이기 때문에
-# 한 번 지우고 바로 서명하면 실패할 수 있다. 지우고 서명하는 과정을 몇 번 재시도한다.
-sign_with_retry() {
+# Desktop/iCloud FileProvider가 Finder 확장 속성을 다시 붙이는 작업 공간에서는 직접 서명이
+# 비결정적으로 실패한다. TMPDIR의 깨끗한 복사본을 서명·검증한 뒤 성공한 번들만 교체한다.
+sign_app_safely() {
     local target="$1"
     shift
-    local attempt
-    for attempt in 1 2 3 4 5; do
-        xattr -d com.apple.FinderInfo "$target" 2>/dev/null || true
-        xattr -cr "$target"
-        if codesign "$@" "$target" 2>/dev/null; then
-            return 0
-        fi
-        sleep 0.5
-    done
-    echo "오류: 코드 서명에 실패했습니다 ($target)"
-    return 1
-}
+    local sign_root staged_app verified_app temp_base
+    temp_base="${TMPDIR:-/tmp}"
+    sign_root=$(mktemp -d "${temp_base%/}/MacOptimizationTool-sign.XXXXXX")
+    staged_app="$sign_root/$(basename "$target")"
+    verified_app="${target}.signed"
 
+    rm -rf "$verified_app"
+    if ! COPYFILE_DISABLE=1 cp -R "$target" "$staged_app"; then
+        rm -rf "$sign_root"
+        return 1
+    fi
+    xattr -cr "$staged_app"
+
+    if ! codesign "$@" "$staged_app"; then
+        rm -rf "$sign_root"
+        return 1
+    fi
+    if ! codesign --verify --strict --verbose=2 "$staged_app"; then
+        rm -rf "$sign_root"
+        return 1
+    fi
+
+    if ! COPYFILE_DISABLE=1 cp -R "$staged_app" "$verified_app"; then
+        rm -rf "$sign_root" "$verified_app"
+        return 1
+    fi
+    if ! codesign --verify --strict --verbose=2 "$verified_app"; then
+        rm -rf "$sign_root" "$verified_app"
+        return 1
+    fi
+
+    rm -rf "$target"
+    mv "$verified_app" "$target"
+    rm -rf "$sign_root"
+}
 
 echo "=== MacOptimizationTool 빌드 시작 ==="
 
 # 1. 이전 빌드 결과물 정리
-rm -rf MacOptimizationTool.app testApp main.swift
+rm -rf MacOptimizationTool.app MacOptimizationTool.app.signed testApp main.swift
 
 # 2. SwiftPM 릴리스 빌드 (MacOptimizationCore + MacOptimizationTool)
 echo "-> SwiftPM 릴리스 빌드 중..."
@@ -38,14 +58,11 @@ CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
 
-mkdir -p "$MACOS_DIR"
-mkdir -p "$RESOURCES_DIR"
+mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
-# 실행 바이너리 복사
 cp "$BUILT_BINARY" "$MACOS_DIR/MacOptimizationTool"
 chmod +x "$MACOS_DIR/MacOptimizationTool"
 
-# 앱 아이콘 복사 (존재하는 경우)
 if [ -f "AppIcon.icns" ]; then
     cp AppIcon.icns "$RESOURCES_DIR/"
 fi
@@ -67,10 +84,9 @@ cat <<EOF > "$CONTENTS_DIR/Info.plist"
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.8.0</string>
+    <string>2.0.0</string>
     <key>CFBundleVersion</key>
-    <string>1.8.0</string>
-
+    <string>2.0.0</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>LSUIElement</key>
@@ -89,17 +105,13 @@ EOF
 
 echo "-> 컴파일 완료! macOS .app 번들 구조 생성 중..."
 
-# 5. Ad-hoc 코드 서명 (codesign)
-# --deep 은 Apple 이 deprecated 처리한 옵션이라 사용하지 않는다.
-# 번들에 중첩 코드가 없으므로 최상위 서명만으로 충분하다.
 echo "-> macOS TCC 및 알림 서비스를 위한 코드 서명(ad-hoc codesign) 적용 중..."
-sign_with_retry "$APP_DIR" --force --entitlements MacOptimizationTool.entitlements --sign -
-
+sign_app_safely "$APP_DIR" --force --entitlements MacOptimizationTool.entitlements --sign -
 
 echo "-> .app 패키징 및 코드 서명 완료: MacOptimizationTool.app"
 
 # 6. 실행 (CLI 직접 빌드 검증용)
-if [ "$1" != "--no-run" ]; then
+if [ "${1:-}" != "--no-run" ]; then
     echo "=== 빌드 성공! 앱을 실행합니다 ==="
     killall MacOptimizationTool 2>/dev/null || true
     sleep 0.5

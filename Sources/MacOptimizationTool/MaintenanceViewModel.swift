@@ -58,17 +58,16 @@ class MaintenanceViewModel: ObservableObject {
         isAnyTaskRunning = true
         
         Task {
-            let success = await Task.detached(priority: .userInitiated) { [weak self] () -> Bool in
-                guard let self = self else { return false }
+            let success = await Task.detached(priority: .userInitiated) { () -> Bool in
                 switch id {
                 case "dns":
-                    return self.flushDNS()
+                    return Self.flushDNS()
                 case "launchServices":
-                    return self.rebuildLaunchServices()
+                    return Self.rebuildLaunchServices()
                 case "fontCache":
-                    return self.cleanFontCache()
+                    return Self.cleanFontCache()
                 case "spotlight":
-                    return self.rebuildSpotlight()
+                    return Self.rebuildSpotlight()
                 default:
                     return false
                 }
@@ -88,50 +87,39 @@ class MaintenanceViewModel: ObservableObject {
     }
     
     // 1. DNS 캐시 플러시
-    nonisolated private func flushDNS() -> Bool {
-        let p1 = Process()
-        p1.launchPath = "/usr/bin/dscacheutil"
-        p1.arguments = ["-flushcache"]
-        try? p1.run()
-        p1.waitUntilExit()
-        
-        let p2 = Process()
-        p2.launchPath = "/usr/bin/killall"
-        p2.arguments = ["-HUP", "mDNSResponder"]
-        try? p2.run()
-        p2.waitUntilExit()
-        
-        return true
+    nonisolated private static func flushDNS() -> Bool {
+        let cacheFlushed = SystemProcessRunner.run(
+            executableURL: URL(fileURLWithPath: "/usr/bin/dscacheutil"),
+            arguments: ["-flushcache"]
+        )
+        let responderReloaded = SystemProcessRunner.run(
+            executableURL: URL(fileURLWithPath: "/usr/bin/killall"),
+            arguments: ["-HUP", "mDNSResponder"]
+        )
+        return cacheFlushed && responderReloaded
     }
     
     // 2. LaunchServices DB 재구성
-    nonisolated private func rebuildLaunchServices() -> Bool {
-        let p = Process()
-        p.launchPath = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
-        p.arguments = ["-kill", "-r", "-domain", "local", "-domain", "system", "-domain", "user"]
-        try? p.run()
-        p.waitUntilExit()
-        return p.terminationStatus == 0
+    nonisolated private static func rebuildLaunchServices() -> Bool {
+        SystemProcessRunner.run(
+            executableURL: URL(fileURLWithPath: "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"),
+            arguments: ["-kill", "-r", "-domain", "local", "-domain", "system", "-domain", "user"]
+        )
     }
     
     // 3. 폰트 캐시 지우기
-    nonisolated private func cleanFontCache() -> Bool {
-        let p = Process()
-        p.launchPath = "/usr/bin/atsutil"
-        p.arguments = ["databases", "-removeUser"]
-        try? p.run()
-        p.waitUntilExit()
-        return p.terminationStatus == 0
+    nonisolated private static func cleanFontCache() -> Bool {
+        SystemProcessRunner.run(
+            executableURL: URL(fileURLWithPath: "/usr/bin/atsutil"),
+            arguments: ["databases", "-removeUser"]
+        )
     }
     
     // 4. Spotlight 인덱스 재빌드
-    nonisolated private func rebuildSpotlight() -> Bool {
-        let p = Process()
-        p.launchPath = "/usr/bin/mdutil"
-        let homePath = FileManager.default.homeDirectoryForCurrentUser.path
-        p.arguments = ["-E", homePath]
-        try? p.run()
-        p.waitUntilExit()
-        return p.terminationStatus == 0
+    nonisolated private static func rebuildSpotlight() -> Bool {
+        SystemProcessRunner.run(
+            executableURL: URL(fileURLWithPath: "/usr/bin/mdutil"),
+            arguments: ["-E", FileManager.default.homeDirectoryForCurrentUser.path]
+        )
     }
 }

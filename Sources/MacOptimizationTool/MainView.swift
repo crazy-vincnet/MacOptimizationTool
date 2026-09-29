@@ -253,16 +253,13 @@ struct MainView: View {
             Button(action: {
                 Task {
                     let before = HardwareStatsHelper.getRAMStats()?.free
-                    await Task.detached(priority: .userInitiated) {
-                        let p = Process()
-                        p.executableURL = URL(fileURLWithPath: "/usr/sbin/purge")
-                        try? p.run()
-                        p.waitUntilExit()
+                    let purgeSucceeded = await Task.detached(priority: .userInitiated) {
+                        SystemProcessRunner.run(executableURL: URL(fileURLWithPath: "/usr/sbin/purge"))
                     }.value
                     let after = HardwareStatsHelper.getRAMStats()?.free
-                    // 측정 실패 시 0 으로 표기해 회수량을 지어내지 않는다.
+                    // 명령 또는 측정 실패 시 0 으로 표기해 회수량을 지어내지 않는다.
                     let reclaimed: Int64 = {
-                        guard let before, let after else { return 0 }
+                        guard purgeSucceeded, let before, let after else { return 0 }
                         return max(0, after - before)
                     }()
 

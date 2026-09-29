@@ -137,7 +137,7 @@ final class OldDownloadsViewModel: ObservableObject {
                 var list: [OldDownloadItem] = []
 
                 let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants]
-                let keys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey, .isDirectoryKey, .isPackageKey]
+                let keys: [URLResourceKey] = [.contentModificationDateKey]
 
                 guard let enumerator = fm.enumerator(
                     at: downloadsURL,
@@ -159,13 +159,8 @@ final class OldDownloadsViewModel: ObservableObject {
                     if FileSafety.isProtectedExact(path) { continue }
 
                     guard let vals = try? fileURL.resourceValues(forKeys: Set(keys)),
-                          let isDir = vals.isDirectory,
-                          let isPkg = vals.isPackage,
                           let modDate = vals.contentModificationDate else { continue }
 
-                    // 폴더나 패키지 내부 깊은 탐색은 스킵
-                    let isDirectoryOrPkg = isDir || isPkg
-                    
                     // 파일 크기(논리)와 실제 로컬 점유를 함께 잡는다.
                     // 클라우드에만 있는 파일은 지워도 공간이 회수되지 않으므로 구분해서 보여준다.
                     let measurement = DirectorySize.measure(at: fileURL, isCancelled: { Task.isCancelled })

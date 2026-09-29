@@ -30,6 +30,7 @@ class DiskCleanViewModel: ObservableObject {
     @Published var isScanning = false
     @Published var isCleaning = false
     @Published var showCleanSuccess = false
+    @Published var showCleanError = false
     @Published var totalJunkSize: Int64 = 0
     @Published var cleanedSize: Int64 = 0
     @Published var hasScanned = false
@@ -110,6 +111,7 @@ class DiskCleanViewModel: ObservableObject {
         isCancelled = false
         isScanning = true
         showCleanSuccess = false
+        showCleanError = false
         scanProgress = 0.05
         scannedItemCount = 0
         scanStatusText = t("disk.status.scanStart")
@@ -229,34 +231,24 @@ class DiskCleanViewModel: ObservableObject {
 
         guard !itemsToDelete.isEmpty else { return }
         isCleaning = true
+        showCleanSuccess = false
+        showCleanError = false
 
-        // 백그라운드 태스크로 넘길 값은 불변 복사본으로 고정한다.
-        let deletionTargets = itemsToDelete
+        // 항목별 moveToTrash 호출 대신 Core의 일괄 삭제 엔진에 넘겨 관리자 인증을 한 번만 수행한다.
+        let deletionTargets = itemsToDelete.map { (url: $0.url, size: $0.size) }
 
         Task {
-            let totalCleaned = await Task.detached(priority: .userInitiated) { () -> Int64 in
-                var cleaned: Int64 = 0
-
-                for item in deletionTargets {
-                    let url = item.url
-                    let isAccessed = url.startAccessingSecurityScopedResource()
-                    defer {
-                        if isAccessed {
-                            url.stopAccessingSecurityScopedResource()
-                        }
-                    }
-
-                    if FileSafety.moveToTrash(url) {
-                        cleaned += item.size
-                    }
-                }
-                return cleaned
+            let result = await Task.detached(priority: .userInitiated) {
+                FileSafety.deleteDiskCleanupBatch(items: deletionTargets)
             }.value
 
-            self.cleanedSize = totalCleaned
+            self.cleanedSize = result.cleanedSize
             self.isCleaning = false
-            self.showCleanSuccess = true
-            self.scanJunk()
+            if result.isSuccess {
+                self.showCleanSuccess = true
+            } else {
+                self.showCleanError = true
+            }
         }
     }
 

@@ -69,7 +69,7 @@ struct DiskHealthView: View {
         VStack(alignment: .leading, spacing: 16) {
             // 메인 헤더
             HStack {
-                Image(systemName: disk.isSSD ? "internaldrive.fill" : "externaldrive.fill")
+                Image(systemName: disk.isSSD.map { $0 ? "internaldrive.fill" : "externaldrive.fill" } ?? "externaldrive")
                     .font(.system(size: 28))
                     .foregroundColor(Theme.accent)
 
@@ -89,26 +89,27 @@ struct DiskHealthView: View {
 
                 Spacer()
 
-                // Health Badge
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.shield.fill")
-                        .foregroundColor(Theme.accent)
-                    Text(String(format: t("health.rating"), disk.healthRatingPercent))
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(Theme.accent)
+                if let healthRating = disk.healthRatingPercent {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.shield.fill")
+                            .foregroundColor(Theme.accent)
+                        Text(String(format: t("health.rating"), healthRating))
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(Theme.accent)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Theme.accentGlow)
+                    .cornerRadius(Theme.radiusChip)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Theme.accentGlow)
-                .cornerRadius(Theme.radiusChip)
             }
 
             Divider()
 
-            // 4개 주요 진단 지표 그리드
+            // 실제로 조회 가능한 용량과 측정되지 않은 하드웨어 지표를 구분한다.
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                metricItem(title: t("health.metric.smart"), value: disk.smartStatus, icon: "checkmark.circle.fill", color: .green)
-                metricItem(title: t("health.metric.temperature"), value: String(format: t("health.metric.temperatureValue"), disk.temperatureCelsius), icon: "thermometer.medium", color: .orange)
+                metricItem(title: t("health.metric.smart"), value: disk.smartStatus ?? "—", icon: disk.smartStatus == nil ? "questionmark.circle" : "checkmark.circle.fill", color: disk.smartStatus == nil ? Theme.textSecondary : .green)
+                metricItem(title: t("health.metric.temperature"), value: disk.temperatureCelsius.map { String(format: t("health.metric.temperatureValue"), $0) } ?? "—", icon: "thermometer.medium", color: disk.temperatureCelsius == nil ? Theme.textSecondary : .orange)
                 metricItem(title: t("health.metric.freeSpace"), value: ByteCountFormatter.string(fromByteCount: disk.freeBytes, countStyle: .file), icon: "internaldrive", color: Theme.accent)
                 metricItem(title: t("health.metric.totalSpace"), value: ByteCountFormatter.string(fromByteCount: disk.totalBytes, countStyle: .file), icon: "square.stack.fill", color: Theme.textSecondary)
             }

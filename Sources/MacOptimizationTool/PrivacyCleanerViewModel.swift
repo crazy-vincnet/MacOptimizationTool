@@ -212,10 +212,10 @@ final class PrivacyCleanerViewModel: ObservableObject {
         isCleaning = true
         showCleanSuccess = false
         
-        var targetsToDelete: [URL] = []
+        var targetsToDelete: [(url: URL, size: Int64)] = []
         for cat in categories {
             for item in cat.items where item.isSelected {
-                targetsToDelete.append(item.url)
+                targetsToDelete.append((item.url, item.size))
             }
         }
         
@@ -225,14 +225,10 @@ final class PrivacyCleanerViewModel: ObservableObject {
         Task {
             let cleanedBytes = await Task.detached(priority: .userInitiated) { () -> Int64 in
                 var freed: Int64 = 0
-                let fm = FileManager.default
-                for url in deletionTargets {
-                    let size = DirectorySize.measure(at: url).localBytes
-                    if FileSafety.moveToTrash(url) {
-                        freed += size
-                    } else {
-                        try? fm.removeItem(at: url)
-                        freed += size
+                for target in deletionTargets {
+                    // moveToTrash가 안전한 폴백까지 담당한다. 실패한 항목은 회수 용량에 포함하지 않는다.
+                    if FileSafety.moveToTrash(target.url) {
+                        freed += target.size
                     }
                 }
                 return freed

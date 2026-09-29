@@ -12,10 +12,10 @@ struct DiskHealthInfo: Identifiable {
     let freeBytes: Int64
     let usedBytes: Int64
     let usagePercent: Double
-    let smartStatus: String
-    let temperatureCelsius: Int
-    let healthRatingPercent: Int
-    let isSSD: Bool
+    let smartStatus: String?
+    let temperatureCelsius: Int?
+    let healthRatingPercent: Int?
+    let isSSD: Bool?
 }
 
 @MainActor
@@ -38,7 +38,7 @@ final class DiskHealthViewModel: ObservableObject {
             let fetched = await Task.detached(priority: .userInitiated) { () -> [DiskHealthInfo] in
                 var results: [DiskHealthInfo] = []
                 let fm = FileManager.default
-                let keys: [URLResourceKey] = [.volumeNameKey, .volumeIsRootFileSystemKey, .volumeTotalCapacityKey, .volumeAvailableCapacityKey, .volumeLocalizedFormatDescriptionKey]
+                let keys: [URLResourceKey] = [.volumeNameKey, .volumeTotalCapacityKey, .volumeAvailableCapacityKey, .volumeLocalizedFormatDescriptionKey]
                 
                 guard let urls = fm.mountedVolumeURLs(includingResourceValuesForKeys: keys, options: [.skipHiddenVolumes]) else {
                     return []
@@ -48,7 +48,6 @@ final class DiskHealthViewModel: ObservableObject {
                     guard let vals = try? url.resourceValues(forKeys: Set(keys)) else { continue }
                     
                     let name = vals.volumeName ?? url.lastPathComponent
-                    let isRoot = vals.volumeIsRootFileSystem ?? false
                     let total = Int64(vals.volumeTotalCapacity ?? 0)
                     let available = Int64(vals.volumeAvailableCapacity ?? 0)
                     
@@ -56,14 +55,10 @@ final class DiskHealthViewModel: ObservableObject {
                     
                     let used = max(0, total - available)
                     let usagePct = (Double(used) / Double(total)) * 100.0
-                    let format = vals.volumeLocalizedFormatDescription ?? "APFS"
+                    let format = vals.volumeLocalizedFormatDescription ?? "—"
                     
-                    // S.M.A.R.T 및 온도 시뮬레이션 지표 (macOS 실측 기준)
-                    let isSSD = format.contains("APFS") || format.contains("SSD") || isRoot
-                    let smart = t("health.smart.verified")
-                    let temp = isRoot ? 34 : 31
-                    let healthRating = isRoot ? 98 : 100
-                    
+                    // Foundation의 볼륨 API는 SMART, 온도, 수명 또는 SSD 여부를 제공하지 않는다.
+                    // 측정하지 않은 값을 정상 수치로 만들어 내지 않고 명시적으로 미측정 상태로 둔다.
                     results.append(DiskHealthInfo(
                         volumeName: name,
                         mountPath: url.path,
@@ -72,10 +67,10 @@ final class DiskHealthViewModel: ObservableObject {
                         freeBytes: available,
                         usedBytes: used,
                         usagePercent: usagePct,
-                        smartStatus: smart,
-                        temperatureCelsius: temp,
-                        healthRatingPercent: healthRating,
-                        isSSD: isSSD
+                        smartStatus: nil,
+                        temperatureCelsius: nil,
+                        healthRatingPercent: nil,
+                        isSSD: nil
                     ))
                 }
                 

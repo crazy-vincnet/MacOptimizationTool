@@ -209,11 +209,10 @@ struct MenuBarMiniView: View {
 
             // Actions
             Button(action: {
-                Task(priority: .userInitiated) {
-                    let p = Process()
-                    p.launchPath = "/usr/sbin/purge"
-                    try? p.run()
-                    p.waitUntilExit()
+                Task {
+                    await Task.detached(priority: .userInitiated) {
+                        SystemProcessRunner.run(executableURL: URL(fileURLWithPath: "/usr/sbin/purge"))
+                    }.value
                 }
             }) {
                 HStack {

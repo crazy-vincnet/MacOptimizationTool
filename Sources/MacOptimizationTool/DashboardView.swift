@@ -437,10 +437,9 @@ struct DashboardView: View {
         Task {
             let (_, freedStr) = await Task.detached(priority: .userInitiated) { () -> (Double, String) in
                 // macOS 빌트인 purge 실행 (임의 버퍼 할당 트릭 제거)
-                let process = Process()
-                process.launchPath = "/usr/sbin/purge"
-                try? process.run()
-                process.waitUntilExit()
+                let purgeSucceeded = SystemProcessRunner.run(
+                    executableURL: URL(fileURLWithPath: "/usr/sbin/purge")
+                )
                 
                 // 3. 정리 완료 후 감소된 메모리 측정
                 var statsAfter = vm_statistics64()
@@ -456,7 +455,7 @@ struct DashboardView: View {
                     
                 let freed = usedBytesBefore - usedBytesAfter
                 var freedString = t("dash.inactiveMemory")
-                if freed > 5 * 1024 * 1024 {
+                if purgeSucceeded && kerrBefore == KERN_SUCCESS && kerrAfter == KERN_SUCCESS && freed > 5 * 1024 * 1024 {
                     freedString = ByteCountFormatter.string(fromByteCount: Int64(freed), countStyle: .memory)
                 }
                 return (freed, freedString)
